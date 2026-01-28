@@ -1,7 +1,11 @@
-# Virtual Environment
-.venv/
-venv/
-
-# Common Python artifacts
-__pycache__/
+# Python & Django basics
 *.pyc
+__pycache__/
+db.sqlite3
+.venv/
+.env
+
+# Media - CRITICAL
+# We ignore the files, but keep the folder structure
+media/
+!media/.gitkeep
