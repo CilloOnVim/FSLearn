@@ -18,15 +18,16 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
 from django.contrib.auth.views import LogoutView
+from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
-    path('logout/', LogoutView.as_view(next_page='core:index'), name='logout'),
+    path("logout/", LogoutView.as_view(next_page="core:index"), name="logout"),
     path("teacher/", include("teacher.urls")),
     path("student/", include("student.urls")),
+    path("learning/", include("learning.urls")),
 ]
 
 if settings.DEBUG:
