@@ -18,4 +18,7 @@ urlpatterns = [
     path("manage/section/", views.add_section, name="add_section"),
     # Note: You can rename 'upload_word' to 'add_word' to be consistent if you want
     path("manage/word/", views.upload_word, name="upload_word"),
+    path("stories/", views.story_list, name="story_list"),
+    path("stories/<int:story_id>/", views.story_view, name="story_view"),
+    path("stories/", views.story_list, name="story_list")
 ]

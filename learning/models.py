@@ -3,19 +3,24 @@ from django.utils.text import slugify
 
 # Create your models here.
 
+
 # --- 1. THEME MODEL (e.g., "Knowing Who We Are") ---
 class Theme(models.Model):
-    title = models.CharField(max_length=200, help_text="e.g., 'Theme 1: Knowing Who We Are'")
-    description = models.TextField(blank=True, help_text="Short description of this theme.")
+    title = models.CharField(
+        max_length=200, help_text="e.g., 'Theme 1: Knowing Who We Are'"
+    )
+    description = models.TextField(
+        blank=True, help_text="Short description of this theme."
+    )
 
     # Optional: Icon for the main menu card
-    icon = models.ImageField(upload_to='themes/icons/', blank=True, null=True)
+    icon = models.ImageField(upload_to="themes/icons/", blank=True, null=True)
 
     # Ordering: Controls which theme appears first (1, 2, 3...)
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
-        ordering = ['order']
+        ordering = ["order"]
 
     def __str__(self):
         return self.title
@@ -24,13 +29,15 @@ class Theme(models.Model):
 # --- 2. SECTION MODEL (e.g., "Emotions", "Family Members") ---
 class Section(models.Model):
     # Links this section to a specific Theme
-    theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name='sections')
+    theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="sections")
 
-    title = models.CharField(max_length=200, help_text="e.g., 'Basic Identity', 'Emotions'")
+    title = models.CharField(
+        max_length=200, help_text="e.g., 'Basic Identity', 'Emotions'"
+    )
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
-        ordering = ['order']
+        ordering = ["order"]
 
     def __str__(self):
         return f"{self.theme.title} - {self.title}"
@@ -39,24 +46,34 @@ class Section(models.Model):
 # --- 3. WORD MODEL (e.g., "MASAYA", "NANAY") ---
 class Word(models.Model):
     # Links this word to a specific Section
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='words')
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name="words")
 
     name = models.CharField(max_length=100, help_text="e.g., 'MASAYA (Happy)'")
 
-    # The Slug is CRITICAL for your URL routing.
+    # The Slug is for your URL routing.
     # unique=True ensures we don't have two pages with the exact same link.
-    slug = models.SlugField(unique=True, blank=True, help_text="Auto-generated from Name (e.g., 'masaya-happy')")
+    slug = models.SlugField(
+        unique=True,
+        blank=True,
+        help_text="Auto-generated from Name (e.g., 'masaya-happy')",
+    )
 
     # Media Files
-    video = models.FileField(upload_to='words/videos/', help_text="Upload the MP4 sign language clip here")
-    image = models.ImageField(upload_to='words/images/', help_text="Upload the illustration/drawing here")
+    video = models.FileField(
+        upload_to="words/videos/", help_text="Upload the MP4 sign language clip here"
+    )
+    image = models.ImageField(
+        upload_to="words/images/", help_text="Upload the illustration/drawing here"
+    )
 
-    description = models.TextField(help_text="Instructions: e.g., 'Smile with both hands moving up...'")
+    description = models.TextField(
+        help_text="Instructions: e.g., 'Smile with both hands moving up...'"
+    )
 
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
-        ordering = ['order']
+        ordering = ["order"]
 
     def __str__(self):
         return self.name
@@ -68,3 +85,33 @@ class Word(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+# --- 4. STORY MODEL (The main content) ---
+class Story(models.Model):
+    theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="stories")
+    title = models.CharField(max_length=200)
+    video = models.FileField(upload_to="stories/videos/", help_text="The main story video")
+    thumbnail = models.ImageField(upload_to="stories/thumbnails/", blank=True, null=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.title
+
+# --- 5. QUIZ QUESTION (A video clip asking a question) ---
+class QuizQuestion(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="questions")
+    video = models.FileField(upload_to="stories/quiz_videos/", help_text="Video of the teacher asking the question")
+    text = models.CharField(max_length=255, help_text="Text version of the question (optional)")
+    
+    def __str__(self):
+        return f"Q: {self.text} ({self.story.title})"
+
+# --- 6. QUIZ CHOICE (The clickable tiles) ---
+class QuizChoice(models.Model):
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name="choices")
+    text = models.CharField(max_length=200, help_text="The answer text displayed on the tile")
+    image = models.ImageField(upload_to="stories/choices/", blank=True, null=True, help_text="Optional image for the choice")
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.text} - {'Correct' if self.is_correct else 'Wrong'}"

@@ -5,6 +5,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import SectionForm, ThemeForm, WordForm
 from .models import Section, Theme, Word
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+
+# ... existing imports ...
+from .models import Story, QuizQuestion  # Import the new models
 
 # Create your views here.
 
@@ -57,12 +62,21 @@ def word_detail(request, word_slug):
 
 
 # THE HUB (The Menu Page)
+# views.py
+
 @login_required
 def manage_content(request):
     # Check if teacher
     if not hasattr(request.user, "teacher_profile"):
         return redirect("index")
-    return render(request, "learning/manage_content.html")
+    
+    # FETCH DATA: Get all themes, and pre-load their sections and words.
+    # 'sections__words' joins the 3 tables efficiently in one go.
+    themes = Theme.objects.prefetch_related('sections__words').all()
+    
+    return render(request, "learning/manage_content.html", {
+        "themes": themes
+    })
 
 
 # 1. ADD WORD
@@ -115,3 +129,46 @@ def add_section(request):
     else:
         form = SectionForm()
     return render(request, "learning/upload_section.html", {"form": form})
+
+# 5. STORY LIST (Pick a story)
+@login_required
+def story_list(request):
+    stories = Story.objects.all()
+    # POINTS TO THE NEW MENU FILE
+    return render(request, "learning/story_list.html", {"stories": stories})
+
+# 6. STORY PLAYER & QUIZ (The logic)
+def story_view(request, story_id):
+    story = get_object_or_404(Story, id=story_id)
+    
+    questions_data = []
+    questions = story.questions.all()
+    
+    for q in questions:
+        # CRITICAL FIX: Skip questions if they have no video, otherwise the page crashes
+        if not q.video:
+            continue
+
+        choices = []
+        for c in q.choices.all():
+            choices.append({
+                "text": c.text,
+                "image": c.image.url if c.image else None,
+                "is_correct": c.is_correct
+            })
+            
+        questions_data.append({
+            "video_url": q.video.url, # This now matches what your JS expects
+            "text": q.text,
+            "choices": choices
+        })
+
+    context = {
+        "story": story,
+        "quiz_data_json": json.dumps(questions_data, cls=DjangoJSONEncoder)
+    }
+    # POINTS TO THE RENAMED PLAYER FILE
+    return render(request, "learning/story_detail.html", context)
+
+
+

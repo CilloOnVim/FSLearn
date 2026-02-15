@@ -1,0 +1,29 @@
+{% extends 'learning/base.html' %} {% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-white">Choose a Story</h1>
+    <div class="row">
+        {% for story in stories %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if story.thumbnail %}
+                    <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary card-img-top" style="height: 200px;"></div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ story.title }}</h5>
+                    <p class="card-text text-muted">{{ story.description|truncatewords:10 }}</p>
+                    <a href="{% url 'learning:story_view' story.id %}" class="btn btn-primary w-100">
+                        ▶ Watch Story
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center text-white">
+            <h3>No stories available yet!</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

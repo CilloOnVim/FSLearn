@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ story.title }} | FSLearn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Fredoka', sans-serif; 
+            background-color: #212529; 
+            color: white; 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; /* No scrolling allowed */
+            margin: 0;
+        }
+        
+        /* The main layout wrapper */
+        .layout-wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* The Content Area (Video + Quiz) */
+        .content-stage {
+            flex-grow: 1; /* Fills all remaining space below header */
+            display: flex;
+            gap: 20px;
+            overflow: hidden; /* Contains the video */
+            height: 100%;
+        }
+
+        /* 1. LEFT SIDE: Video */
+        .video-container {
+            flex: 2; /* Takes 2/3rds of width */
+            background: #000; /* Subtle background for video area */
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; /* Ensures the whole video is seen without cropping */
+        }
+
+        /* 2. RIGHT SIDE: Quiz Panel */
+        .quiz-container {
+            flex: 1; /* Takes 1/3rd of width */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* The Choices Grid */
+        .choices-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns */
+            grid-template-rows: 1fr 1fr;    /* 2 rows */
+            gap: 15px;
+            height: 60%; /* Occupies most of the right panel */
+            width: 100%;
+        }
+
+        /* Individual Choice Button */
+        .choice-card {
+            background: white; 
+            color: #212529; 
+            border-radius: 15px;
+            cursor: pointer; 
+            transition: all 0.2s;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            border: 4px solid transparent;
+            height: 100%; /* Fill the grid cell */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .choice-card:hover { transform: scale(1.02); background: #f8f9fa; }
+        .choice-card.correct { background: #d1e7dd; border-color: #198754; color: #0f5132; }
+        .choice-card.wrong { background: #f8d7da; border-color: #dc3545; color: #842029; }
+
+        /* Start Button */
+        .btn-start {
+            font-size: 1.5rem;
+            padding: 20px 40px;
+            width: 100%;
+        }
+
+        /* Responsive Fix: Stack vertically on phones */
+        @media (max-width: 992px) {
+            .content-stage { flex-direction: column; }
+            .video-container { flex: 1; min-height: 40vh; }
+            .quiz-container { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="layout-wrapper">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3" style="height: 50px;">
+            <a href="{% url 'learning:story_list' %}" class="btn btn-outline-light rounded-pill px-4">✕ Exit</a>
+            <h4 class="m-0" id="phaseTitle">{{ story.title }}</h4>
+            <div class="badge bg-primary fs-5" id="scoreBadge" style="display: none;">Score: 0</div>
+        </div>
+
+        <div class="content-stage">
+            
+            <div class="video-container shadow">
+                <video id="mainPlayer" controls autoplay>
+                    <source src="{{ story.video.url }}" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="quiz-container">
+                
+                <div id="startPanel" class="text-center w-100">
+                    <h3 class="mb-4 text-white-50">Ready to play?</h3>
+                    <button onclick="startQuiz()" class="btn btn-warning btn-start rounded-pill fw-bold shadow">
+                        🚀 Start Quiz
+                    </button>
+                </div>
+
+                <div id="quizPanel" class="w-100 h-100 d-flex flex-column justify-content-center" style="display: none !important;">
+                    <h2 id="questionText" class="text-center mb-4 fw-bold">Question goes here?</h2>
+                    
+                    <div class="choices-wrapper" id="choicesGrid">
+                        </div>
+                </div>
+
+                <div id="resultPanel" class="text-center w-100" style="display: none;">
+                    <h1 class="display-1">🎉</h1>
+                    <h2 class="fw-bold mb-4">Good Job!</h2>
+                    <h3 id="finalScore" class="mb-4">You got X out of Y correct.</h3>
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'learning:story_list' %}" class="btn btn-primary btn-lg rounded-pill">Pick Another Story</a>
+                        <button onclick="location.reload()" class="btn btn-outline-light btn-lg rounded-pill">Try Again</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {{ quiz_data_json|safe }};
+        
+        const player = document.getElementById('mainPlayer');
+        const startPanel = document.getElementById('startPanel');
+        const quizPanel = document.getElementById('quizPanel');
+        const resultPanel = document.getElementById('resultPanel');
+        const choicesGrid = document.getElementById('choicesGrid');
+        const scoreBadge = document.getElementById('scoreBadge');
+        const phaseTitle = document.getElementById('phaseTitle');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswering = false;
+
+        function startQuiz() {
+            if (quizData.length === 0) {
+                alert("No questions found for this story!");
+                return;
+            }
+            startPanel.style.display = 'none';
+            // Use flex to ensure proper centering logic applies
+            quizPanel.style.setProperty('display', 'flex', 'important'); 
+            scoreBadge.style.display = 'block';
+            player.removeAttribute('controls');
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            if (index >= quizData.length) {
+                endQuiz();
+                return;
+            }
+            currentQuestionIndex = index;
+            isAnswering = false;
+            const q = quizData[index];
+
+            player.src = q.video_url;
+            player.play();
+            phaseTitle.innerText = `Question ${index + 1} of ${quizData.length}`;
+            document.getElementById('questionText').innerText = q.text || "Choose the correct answer:";
+
+            choicesGrid.innerHTML = '';
+            q.choices.forEach(choice => {
+                // Create the card directly
+                const card = document.createElement('div');
+                card.className = 'choice-card shadow-sm';
+                card.innerHTML = choice.text;
+                card.onclick = () => handleAnswer(card, choice.is_correct);
+                choicesGrid.appendChild(card);
+            });
+        }
+
+        function handleAnswer(element, isCorrect) {
+            if (isAnswering) return;
+            isAnswering = true;
+            if (isCorrect) {
+                element.classList.add('correct');
+                score++;
+                scoreBadge.innerText = `Score: ${score}`;
+            } else {
+                element.classList.add('wrong');
+            }
+            setTimeout(() => {
+                loadQuestion(currentQuestionIndex + 1);
+            }, 1500);
+        }
+
+        function endQuiz() {
+            quizPanel.style.setProperty('display', 'none', 'important');
+            player.style.display = 'none';
+            // In split screen, we might want to hide the video container border or just leave it
+            document.querySelector('.video-container').style.display = 'none'; 
+            // Expand result panel to fill the whole screen or just the right side? 
+            // Let's make it fill the right side nicely.
+            resultPanel.style.display = 'block';
+            
+            // To make the result look good, let's center it in the whole page
+            const contentStage = document.querySelector('.content-stage');
+            contentStage.innerHTML = ''; // Clear everything
+            contentStage.appendChild(resultPanel); // Move result panel to main stage
+            contentStage.style.alignItems = 'center';
+            contentStage.style.justifyContent = 'center';
+            
+            document.getElementById('finalScore').innerText = `You got ${score} out of ${quizData.length} correct!`;
+        }
+    </script>
+</body>
+</html>
