@@ -20,6 +20,15 @@ class FSLSign(models.Model):
 
     def __str__(self):
         return f"Sign for {self.char}"
+    
+
+# 2. FOR SENTENCE RESTRUCTURING (EAT, APPLE, TODAY...)
+class FSLWord(models.Model):
+    word = models.CharField(max_length=100, unique=True, help_text="e.g. 'EAT', 'APPLE'")
+    video = models.FileField(upload_to="fsl_words/", help_text="Upload word video here")
+
+    def __str__(self):
+        return f"Word: {self.word.upper()}"
 
 
 class StudentProfile(models.Model):

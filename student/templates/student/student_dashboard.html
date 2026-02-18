@@ -52,6 +52,13 @@
                 padding: 10px 30px;
                 font-weight: bold;
                 text-decoration: none;
+                border: none;
+            }
+            .action-btn {
+                transition: transform 0.2s;
+            }
+            .action-btn:hover {
+                transform: translateY(-5px);
             }
         </style>
     </head>
@@ -63,7 +70,7 @@
             </form>
         </div>
 
-        <div class="container">
+        <div class="container mb-5">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="dashboard-card">
@@ -122,14 +129,21 @@
                             <h5 class="text-center fw-bold text-muted mb-3">More Fun Activities</h5>
 
                             <div class="row g-3 justify-content-center">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <a href="{% url 'student:translator' %}" class="btn btn-primary w-100 py-3 shadow action-btn" style="background-color: #6f42c1; border: none;">
                                         <div class="fs-2 mb-1">🔤</div>
                                         <h6 class="fw-bold mb-0">Fingerspell</h6>
                                     </a>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <a href="{% url 'student:restructure' %}" class="btn btn-danger w-100 py-3 shadow action-btn" style="background-color: #ff6b6b; border: none;">
+                                        <div class="fs-2 mb-1">🧠</div>
+                                        <h6 class="fw-bold mb-0">Structure NLP</h6>
+                                    </a>
+                                </div>
+
+                                <div class="col-md-4">
                                     <a href="{% url 'learning:story_list' %}" class="btn btn-warning w-100 py-3 shadow action-btn text-white" style="background-color: #fd7e14; border: none;">
                                         <div class="fs-2 mb-1">🎮</div>
                                         <h6 class="fw-bold mb-0">Play Quizzes</h6>

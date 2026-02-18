@@ -8,5 +8,6 @@ app_name = "student"
 urlpatterns = [
     # This maps 'http://127.0.0.1:8000/student/translator/' to your view
     path("translator/", views.translator_view, name="translator"),
+    path("restructure/", views.restructure_sentence_view, name="restructure"),
     path("student_dashboard/", views.student_dashboard, name="student_dashboard"),
 ]

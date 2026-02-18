@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 
-from .models import FSLSign, StudentProfile
+from .models import FSLSign, StudentProfile, FSLWord
 
 
 @admin.register(FSLSign)
@@ -20,3 +20,5 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
     # Filter sidebar to quickly see all "Kinder 1" students
     list_filter = ("level", "section")
+
+admin.site.register(FSLWord)

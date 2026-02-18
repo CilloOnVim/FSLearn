@@ -23,12 +23,16 @@
             color: white;
             position: relative;
         }
-        .sign-display {
+        
+        /* We need BOTH tags, hidden by default */
+        .media-display {
             max-height: 400px;
             max-width: 100%;
             object-fit: contain;
             border-radius: 10px;
+            display: none; /* Hidden initially */
         }
+
         .current-char {
             font-size: 5rem;
             font-weight: bold;
@@ -43,7 +47,7 @@
             border-radius: 20px;
             height: 100%;
             padding: 30px;
-            overflow-y: auto; /* Scrollable if text is long */
+            overflow-y: auto; 
         }
         .sign-card {
             width: 100px;
@@ -55,10 +59,21 @@
             border-radius: 15px;
             border: 2px solid #dee2e6;
             transition: transform 0.2s;
+            vertical-align: top;
         }
-        .sign-card img { width: 100%; height: auto; }
+        .sign-card img, .sign-card video { 
+            width: 100%; 
+            height: 80px; /* Fixed height for neatness */
+            object-fit: contain; 
+        }
         .sign-card:hover { transform: scale(1.1); border-color: #6f42c1; }
         .active-card { background-color: #d1e7dd; border-color: #198754; transform: scale(1.1); }
+        
+        /* Special Characters Buttons */
+        .special-char-btn {
+            min-width: 50px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -70,9 +85,17 @@
             
             <div class="col-lg-6">
                 <div class="player-box shadow">
-                    <img id="mainDisplay" src="https://placehold.co/400x400/333/999?text=Ready" class="sign-display">
+                    <img id="imgPlayer" src="" class="media-display">
                     
-                    <div id="bigLetterDisplay" class="current-char">?</div>
+                    <video id="videoPlayer" class="media-display" muted playsinline>
+                        <source src="" type="video/mp4">
+                    </video>
+
+                    <div id="placeholder" class="text-white-50">
+                        <h3>Type to start...</h3>
+                    </div>
+                    
+                    <div id="bigLetterDisplay" class="current-char"></div>
 
                     <div class="mt-4">
                         <button onclick="playSequence()" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow">
@@ -86,9 +109,17 @@
                 <div class="storyboard-box shadow">
                     <h2 class="fw-bold mb-4" style="color: #6f42c1;">Fingerspell Translator</h2>
                     
-                    <div class="input-group input-group-lg mb-5">
-                        <input type="text" id="textInput" class="form-control rounded-start-pill border-2" placeholder="Type here (e.g. HELLO)...">
-                        <button class="btn btn-primary rounded-end-pill fw-bold px-4" type="button" onclick="processText()">Translate 🚀</button>
+                    <div class="mb-5">
+                        <div class="input-group input-group-lg">
+                            <input type="text" id="textInput" class="form-control rounded-start-pill border-2" placeholder="Type here (e.g. HELLO)...">
+                            <button class="btn btn-primary rounded-end-pill fw-bold px-4" type="button" onclick="processText()">Translate 🚀</button>
+                        </div>
+                        
+                        <div class="mt-2 text-muted small d-flex align-items-center gap-2">
+                            <span>Insert Special:</span>
+                            <button class="btn btn-sm btn-outline-secondary special-char-btn rounded-pill" onclick="insertChar('ñ')">ñ</button>
+                            <button class="btn btn-sm btn-outline-secondary special-char-btn rounded-pill" onclick="insertChar('ng')">ng</button>
+                        </div>
                     </div>
 
                     <h5 class="text-muted fw-bold mb-3">Breakdown:</h5>
@@ -103,39 +134,71 @@
     </div>
 
     <script>
-        // 1. Get the data from Django Views
-        // The 'safe' filter is required to render JSON correctly in templates
+        // DATA FROM DJANGO
         const signMap = {{ sign_map|safe }}; 
         
-        let animationInterval;
         let currentSequence = [];
+        let isPlaying = false;
+
+        // NEW FUNCTION: Insert special characters
+        function insertChar(char) {
+            const input = document.getElementById('textInput');
+            input.value += char;
+            input.focus();
+        }
 
         function processText() {
             const input = document.getElementById('textInput').value.toLowerCase();
             const grid = document.getElementById('storyboardGrid');
             
-            // Clear previous results
             grid.innerHTML = '';
             currentSequence = [];
-            clearInterval(animationInterval);
 
-            // Loop through input string
-            for (let char of input) {
-                // Ignore spaces for now, or you could add a 'space' image
-                if (signMap[char]) {
-                    const imageUrl = signMap[char];
-                    currentSequence.push({ char: char, url: imageUrl });
+            // 1. Build the Sequence (With Special Handling for 'ng')
+            let i = 0;
+            while (i < input.length) {
+                let char = input[i];
+                let nextChar = input[i+1];
+                let token = char;
 
-                    // Add to Storyboard (Right Side)
+                // CHECK FOR 'ng' (2 letters treated as 1 sign)
+                if (char === 'n' && nextChar === 'g') {
+                    if (signMap['ng']) {
+                        token = 'ng';
+                        i++; // Skip the 'g'
+                    }
+                }
+                
+                // If we have a file for this token (a, b, ñ, ng, etc.)
+                if (signMap[token]) {
+                    const mediaUrl = signMap[token];
+                    const isVideo = mediaUrl.endsWith('.mp4');
+                    
+                    currentSequence.push({ 
+                        char: token, 
+                        url: mediaUrl,
+                        isVideo: isVideo 
+                    });
+
+                    // 2. Add to Storyboard
                     const card = document.createElement('div');
                     card.className = 'sign-card shadow-sm';
-                    card.id = `card-${currentSequence.length - 1}`; // Index for highlighting
+                    card.id = `card-${currentSequence.length - 1}`;
+                    
+                    let mediaHtml = '';
+                    if (isVideo) {
+                        mediaHtml = `<video src="${mediaUrl}" muted></video>`;
+                    } else {
+                        mediaHtml = `<img src="${mediaUrl}">`;
+                    }
+
                     card.innerHTML = `
-                        <img src="${imageUrl}">
-                        <div class="fw-bold mt-2 text-uppercase">${char}</div>
+                        ${mediaHtml}
+                        <div class="fw-bold mt-2 text-uppercase">${token}</div>
                     `;
                     grid.appendChild(card);
                 }
+                i++;
             }
 
             if (currentSequence.length > 0) {
@@ -145,37 +208,70 @@
             }
         }
 
+        // --- THE SMART PLAYER LOGIC ---
         function playSequence() {
-            let index = 0;
-            const mainImg = document.getElementById('mainDisplay');
+            if (isPlaying || currentSequence.length === 0) return;
+            isPlaying = true;
+            
+            playStep(0); 
+        }
+
+        function playStep(index) {
+            if (index >= currentSequence.length) {
+                isPlaying = false;
+                resetPlayer(); 
+                return;
+            }
+
+            const item = currentSequence[index];
+            const imgPlayer = document.getElementById('imgPlayer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const placeholder = document.getElementById('placeholder');
             const bigLetter = document.getElementById('bigLetterDisplay');
 
-            // Clear any running interval
-            if (animationInterval) clearInterval(animationInterval);
+            // 1. Highlight Storyboard Card
+            document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active-card'));
+            const activeCard = document.getElementById(`card-${index}`);
+            if(activeCard) {
+                activeCard.classList.add('active-card');
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
-            // Function to update the frame
-            animationInterval = setInterval(() => {
-                if (index >= currentSequence.length) {
-                    index = 0; // Loop automatically? Or clearInterval to stop.
-                    // Let's loop it for better learning
-                }
+            // 2. Set Letter Display
+            bigLetter.innerText = item.char;
+            placeholder.style.display = 'none';
 
-                const item = currentSequence[index];
+            // 3. Play Logic (Image vs Video)
+            if (item.isVideo) {
+                imgPlayer.style.display = 'none';
+                videoPlayer.style.display = 'block';
                 
-                // Update Player (Left)
-                mainImg.src = item.url;
-                bigLetter.innerText = item.char;
+                videoPlayer.src = item.url;
+                videoPlayer.play();
 
-                // Highlight Storyboard (Right)
-                document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active-card'));
-                const activeCard = document.getElementById(`card-${index}`);
-                if(activeCard) {
-                    activeCard.classList.add('active-card');
-                    activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                videoPlayer.onended = function() {
+                    playStep(index + 1);
+                };
 
-                index++;
-            }, 800); // 800ms speed per letter
+            } else {
+                videoPlayer.style.display = 'none';
+                videoPlayer.pause(); 
+                imgPlayer.style.display = 'block';
+                
+                imgPlayer.src = item.url;
+
+                setTimeout(() => {
+                    playStep(index + 1);
+                }, 1000); 
+            }
+        }
+
+        function resetPlayer() {
+            document.getElementById('imgPlayer').style.display = 'none';
+            document.getElementById('videoPlayer').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+            document.getElementById('bigLetterDisplay').innerText = "DONE";
+            document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active-card'));
         }
     </script>
 

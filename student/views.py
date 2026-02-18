@@ -1,33 +1,105 @@
-# Create your views here.
-import json
+# student/views.py
 
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from .models import FSLSign
+# CRITICAL: Import both models
+from .models import FSLSign, FSLWord 
+from .nlp_utils import translate_to_fsl
 
 
+# --- 1. FINGERSPELLING (Uses FSLSign / Alphabet) ---
 def translator_view(request):
-    # Fetch all signs from the DB
+    # Fetch all signs (A-Z, 0-9)
     signs = FSLSign.objects.all()
 
-    # Create a dictionary: {'a': '/media/fsl_clips/a.png', 'b': ...}
-    # We lower() the char to make matching easier later
+    # Map char -> media_file (e.g., 'a': '/media/fsl_alphabet/a.mp4')
     sign_map = {sign.char.lower(): sign.media_file.url for sign in signs}
 
     context = {
-        "sign_map": json.dumps(sign_map)  # Pass this to the template as a JSON string
+        "sign_map": json.dumps(sign_map)
     }
     return render(request, "student/fsl_translator.html", context)
 
+
+# --- 2. SENTENCE RESTRUCTURING (Uses FSLWord / Vocabulary) ---
+@login_required
+def restructure_sentence_view(request):
+    context = {}
+    if request.method == "POST":
+        original_text = request.POST.get("sentence", "")
+        if original_text:
+            nlp_results = translate_to_fsl(original_text)
+            gloss_words = nlp_results['complete'].split()
+            
+            visual_sequence = []
+            
+            for word_text in gloss_words:
+                # 1. Check for Explicit Fingerspelling Tag (from NLP)
+                if word_text.startswith("fs-"):
+                    clean_name = word_text.replace("fs-", "")
+                    visual_sequence.extend(get_fingerspell_sequence(clean_name))
+
+                # 2. Check standard Word Database
+                else:
+                    word_obj = FSLWord.objects.filter(word__iexact=word_text).first()
+                    
+                    if word_obj and word_obj.video:
+                        # Success: We have a video for this word
+                        visual_sequence.append({
+                            "word": word_text,
+                            "video_url": word_obj.video.url,
+                            "type": "video"
+                        })
+                    else:
+                        # 3. FALLBACK: Word unknown? FINGERSPELL IT!
+                        # This catches "dlsud", "wifi", or any word you haven't filmed yet.
+                        visual_sequence.extend(get_fingerspell_sequence(word_text))
+
+            context = {
+                "original": original_text,
+                "results": nlp_results,
+                "visual_sequence": visual_sequence
+            }
+    
+    return render(request, "student/fsl_restructure.html", context)
+
+# --- HELPER FUNCTION (Paste this above or below the view) ---
+def get_fingerspell_sequence(text):
+    """
+    Breaks a text into individual letters and finds their videos.
+    Returns a list of dictionaries.
+    """
+    sequence = []
+    for char in text:
+        # Skip non-alphabet characters (like numbers/punctuation if you don't have signs for them)
+        if not char.isalpha():
+            continue
+            
+        letter_obj = FSLSign.objects.filter(char__iexact=char).first()
+        if letter_obj and letter_obj.media_file:
+            sequence.append({
+                "word": char.upper(),
+                "video_url": letter_obj.media_file.url,
+                "type": "letter"
+            })
+        else:
+            # Absolute worst case: No video for the letter
+            sequence.append({
+                "word": char.upper(),
+                "video_url": None,
+                "type": "text"
+            })
+    return sequence
+
+# --- 3. DASHBOARD ---
 @login_required
 def student_dashboard(request):
     try:
-        # Access the profile using the related_name 'student_profile'
         student = request.user.student_profile
     except AttributeError:
-        # If they logged in but don't have a student profile, kick them out.
-        # This prevents the page from crashing with a 500 error.
+        # If logged in but no profile, send to home
         return redirect('index')
 
     context = {

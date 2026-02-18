@@ -1,29 +1,130 @@
-{% extends 'learning/base.html' %} {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4 text-white">Choose a Story</h1>
-    <div class="row">
-        {% for story in stories %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                {% if story.thumbnail %}
-                    <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 200px; object-fit: cover;">
-                {% else %}
-                    <div class="bg-secondary card-img-top" style="height: 200px;"></div>
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ story.title }}</h5>
-                    <p class="card-text text-muted">{{ story.description|truncatewords:10 }}</p>
-                    <a href="{% url 'learning:story_view' story.id %}" class="btn btn-primary w-100">
-                        ▶ Watch Story
-                    </a>
-                </div>
+{% extends 'learning/base.html' %} 
+{% load static %}
+
+{% block content %}
+<style>
+    /* Custom Styling for the Hub Cards */
+    .hub-card {
+        border: none;
+        border-radius: 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        overflow: hidden;
+        height: 100%;
+        text-align: center;
+        background: #2b3035; /* Dark card background */
+        color: white;
+    }
+    .hub-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: #343a40;
+    }
+    .hub-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+    
+    /* Section Visibility Toggles */
+    .content-section {
+        display: none; /* Hidden by default */
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    .content-section.active {
+        display: block; /* Show when active */
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container mt-4">
+    
+    <div class="text-center mb-5 text-white">
+        <h1 class="display-4 fw-bold">Welcome to the Learning Hub</h1>
+        <p class="lead text-white-50">Choose your path to start learning Filipino Sign Language.</p>
+    </div>
+
+    <div class="row g-4 mb-5 justify-content-center">
+        
+        <div class="col-md-5">
+            <div class="card hub-card p-5" onclick="showSection('stories')">
+                <div class="hub-icon">📺</div>
+                <h2 class="fw-bold">Story Quizzes</h2>
+                <p class="text-white-50">Watch short FSL stories and test your comprehension.</p>
+                <button class="btn btn-primary rounded-pill px-4 mt-3">Go to Stories</button>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center text-white">
-            <h3>No stories available yet!</h3>
+
+        <div class="col-md-5">
+            <div class="card hub-card p-5" onclick="showSection('sentences')">
+                <div class="hub-icon">🗣️</div>
+                <h2 class="fw-bold">Learn Sentences</h2>
+                <p class="text-white-50">Practice constructing and understanding full sentences.</p>
+                <button class="btn btn-success rounded-pill px-4 mt-3">Start Sentences</button>
+            </div>
         </div>
-        {% endfor %}
+
     </div>
+
+    <hr class="border-secondary mb-5">
+
+    <div id="stories-section" class="content-section">
+        <h2 class="text-white mb-4">📺 Available Stories</h2>
+        <div class="row">
+            {% for story in stories %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm bg-dark text-white border-secondary">
+                    {% if story.thumbnail %}
+                        <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary card-img-top d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span class="fs-1">📺</span>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ story.title }}</h5>
+                        <p class="card-text text-white-50">{{ story.description|truncatewords:10 }}</p>
+                        <a href="{% url 'learning:story_view' story.id %}" class="btn btn-outline-light w-100 mt-2">
+                            ▶ Watch & Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-white-50">
+                <h3>No stories available yet!</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="sentences-section" class="content-section">
+        <h2 class="text-white mb-4">🗣️ Practice Sentences</h2>
+        <div class="alert alert-info text-center p-5">
+            <h3>🚧 Coming Soon!</h3>
+            <p>This feature is under construction. Check back later for sentence building exercises.</p>
+            </div>
+    </div>
+
 </div>
+
+<script>
+    function showSection(sectionName) {
+        // 1. Hide all sections
+        document.getElementById('stories-section').classList.remove('active');
+        document.getElementById('sentences-section').classList.remove('active');
+        
+        // 2. Show the selected section
+        const selected = document.getElementById(sectionName + '-section');
+        if (selected) {
+            selected.classList.add('active');
+            // Smooth scroll to the content
+            selected.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+</script>
+
 {% endblock %}

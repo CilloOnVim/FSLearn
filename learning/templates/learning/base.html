@@ -24,14 +24,11 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'learning:manage_content' %}">FSLearn</a>
+            <a class="navbar-brand fw-bold" href="{% url 'teacher:teacher_dashboard' %}">FSLearn</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'learning:manage_content' %}">Teacher Hub</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'learning:story_list' %}">Stories</a>
+                        <a class="nav-link" href="{% url 'student:student_dashboard' %}">Home</a>
                     </li>
                 </ul>
             </div>
