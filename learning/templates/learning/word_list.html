@@ -9,7 +9,7 @@
 </head>
 <body class="p-4">
     <div class="container">
-        <a href="{% url 'learning:section_list' section.theme.id %}" class="btn btn-outline-dark rounded-pill mb-4">← Back to Sections</a>
+        <a href="{% url 'learning:section_list' section.theme.pk %}" class="btn btn-outline-dark rounded-pill mb-4">← Back to Sections</a>
 
         <h2 class="text-center fw-bold mb-5">Let's Learn: {{ section.title }}</h2>
 

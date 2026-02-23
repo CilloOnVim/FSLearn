@@ -1,0 +1,23 @@
+{% extends 'learning/base.html' %} {% block content %}
+<div class="container mt-5">
+    <h1 class="fw-bold mb-4 text-white">🧩 Puzzle Games</h1>
+    <div class="row g-4">
+        {% for quiz in quizzes %}
+        <div class="col-md-4">
+            <a href="{% url 'learning:take_quiz' quiz.pk %}" class="text-decoration-none">
+                <div class="card p-4 rounded-4 shadow border-0 text-center" style="background-color: #FFF8E1; border-bottom: 6px solid #FFE082 !important;">
+                    <div class="fs-1 mb-2">🧠</div>
+                    <h4 class="fw-bold text-dark">{{ quiz.original_text }}</h4>
+                    <span class="btn btn-warning mt-3 rounded-pill fw-bold">Play Now</span>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center text-white-50 mt-5">
+            <h3>No puzzles available yet!</h3>
+            <p>Wait for your teacher to create some magic.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

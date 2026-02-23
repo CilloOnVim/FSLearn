@@ -1,0 +1,48 @@
+{% extends 'learning/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-white">Sentence Quizzes</h2>
+            <p class="text-white-50">Manage the drag-and-drop puzzles.</p>
+        </div>
+        <a href="{% url 'learning:create_quiz' %}" class="btn btn-warning rounded-pill fw-bold">
+            + New Puzzle
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% if quizzes %}
+                <div class="list-group shadow-sm rounded-4 overflow-hidden">
+                    {% for quiz in quizzes %}
+                        <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="fw-bold text-dark mb-1">{{ quiz.original_text }}</h4>
+                                <div class="text-muted small">
+                                    Structure: 
+                                    <span class="badge bg-light text-dark border ms-1">{{ quiz.structure_json.complete }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted small">{{ quiz.created_at|date:"M d, Y" }}</span>
+                                <a href="{% url 'learning:delete_quiz' quiz.pk %}" 
+                                   class="btn btn-outline-danger btn-sm rounded-pill"
+                                   onclick="return confirm('Delete this quiz?');">
+                                    🗑️
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-white-50">
+                    <h3>📂 No Quizzes Yet</h3>
+                    <p>Click "New Puzzle" to create the first one!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

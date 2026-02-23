@@ -14,7 +14,7 @@
 <body class="p-3">
     <div class="container h-100">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="{% url 'learning:word_list' word.section.id %}" class="btn btn-outline-light rounded-pill">✕ Close</a>
+            <a href="{% url 'learning:word_list' word.section.pk %}" class="btn btn-outline-light rounded-pill">✕ Close</a>
             <span class="badge bg-primary">{{ word.section.theme.title }} > {{ word.section.title }}</span>
         </div>
 
@@ -54,7 +54,7 @@
             {% if next_word %}
                 <a href="{% url 'learning:word_detail' next_word.slug %}" class="btn btn-lg btn-success rounded-pill px-5 shadow">Next Word →</a>
             {% else %}
-                <a href="{% url 'learning:word_list' word.section.id %}" class="btn btn-lg btn-primary rounded-pill px-5">Finish! 🎉</a>
+                <a href="{% url 'learning:word_list' word.section.pk %}" class="btn btn-lg btn-primary rounded-pill px-5">Finish! 🎉</a>
             {% endif %}
         </div>
     </div>

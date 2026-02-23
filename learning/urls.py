@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 app_name = "learning"  # <--- Namespace is CRITICAL
@@ -13,12 +12,39 @@ urlpatterns = [
     path("section/<int:section_id>/", views.word_list, name="word_list"),
     # 4. The Lesson Page (The actual content)
     path("word/<slug:word_slug>/", views.word_detail, name="word_detail"),
+    
+    # --- CRUD CREATE ---
     path("manage/", views.manage_content, name="manage_content"),
     path("manage/theme/", views.add_theme, name="add_theme"),
     path("manage/section/", views.add_section, name="add_section"),
-    # Note: You can rename 'upload_word' to 'add_word' to be consistent if you want
     path("manage/word/", views.upload_word, name="upload_word"),
+
+    # --- CRUD UPDATE (EDIT) ---
+    path("manage/theme/<int:pk>/edit/", views.edit_theme, name="edit_theme"),
+    path("manage/section/<int:pk>/edit/", views.edit_section, name="edit_section"),
+    path("manage/word/<int:pk>/edit/", views.edit_word, name="edit_word"),
+
+    # --- CRUD DELETE ---
+    path("manage/theme/<int:pk>/delete/", views.delete_theme, name="delete_theme"),
+    path("manage/section/<int:pk>/delete/", views.delete_section, name="delete_section"),
+    path("manage/word/<int:pk>/delete/", views.delete_word, name="delete_word"),
+
+    # --- STORIES & QUIZZES ---
     path("stories/", views.story_list, name="story_list"),
     path("stories/<int:story_id>/", views.story_view, name="story_view"),
-    path("stories/", views.story_list, name="story_list")
+    path('quizzes/', views.manage_quizzes, name='manage_quizzes'),
+    path('quizzes/create/', views.create_quiz, name='create_quiz'),
+    path('quizzes/delete/<int:quiz_id>/', views.delete_quiz, name='delete_quiz'),
+    path("puzzles/", views.sentence_quiz_list, name="quiz_list"),
+    path("puzzles/<int:quiz_id>/", views.take_sentence_quiz, name="take_quiz"),
+    path("manage/story/add/", views.add_story, name="add_story"),
+
+    # --- STORY QUIZ CRUD ---
+    # Notice the add route needs the story_id so it knows which story to attach the quiz to
+    path("manage/story/<int:story_id>/question/add/", views.add_question, name="add_question"),
+    path("manage/question/<int:pk>/edit/", views.edit_question, name="edit_question"),
+    path("manage/question/<int:pk>/delete/", views.delete_question, name="delete_question"),
+    path("manage/story/<int:pk>/edit/", views.edit_story, name="edit_story"),
+    path("manage/story/<int:pk>/delete/", views.delete_story, name="delete_story"),
 ]
+

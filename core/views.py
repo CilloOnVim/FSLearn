@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
@@ -39,23 +40,20 @@ def login_view(request):
                 login(request, user)
 
                 # --- CRITICAL REDIRECTION LOGIC ---
-
+                
                 # 1. CHECK TEACHER FIRST
-                # We do this because your signal might have accidentally gave them
-                # a StudentProfile too. The TeacherProfile is the specific one.
-                # using related_name='teacher_profile'
                 if hasattr(user, 'teacher_profile'):
-                    return redirect('teacher:teacher_dashboard')
-
+                    return redirect('teacher:teacher_dashboard') 
+                
                 # 2. CHECK STUDENT SECOND
-                # using related_name='student_profile'
                 elif hasattr(user, 'student_profile'):
-                    return redirect('student:student_dashboard')
-
+                    return redirect('student:student_dashboard') 
+                
                 # 3. ADMIN FALLBACK
-                elif user.is_superuser:
+                elif user.is_superuser or user.is_staff:
                     return redirect('/admin/')
-
+                
+                # 4. NO PROFILE FOUND
                 else:
                     messages.warning(request, "Account exists but has no Student or Teacher profile.")
                     return redirect('index')

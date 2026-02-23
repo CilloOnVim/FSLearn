@@ -1,0 +1,91 @@
+{% extends 'learning/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-white">🧩 Create Sentence Puzzle</h2>
+            <a href="{% url 'learning:manage_quizzes' %}" class="btn btn-outline-light rounded-pill">Cancel</a>
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <label class="fw-bold text-muted mb-2">Type an English Sentence</label>
+                    <div class="input-group mb-3">
+                        <input type="text" name="sentence" class="form-control form-control-lg bg-light" 
+                               value="{{ original }}" placeholder="e.g. The boy eats an apple" required>
+                        <button type="submit" name="action" value="analyze" class="btn btn-primary fw-bold px-4">
+                            🔍 Analyze
+                        </button>
+                    </div>
+                    
+                    {% if nlp_result %}
+                        <input type="hidden" name="action" value="save">
+                        {% endif %}
+                </form>
+            </div>
+        </div>
+
+        {% if nlp_result %}
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-warning text-dark fw-bold p-3">
+                👀 Preview & Check
+            </div>
+            <div class="card-body p-4">
+                
+                <h5 class="fw-bold mb-3">Grammar Breakdown:</h5>
+                <div class="d-flex gap-2 mb-4">
+                    {% if nlp_result.time %}
+                        <span class="badge bg-info text-dark p-3 fs-6">⏰ {{ nlp_result.time }}</span>
+                    {% endif %}
+                    {% if nlp_result.topic %}
+                        <span class="badge bg-warning text-dark p-3 fs-6">📦 {{ nlp_result.topic }}</span>
+                    {% endif %}
+                    {% if nlp_result.comment %}
+                        <span class="badge bg-success text-white p-3 fs-6">🏃 {{ nlp_result.comment }}</span>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <h5 class="fw-bold mb-3">Video Database Check:</h5>
+                <div class="list-group mb-4">
+                    {% for item in report %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-uppercase">{{ item.word }}</span>
+                                <small class="text-muted ms-2">({{ item.category }})</small>
+                            </div>
+                            
+                            {% if item.has_video %}
+                                <span class="badge bg-success rounded-pill">✅ Video Found</span>
+                            {% else %}
+                                <div>
+                                    <span class="badge bg-danger rounded-pill me-2">❌ Missing Video</span>
+                                    <small class="text-danger d-block mt-1">Will default to fingerspelling</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="sentence" value="{{ original }}">
+                        <button type="submit" name="action" value="save" class="btn btn-success btn-lg rounded-pill fw-bold w-100">
+                            💾 Save Quiz for Students
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

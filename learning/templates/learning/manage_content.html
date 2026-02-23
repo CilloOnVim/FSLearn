@@ -54,33 +54,48 @@
             <div class="col-lg-4">
                 <div class="sidebar-container shadow-sm">
                     <h5 class="fw-bold mb-3 text-secondary">Course Structure</h5>
-                    
                     {% if themes %}
                         <div class="accordion" id="themeAccordion">
                             {% for theme in themes %}
                             <div class="accordion-item border-0 mb-2 rounded overflow-hidden shadow-sm">
-                                <h2 class="accordion-header" id="heading{{ theme.id }}">
-                                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ theme.id }}">
+                                <h2 class="accordion-header" id="heading{{ theme.pk }}">
+                                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ theme.pk }}">
                                         {{ theme.title }}
                                     </button>
                                 </h2>
-                                <div id="collapse{{ theme.id }}" class="accordion-collapse collapse" data-bs-parent="#themeAccordion">
+                                <div id="collapse{{ theme.pk }}" class="accordion-collapse collapse" data-bs-parent="#themeAccordion">
                                     <div class="accordion-body p-2 bg-light">
                                         
+                                        <div class="d-flex justify-content-end gap-2 mb-3 pb-2 border-bottom">
+                                            <a href="{% url 'learning:edit_theme' theme.pk %}" class="btn btn-sm btn-outline-warning text-dark px-3">✏️ Edit Theme</a>
+                                            <a href="{% url 'learning:delete_theme' theme.pk %}" class="btn btn-sm btn-outline-danger px-3" onclick="return confirm('WARNING: Deleting this theme will wipe out ALL sections, words, and stories inside it. Proceed?');">🗑️ Delete Theme</a>
+                                        </div>
+
                                         {% if theme.sections.all %}
                                             {% for section in theme.sections.all %}
                                             <div class="mb-2">
                                                 <div class="d-flex justify-content-between align-items-center p-2 bg-white rounded border">
-                                                    <span class="fw-bold text-primary">{{ section.title }}</span>
-                                                    <small class="text-muted">Section {{ section.order }}</small>
+                                                    <div>
+                                                        <span class="fw-bold text-primary">{{ section.title }}</span>
+                                                        <small class="text-muted ms-2">Section {{ section.order }}</small>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <a href="{% url 'learning:edit_section' section.pk %}" class="btn btn-sm btn-warning py-0 px-2" title="Edit Section">✏️</a>
+                                                        <a href="{% url 'learning:delete_section' section.pk %}" class="btn btn-sm btn-danger py-0 px-2" title="Delete Section" onclick="return confirm('Delete this section and all its words?');">🗑️</a>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div class="list-group mt-1 ms-3">
                                                     {% for word in section.words.all %}
-                                                    <a href="{% url 'learning:word_detail' word.slug %}" class="list-group-item list-group-item-action word-item border-0 mb-1 rounded d-flex justify-content-between align-items-center">
-                                                        <span>{{ word.name }}</span>
-                                                        <span style="font-size: 0.8rem;">🎥</span>
-                                                    </a>
+                                                    <div class="list-group-item word-item border-0 mb-1 rounded d-flex justify-content-between align-items-center">
+                                                        <a href="{% url 'learning:word_detail' word.slug %}" class="text-decoration-none text-dark fw-bold w-100">
+                                                            {{ word.name }} <span style="font-size: 0.8rem;">🎥</span>
+                                                        </a>
+                                                        <div class="d-flex gap-1 ms-2">
+                                                            <a href="{% url 'learning:edit_word' word.pk %}" class="btn btn-sm btn-warning py-0 px-2" title="Edit Word">✏️</a>
+                                                            <a href="{% url 'learning:delete_word' word.pk %}" class="btn btn-sm btn-danger py-0 px-2" title="Delete Word" onclick="return confirm('Delete this word?');">🗑️</a>
+                                                        </div>
+                                                    </div>
                                                     {% empty %}
                                                         <div class="p-2 text-muted small ms-2">No words yet.</div>
                                                     {% endfor %}
@@ -91,6 +106,49 @@
                                             <p class="text-muted small p-2">No sections in this theme yet.</p>
                                         {% endif %}
 
+                                        <hr class="my-3 border-secondary">
+                                        <h6 class="fw-bold text-success mb-3">📖 Theme Stories & Quizzes</h6>
+
+                                        {% if theme.stories.all %}
+                                            {% for story in theme.stories.all %}
+                                            <div class="mb-3 border rounded p-2 bg-white border-success">
+                                                
+                                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                                    <div>
+                                                        <span class="fw-bold text-success">{{ story.title }}</span>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <a href="{% url 'learning:edit_story' story.pk %}" class="btn btn-sm btn-warning py-0 px-2" title="Edit Story">✏️</a>
+                                                        <a href="{% url 'learning:delete_story' story.pk %}" class="btn btn-sm btn-danger py-0 px-2" title="Delete Story" onclick="return confirm('Nuke this story and ALL its questions?');">🗑️</a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="list-group mt-1 ms-3 mb-2">
+                                                    {% for question in story.questions.all %}
+                                                    <div class="list-group-item border-0 mb-1 rounded d-flex justify-content-between align-items-center" style="background-color: #f1f8f5;">
+                                                        <span class="text-dark small w-100">
+                                                            <strong>Q:</strong> {{ question.text|default:"(Video Question Only)" }}
+                                                        </span>
+                                                        <div class="d-flex gap-1 ms-2">
+                                                            <a href="{% url 'learning:edit_question' question.pk %}" class="btn btn-sm btn-warning py-0 px-2">✏️</a>
+                                                            <a href="{% url 'learning:delete_question' question.pk %}" class="btn btn-sm btn-danger py-0 px-2" onclick="return confirm('Delete this specific question?');">🗑️</a>
+                                                        </div>
+                                                    </div>
+                                                    {% empty %}
+                                                        <div class="p-2 text-muted small ms-2">No quiz questions yet.</div>
+                                                    {% endfor %}
+                                                </div>
+
+                                                <div class="text-end mt-2">
+                                                    <a href="{% url 'learning:add_question' story.pk %}" class="btn btn-sm btn-outline-success rounded-pill px-3">+ Add Question</a>
+                                                </div>
+
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted small p-2">No stories uploaded for this theme yet.</p>
+                                        {% endif %}
+
                                     </div>
                                 </div>
                             </div>
@@ -98,7 +156,7 @@
                         </div>
                     {% else %}
                         <div class="alert alert-info">No content created yet. Use the buttons on the right to start!</div>
-                    {% endif %}
+                    {% endif %}    
                 </div>
             </div>
 
@@ -140,6 +198,27 @@
                             </div>
                         </a>
                     </div>
+
+                    <div class="col-md-4">
+                        <a href="{% url 'learning:manage_quizzes' %}" class="text-decoration-none">
+                            <div class="card manage-card shadow-sm" style="background-color: #E1F5FE;">
+                                <div class="display-4 mb-3">🧩</div>
+                                <h4 class="fw-bold text-dark">Sentence Puzzles</h4>
+                                <p class="text-muted small">Create drag-and-drop sentence games.</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="{% url 'learning:add_story' %}" class="text-decoration-none">
+                            <div class="card manage-card shadow-sm" style="background-color: #d4edda;">
+                                <div class="display-4 mb-3">📖</div>
+                                <h4 class="fw-bold text-dark">Add Story</h4>
+                                <p class="text-muted small">Upload a story and build a quiz.</p>
+                            </div>
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
