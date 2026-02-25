@@ -34,6 +34,21 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         return f"{self.nickname} ({self.level})"
+    
+class WordProgress(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="completed_words")
+    word = models.ForeignKey("learning.Word", on_delete=models.CASCADE)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # A student can only complete a specific word once
+        unique_together = ("student", "word")
+
+class QuizProgress(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="quiz_scores")
+    quiz = models.ForeignKey("learning.SentenceQuiz", on_delete=models.CASCADE)
+    is_passed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now_add=True)
 
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):

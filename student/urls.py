@@ -10,4 +10,6 @@ urlpatterns = [
     path("translator/", views.translator_view, name="translator"),
     path("restructure/", views.restructure_sentence_view, name="restructure"),
     path("student_dashboard/", views.student_dashboard, name="student_dashboard"),
+    path("api/word/<int:word_id>/done/", views.mark_word_done, name="mark_word_done"),
+    path("api/quiz/<int:quiz_id>/save/", views.save_quiz_score, name="save_quiz_score"),
 ]

@@ -3,6 +3,10 @@
 import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from learning.models import Word, SentenceQuiz
+from .models import WordProgress, QuizProgress
 
 # CRITICAL: Import both models
 from .models import FSLSign, FSLWord 
@@ -99,10 +103,35 @@ def student_dashboard(request):
     try:
         student = request.user.student_profile
     except AttributeError:
-        # If logged in but no profile, send to home
         return redirect('index')
+
+    # Calculate basic progress stats
+    words_learned = student.completed_words.count()
+    quizzes_passed = student.quiz_scores.filter(is_passed=True).count()
 
     context = {
         'student': student,
+        'words_learned': words_learned,
+        'quizzes_passed': quizzes_passed,
     }
     return render(request, 'student/student_dashboard.html', context)
+
+
+@login_required
+def mark_word_done(request, word_id):
+    if request.method == "POST" and hasattr(request.user, "student_profile"):
+        word = get_object_or_404(Word, pk=word_id)
+        # get_or_create prevents duplicate spam if they refresh the page
+        WordProgress.objects.get_or_create(student=request.user.student_profile, word=word)
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=400)
+
+@login_required
+def save_quiz_score(request, quiz_id):
+    if request.method == "POST" and hasattr(request.user, "student_profile"):
+        quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
+        # Expecting the frontend to send a 'passed' boolean
+        passed = request.POST.get("passed") == "true"
+        QuizProgress.objects.create(student=request.user.student_profile, quiz=quiz, is_passed=passed)
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=400)

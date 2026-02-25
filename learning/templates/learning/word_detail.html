@@ -58,5 +58,56 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        // Standard Django helper to grab the CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const videoElement = document.querySelector("video"); 
+            const wordId = "{{ word.word_id }}"; 
+
+            if (videoElement) {
+                // Fire the save request ONLY when the video finishes playing
+                videoElement.addEventListener("ended", function() {
+                    recordWordProgress(wordId);
+                });
+            } else {
+                // Fallback: If there's no video, give them credit after 3 seconds.
+                setTimeout(() => recordWordProgress(wordId), 3000);
+            }
+        });
+
+        function recordWordProgress(wordId) {
+            fetch(`/student/api/word/${wordId}/done/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Database updated: Word marked as learned.");
+                } else {
+                    console.error("Failed to save progress. Is the user logged in as a student?");
+                }
+            })
+            .catch(error => console.error("Network error:", error));
+        }
+    </script>
 </body>
 </html>

@@ -107,14 +107,15 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="stat-box" style="background-color: #87ceeb">
-                                        <h5>Current Progress</h5>
-                                        <p class="mb-0 fw-bold">
-                                            0% (Start Learning!)
-                                        </p>
+                                    <div class="col-md-6">
+                                        <div class="stat-box" style="background-color: #87ceeb">
+                                            <h5>My Progress</h5>
+                                            <p class="mb-0 fw-bold fs-5">
+                                                <span class="text-primary">{{ words_learned|default:"0" }}</span> Signs Learned<br>
+                                                <span class="text-success">{{ quizzes_passed|default:"0" }}</span> Quizzes Passed
+                                            </p>
                                     </div>
-                                </div>
+                    </div>
                             </div>
 
                             <hr class="my-4" style="border-top: 2px dashed #ccc;">

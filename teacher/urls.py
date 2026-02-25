@@ -19,4 +19,5 @@ urlpatterns = [
     path("manage/theme/<int:pk>/delete/", learning_views.delete_theme, name="delete_theme"),
     path("manage/section/<int:pk>/delete/", learning_views.delete_section, name="delete_section"),
     path("manage/word/<int:pk>/delete/", learning_views.delete_word, name="delete_word"),
+    path("class_progress/", views.class_progress_report, name="class_progress_report"),
 ]
