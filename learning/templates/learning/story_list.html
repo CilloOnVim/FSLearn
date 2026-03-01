@@ -1,4 +1,4 @@
-{% extends 'learning/base.html' %} 
+{% extends 'learning/base.html' %}
 {% load static %}
 
 {% block content %}
@@ -12,43 +12,86 @@
         overflow: hidden;
         height: 100%;
         text-align: center;
-        background: #2b3035; /* Dark card background */
+        background: #2b3035;
+        /* Dark card background */
         color: white;
     }
+
     .hub-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         background: #343a40;
     }
+
     .hub-icon {
         font-size: 4rem;
         margin-bottom: 15px;
     }
-    
+
     /* Section Visibility Toggles */
     .content-section {
-        display: none; /* Hidden by default */
+        display: none;
+        /* Hidden by default */
         animation: fadeIn 0.5s ease-in-out;
     }
+
     .content-section.active {
-        display: block; /* Show when active */
+        display: block;
+        /* Show when active */
     }
-    
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .btn-chunky {
+        background-color: #6f42c1;
+        color: white;
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: inline-block;
+    }
+
+    .btn-chunky:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .btn-chunky:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 </style>
 
 <div class="container mt-4">
-    
+
+    <div class="d-flex justify-content-start mb-4">
+        <a href="{% url 'student:student_dashboard' %}" class="btn-chunky">
+            <span class="fs-5 me-2">🔙</span> Back to Dashboard
+        </a>
+    </div>
+
     <div class="text-center mb-5 text-white">
         <h1 class="display-4 fw-bold">Welcome to the Learning Hub</h1>
         <p class="lead text-white-50">Choose your path to start learning Filipino Sign Language.</p>
     </div>
 
     <div class="row g-4 mb-5 justify-content-center">
-        
+
         <div class="col-md-5">
             <div class="card hub-card p-5" onclick="showSection('stories')">
                 <div class="hub-icon">📺</div>
@@ -61,7 +104,8 @@
         <div class="col-md-5">
             <a href="{% url 'learning:quiz_list' %}" class="text-decoration-none">
                 <div class="card hub-card p-5">
-                    <div class="hub-icon">🧩</div> <h2 class="fw-bold">Sentence Puzzles</h2>
+                    <div class="hub-icon">🧩</div>
+                    <h2 class="fw-bold">Sentence Puzzles</h2>
                     <p class="text-white-50">Practice constructing FSL sentences with drag-and-drop tiles.</p>
                     <button class="btn btn-success rounded-pill px-4 mt-3">Start Playing</button>
                 </div>
@@ -79,16 +123,19 @@
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm bg-dark text-white border-secondary">
                     {% if story.thumbnail %}
-                        <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}" style="height: 200px; object-fit: cover;">
+                    <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}"
+                        style="height: 200px; object-fit: cover;">
                     {% else %}
-                        <div class="bg-secondary card-img-top d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <span class="fs-1">📺</span>
-                        </div>
+                    <div class="bg-secondary card-img-top d-flex align-items-center justify-content-center"
+                        style="height: 200px;">
+                        <span class="fs-1">📺</span>
+                    </div>
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ story.title }}</h5>
                         <p class="card-text text-white-50">{{ story.description|truncatewords:10 }}</p>
-                        <a href="{% url 'learning:story_view' story.id %}" class="btn btn-outline-light w-100 mt-2">
+                        <a href="{% url 'learning:story_view' story.story_id %}"
+                            class="btn btn-outline-light w-100 mt-2">
                             ▶ Watch & Quiz
                         </a>
                     </div>
@@ -101,14 +148,14 @@
             {% endfor %}
         </div>
     </div>
-    
-    </div>
+
+</div>
 
 <script>
     function showSection(sectionName) {
         // Hide the stories section first to reset
         document.getElementById('stories-section').classList.remove('active');
-        
+
         // Show the selected section (only stories uses this now)
         const selected = document.getElementById(sectionName + '-section');
         if (selected) {

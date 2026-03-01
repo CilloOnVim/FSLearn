@@ -30,7 +30,7 @@ def class_progress_report(request):
     teacher = request.user.teacher_profile
     
     # Grab all students assigned to this teacher's specific class section
-    students = StudentProfile.objects.filter(section=teacher.advisory_class).prefetch_related('completed_words', 'quiz_scores')
+    students = StudentProfile.objects.filter(section=teacher.advisory_class).prefetch_related('completed_words', 'quiz_scores', 'story_quiz_scores')
 
     return render(request, "teacher/class_progress.html", {
         "teacher": teacher,

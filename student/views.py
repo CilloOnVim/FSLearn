@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from learning.models import Word, SentenceQuiz
-from .models import WordProgress, QuizProgress
+from .models import WordProgress, QuizProgress, StoryQuizProgress
 
 # CRITICAL: Import both models
 from .models import FSLSign, FSLWord 
@@ -108,11 +108,13 @@ def student_dashboard(request):
     # Calculate basic progress stats
     words_learned = student.completed_words.count()
     quizzes_passed = student.quiz_scores.filter(is_passed=True).count()
+    story_quizzes_passed = student.story_quiz_scores.filter(is_passed=True).count()
 
     context = {
         'student': student,
         'words_learned': words_learned,
         'quizzes_passed': quizzes_passed,
+        'story_quizzes_passed': story_quizzes_passed,
     }
     return render(request, 'student/student_dashboard.html', context)
 
@@ -133,5 +135,33 @@ def save_quiz_score(request, quiz_id):
         # Expecting the frontend to send a 'passed' boolean
         passed = request.POST.get("passed") == "true"
         QuizProgress.objects.create(student=request.user.student_profile, quiz=quiz, is_passed=passed)
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=400)
+
+@login_required
+def save_story_quiz_score(request, story_id):
+    if request.method == "POST" and hasattr(request.user, "student_profile"):
+        from learning.models import Story
+        story = get_object_or_404(Story, pk=story_id)
+        
+        # Expecting the frontend to send a 'score' and 'passed'
+        score = int(request.POST.get("score", 0))
+        passed = request.POST.get("passed") == "true"
+        
+        # Update or create the progress record
+        progress, created = StoryQuizProgress.objects.get_or_create(
+            student=request.user.student_profile, 
+            story=story,
+            defaults={'score': score, 'is_passed': passed}
+        )
+        
+        # If it already existed, update with the best score
+        if not created:
+            if score > progress.score:
+                progress.score = score
+            if passed:
+                progress.is_passed = True
+            progress.save()
+            
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)

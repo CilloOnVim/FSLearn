@@ -1,7 +1,36 @@
 {% extends 'learning/base.html' %}
 
-{% block content %}
+<style>
+    .btn-chunky {
+        background-color: #6f42c1;
+        color: white;
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: inline-block;
+    }
+
+    .btn-chunky:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .btn-chunky:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
 <div class="container mt-4">
+    <div class="d-flex justify-content-start mb-4">
+        <a href="{% url 'learning:manage_content' %}" class="btn-chunky">
+            <span class="fs-5 me-2">🔙</span> Back to Content
+        </a>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-white">Sentence Quizzes</h2>
@@ -15,32 +44,32 @@
     <div class="row">
         <div class="col-12">
             {% if quizzes %}
-                <div class="list-group shadow-sm rounded-4 overflow-hidden">
-                    {% for quiz in quizzes %}
-                        <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h4 class="fw-bold text-dark mb-1">{{ quiz.original_text }}</h4>
-                                <div class="text-muted small">
-                                    Structure: 
-                                    <span class="badge bg-light text-dark border ms-1">{{ quiz.structure_json.complete }}</span>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="text-muted small">{{ quiz.created_at|date:"M d, Y" }}</span>
-                                <a href="{% url 'learning:delete_quiz' quiz.pk %}" 
-                                   class="btn btn-outline-danger btn-sm rounded-pill"
-                                   onclick="return confirm('Delete this quiz?');">
-                                    🗑️
-                                </a>
-                            </div>
+            <div class="list-group shadow-sm rounded-4 overflow-hidden">
+                {% for quiz in quizzes %}
+                <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">{{ quiz.original_text }}</h4>
+                        <div class="text-muted small">
+                            Structure:
+                            <span class="badge bg-light text-dark border ms-1">{{ quiz.structure_json.complete }}</span>
                         </div>
-                    {% endfor %}
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="text-muted small">{{ quiz.created_at|date:"M d, Y" }}</span>
+                        <a href="{% url 'learning:delete_quiz' quiz.pk %}"
+                            class="btn btn-outline-danger btn-sm rounded-pill"
+                            onclick="return confirm('Delete this quiz?');">
+                            🗑️
+                        </a>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <div class="text-center py-5 text-white-50">
-                    <h3>📂 No Quizzes Yet</h3>
-                    <p>Click "New Puzzle" to create the first one!</p>
-                </div>
+            <div class="text-center py-5 text-white-50">
+                <h3>📂 No Quizzes Yet</h3>
+                <p>Click "New Puzzle" to create the first one!</p>
+            </div>
             {% endif %}
         </div>
     </div>

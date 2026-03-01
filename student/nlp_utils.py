@@ -44,7 +44,7 @@ def translate_to_fsl(english_sentence):
             structure["object"].append(word_lemma)
         elif token.dep_ in ["nsubj", "nsubjpass", "prt", "poss"]:
             if word_lemma == "I": word_lemma = "ME"
-            if token.text.lower() == "my": word_lemma = "MY"
+            if token.text.lower() == "my": word_lemma = "ME"
             structure["subject"].append(word_lemma)
         elif token.pos_ in ["VERB", "ADJ", "ADV"] and token.dep_ != "npadvmod":
             structure["action"].append(word_lemma)

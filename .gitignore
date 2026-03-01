@@ -9,3 +9,7 @@ db.sqlite3
 # We ignore the files, but keep the folder structure
 media/
 !media/.gitkeep
+
+/THEME 1/
+/EDITED/
+/FSL_STORIES_CUT/

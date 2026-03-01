@@ -50,6 +50,16 @@ class QuizProgress(models.Model):
     is_passed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(auto_now_add=True)
 
+class StoryQuizProgress(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="story_quiz_scores")
+    story = models.ForeignKey("learning.Story", on_delete=models.CASCADE)
+    score = models.IntegerField(default=0, help_text="Number of questions answered correctly")
+    is_passed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "story")
+
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):
     if created and not instance.is_staff:

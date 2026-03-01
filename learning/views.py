@@ -145,7 +145,7 @@ def story_list(request):
 
 # 6. STORY PLAYER & QUIZ (The logic)
 def story_view(request, story_id):
-    story = get_object_or_404(Story, id=story_id)
+    story = get_object_or_404(Story, pk=story_id)
     
     questions_data = []
     questions = story.questions.all()
@@ -261,9 +261,21 @@ def delete_quiz(request, quiz_id):
 
 @login_required
 def sentence_quiz_list(request):
-    """Shows all available puzzles to the student"""
+    """Shows all available puzzles to the student and checks progress"""
     quizzes = SentenceQuiz.objects.all().order_by('-created_at')
-    return render(request, "learning/quiz_list.html", {"quizzes": quizzes})
+    
+    passed_quiz_ids = []
+    # Only try to fetch scores if the user is actually a student
+    if hasattr(request.user, 'student_profile'):
+        # This creates a flat list of ID numbers (e.g., [1, 4, 5]) for quizzes they passed
+        passed_quiz_ids = request.user.student_profile.quiz_scores.filter(
+            is_passed=True
+        ).values_list('quiz_id', flat=True)
+
+    return render(request, "learning/quiz_list.html", {
+        "quizzes": quizzes,
+        "passed_quiz_ids": passed_quiz_ids
+    })
 
 @login_required
 def take_sentence_quiz(request, quiz_id):

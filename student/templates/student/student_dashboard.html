@@ -1,161 +1,233 @@
 {% load static %}
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Student Dashboard | FSLearn</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-        />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap"
-            rel="stylesheet"
-        />
-        <style>
-            body {
-                font-family: "Fredoka", sans-serif;
-                background-color: #f0f8ff; /* Friendly Blue */
-            }
-            .dashboard-card {
-                background: white;
-                border-radius: 25px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-            }
-            .profile-header {
-                background-color: #20c997; /* Mint Green */
-                padding: 30px;
-                text-align: center;
-                color: white;
-            }
-            .profile-img {
-                width: 150px;
-                height: 150px;
-                object-fit: cover;
-                border-radius: 50%;
-                border: 5px solid white;
-                background-color: #fff;
-            }
-            .stat-box {
-                background-color: #ffd700; /* Yellow */
-                border-radius: 15px;
-                padding: 15px;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .btn-logout {
-                background-color: #dc3545;
-                color: white;
-                border-radius: 50px;
-                padding: 10px 30px;
-                font-weight: bold;
-                text-decoration: none;
-                border: none;
-            }
-            .action-btn {
-                transition: transform 0.2s;
-            }
-            .action-btn:hover {
-                transform: translateY(-5px);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="d-flex justify-content-end m-3">
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn-logout shadow">Log Out</button>
-            </form>
-        </div>
 
-        <div class="container mb-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="dashboard-card">
-                        <div class="profile-header">
-                            {% if student.avatar %}
-                            <img
-                                src="{{ student.avatar.url }}"
-                                alt="Profile"
-                                class="profile-img shadow"
-                            />
-                            {% else %}
-                            <img
-                                src="https://placehold.co/150x150/png?text=Kid"
-                                alt="Default"
-                                class="profile-img shadow"
-                            />
-                            {% endif %}
+<head>
+    <meta charset="UTF-8" />
+    <title>Student Dashboard | FSLearn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: "Fredoka", sans-serif;
+            background-color: #f0f8ff;
+            /* Friendly Blue */
+        }
 
-                            <h2 class="mt-3 fw-bold">
-                                Hello, {{ student.nickname }}!
-                            </h2>
-                            <p class="fs-5">
-                                {{ student.level }} | {{ student.section }}
-                            </p>
+        .dashboard-card {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .profile-header {
+            background-color: #20c997;
+            /* Mint Green */
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid white;
+            background-color: #fff;
+        }
+
+        .stat-box {
+            background-color: #ffd700;
+            /* Yellow */
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-logout {
+            background-color: #ff6b6b;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            border: none;
+            box-shadow: 0 4px 0px #c92a2a, 0 5px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0px #c92a2a, 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-logout:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #c92a2a, 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.1);
+        }
+
+        .action-btn:active {
+            transform: translateY(2px);
+            filter: brightness(0.95);
+        }
+
+        /* Specific shadows for the colored buttons */
+        .btn-green-chunky {
+            background-color: #20c997;
+            box-shadow: 0 5px 0px #128c68, 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-purple-chunky {
+            background-color: #6f42c1;
+            box-shadow: 0 5px 0px #4e2d8b, 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-pink-chunky {
+            background-color: #ff6b6b;
+            box-shadow: 0 5px 0px #c92a2a, 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-cyan-chunky {
+            background-color: #0dcaf0;
+            box-shadow: 0 5px 0px #0aa2c0, 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-green-chunky:hover {
+            box-shadow: 0 7px 0px #128c68, 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-purple-chunky:hover {
+            box-shadow: 0 7px 0px #4e2d8b, 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-pink-chunky:hover {
+            box-shadow: 0 7px 0px #c92a2a, 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-cyan-chunky:hover {
+            box-shadow: 0 7px 0px #0aa2c0, 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-green-chunky:active,
+        .btn-purple-chunky:active,
+        .btn-pink-chunky:active,
+        .btn-cyan-chunky:active {
+            box-shadow: 0 0px 0px rgba(0, 0, 0, 0), 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="d-flex justify-content-end m-3">
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout shadow">Log Out</button>
+        </form>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="dashboard-card">
+                    <div class="profile-header">
+                        {% if student.avatar %}
+                        <img src="{{ student.avatar.url }}" alt="Profile" class="profile-img shadow" />
+                        {% else %}
+                        <img src="https://placehold.co/150x150/png?text=Kid" alt="Default" class="profile-img shadow" />
+                        {% endif %}
+
+                        <h2 class="mt-3 fw-bold">
+                            Hello, {{ student.nickname }}!
+                        </h2>
+                        <p class="fs-5">
+                            {{ student.level }} | {{ student.section }}
+                        </p>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="stat-box">
+                                    <h5>Guardian</h5>
+                                    <p class="mb-0 fw-bold">
+                                        {{ student.guardian_name }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-box" style="background-color: #87ceeb">
+                                    <h5>My Progress</h5>
+                                    <p class="mb-0 fw-bold fs-5">
+                                        <span class="text-primary">{{ words_learned|default:"0" }}</span> Signs
+                                        Learned<br>
+                                        <span class="text-success">{{ quizzes_passed|default:"0" }}</span> Word Quizzes
+                                        Passed<br>
+                                        <span class="text-info">{{ story_quizzes_passed|default:"0" }}</span> Story
+                                        Quizzes
+                                        Passed
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="stat-box">
-                                        <h5>Guardian</h5>
-                                        <p class="mb-0 fw-bold">
-                                            {{ student.guardian_name }}
-                                        </p>
-                                    </div>
-                                </div>
-                                    <div class="col-md-6">
-                                        <div class="stat-box" style="background-color: #87ceeb">
-                                            <h5>My Progress</h5>
-                                            <p class="mb-0 fw-bold fs-5">
-                                                <span class="text-primary">{{ words_learned|default:"0" }}</span> Signs Learned<br>
-                                                <span class="text-success">{{ quizzes_passed|default:"0" }}</span> Quizzes Passed
-                                            </p>
-                                    </div>
-                    </div>
-                            </div>
+                        <hr class="my-4" style="border-top: 2px dashed #ccc;">
 
-                            <hr class="my-4" style="border-top: 2px dashed #ccc;">
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold mb-3" style="color: #6610f2;">Ready for Class?</h4>
+                            <a href="{% url 'learning:theme_list' %}"
+                                class="btn btn-green-chunky text-white btn-lg rounded-pill px-5 py-3 action-btn">
+                                <span class="fs-4 me-2">🚀</span> <span class="fs-4 fw-bold">Start Learning Signs</span>
+                            </a>
+                        </div>
 
-                            <div class="text-center mb-4">
-                                <h4 class="fw-bold mb-3" style="color: #6610f2;">Ready for Class?</h4>
-                                <a href="{% url 'learning:theme_list' %}" class="btn btn-success btn-lg rounded-pill px-5 py-3 shadow action-btn" style="background-color: #20c997; border: none;">
-                                    <span class="fs-4 me-2">🚀</span> <span class="fs-4 fw-bold">Start Learning Signs</span>
+                        <h5 class="text-center fw-bold text-muted mb-3">More Fun Activities</h5>
+
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-md-4">
+                                <a href="{% url 'student:translator' %}"
+                                    class="btn btn-purple-chunky text-white w-100 py-3 action-btn rounded-4">
+                                    <div class="fs-2 mb-1">🔤</div>
+                                    <h6 class="fw-bold mb-0">Fingerspell</h6>
                                 </a>
                             </div>
 
-                            <h5 class="text-center fw-bold text-muted mb-3">More Fun Activities</h5>
+                            <div class="col-md-4">
+                                <a href="{% url 'student:restructure' %}"
+                                    class="btn btn-pink-chunky text-white w-100 py-3 action-btn rounded-4">
+                                    <div class="fs-2 mb-1">🧠</div>
+                                    <h6 class="fw-bold mb-0">Structure NLP</h6>
+                                </a>
+                            </div>
 
-                            <div class="row g-3 justify-content-center">
-                                <div class="col-md-4">
-                                    <a href="{% url 'student:translator' %}" class="btn btn-primary w-100 py-3 shadow action-btn" style="background-color: #6f42c1; border: none;">
-                                        <div class="fs-2 mb-1">🔤</div>
-                                        <h6 class="fw-bold mb-0">Fingerspell</h6>
-                                    </a>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <a href="{% url 'student:restructure' %}" class="btn btn-danger w-100 py-3 shadow action-btn" style="background-color: #ff6b6b; border: none;">
-                                        <div class="fs-2 mb-1">🧠</div>
-                                        <h6 class="fw-bold mb-0">Structure NLP</h6>
-                                    </a>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <a href="{% url 'learning:story_list' %}" class="btn btn-warning w-100 py-3 shadow action-btn text-white" style="background-color: #fd7e14; border: none;">
-                                        <div class="fs-2 mb-1">🎮</div>
-                                        <h6 class="fw-bold mb-0">Play Quizzes</h6>
-                                    </a>
-                                </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'learning:story_list' %}"
+                                    class="btn btn-cyan-chunky text-white w-100 py-3 action-btn rounded-4">
+                                    <div class="fs-2 mb-1">📖</div>
+                                    <h6 class="fw-bold mb-0">Play Quizzes</h6>
+                                </a>
                             </div>
                         </div>
-
                     </div>
+
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
