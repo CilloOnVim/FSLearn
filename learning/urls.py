@@ -46,5 +46,6 @@ urlpatterns = [
     path("manage/question/<int:pk>/delete/", views.delete_question, name="delete_question"),
     path("manage/story/<int:pk>/edit/", views.edit_story, name="edit_story"),
     path("manage/story/<int:pk>/delete/", views.delete_story, name="delete_story"),
+    path('story_library/', views.story_library, name='story_library'),
 ]
 

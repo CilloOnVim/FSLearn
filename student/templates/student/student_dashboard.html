@@ -7,226 +7,227 @@
     <title>Student Dashboard | FSLearn</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
     <style>
+        :root {
+            --mint: #20c997;
+            --mint-dark: #128c68;
+            --purple: #6f42c1;
+            --purple-dark: #4e2d8b;
+            --pink: #ff6b6b;
+            --pink-dark: #c92a2a;
+            --cyan: #0dcaf0;
+            --cyan-dark: #0aa2c0;
+            --yellow: #ffd700;
+            --yellow-dark: #d4b200;
+        }
+
         body {
             font-family: "Fredoka", sans-serif;
             background-color: #f0f8ff;
-            /* Friendly Blue */
-        }
-
-        .dashboard-card {
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
+            /* Prevents all scrolling */
+            display: flex;
+            flex-direction: column;
         }
 
-        .profile-header {
-            background-color: #20c997;
-            /* Mint Green */
-            padding: 30px;
-            text-align: center;
+        /* Top Header Bar */
+        .top-bar {
+            background-color: var(--mint);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .profile-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .profile-img {
-            width: 150px;
-            height: 150px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
             border-radius: 50%;
-            border: 5px solid white;
+            border: 3px solid white;
             background-color: #fff;
         }
 
-        .stat-box {
-            background-color: #ffd700;
-            /* Yellow */
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 20px;
+        .greeting {
+            line-height: 1.1;
         }
 
-        .btn-logout {
-            background-color: #ff6b6b;
-            color: white;
-            border-radius: 50px;
-            padding: 12px 30px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-decoration: none;
-            border: none;
-            box-shadow: 0 4px 0px #c92a2a, 0 5px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Stats Ribbon */
+        .stats-ribbon {
+            background-color: var(--yellow);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            z-index: 9;
         }
 
-        .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0px #c92a2a, 0 8px 15px rgba(0, 0, 0, 0.15);
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn-logout:active {
-            transform: translateY(4px);
-            box-shadow: 0 0px 0px #c92a2a, 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* Massive Grid Area */
+        .action-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
         }
 
         .action-btn {
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: white !important;
+            /* Force white text */
+            transition: all 0.1s ease-in-out;
             border: none;
+            cursor: pointer;
         }
 
-        .action-btn:hover {
-            transform: translateY(-4px);
-            filter: brightness(1.1);
+        .emoji {
+            font-size: 5rem;
+            /* Massive icons */
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .btn-text {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
+            padding: 0 10px;
+        }
+
+        /* Chunky Button Colors & Shadows */
+        .btn-learn {
+            background-color: var(--mint);
+            box-shadow: 0 12px 0px var(--mint-dark);
+        }
+
+        .btn-finger {
+            background-color: var(--purple);
+            box-shadow: 0 12px 0px var(--purple-dark);
+        }
+
+        .btn-sentence {
+            background-color: var(--pink);
+            box-shadow: 0 12px 0px var(--pink-dark);
+        }
+
+        .btn-quiz {
+            background-color: var(--cyan);
+            box-shadow: 0 12px 0px var(--cyan-dark);
         }
 
         .action-btn:active {
-            transform: translateY(2px);
-            filter: brightness(0.95);
+            transform: translateY(12px);
+            box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
         }
 
-        /* Specific shadows for the colored buttons */
-        .btn-green-chunky {
-            background-color: #20c997;
-            box-shadow: 0 5px 0px #128c68, 0 10px 15px rgba(0, 0, 0, 0.1);
+        /* Logout Button */
+        .btn-logout {
+            background-color: var(--pink);
+            color: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border: none;
+            box-shadow: 0 5px 0px var(--pink-dark);
         }
 
-        .btn-purple-chunky {
-            background-color: #6f42c1;
-            box-shadow: 0 5px 0px #4e2d8b, 0 10px 15px rgba(0, 0, 0, 0.1);
+        .btn-logout:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px var(--pink-dark);
         }
 
-        .btn-pink-chunky {
-            background-color: #ff6b6b;
-            box-shadow: 0 5px 0px #c92a2a, 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
+        /* Responsive adjustments for smaller tablets */
+        @media (max-width: 768px) {
+            .emoji {
+                font-size: 3.5rem;
+            }
 
-        .btn-cyan-chunky {
-            background-color: #0dcaf0;
-            box-shadow: 0 5px 0px #0aa2c0, 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
+            .btn-text {
+                font-size: 1.5rem;
+            }
 
-        .btn-green-chunky:hover {
-            box-shadow: 0 7px 0px #128c68, 0 15px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-purple-chunky:hover {
-            box-shadow: 0 7px 0px #4e2d8b, 0 15px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-pink-chunky:hover {
-            box-shadow: 0 7px 0px #c92a2a, 0 15px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-cyan-chunky:hover {
-            box-shadow: 0 7px 0px #0aa2c0, 0 15px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-green-chunky:active,
-        .btn-purple-chunky:active,
-        .btn-pink-chunky:active,
-        .btn-cyan-chunky:active {
-            box-shadow: 0 0px 0px rgba(0, 0, 0, 0), 0 2px 5px rgba(0, 0, 0, 0.1);
+            .stats-ribbon {
+                font-size: 1rem;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="d-flex justify-content-end m-3">
-        <form action="{% url 'logout' %}" method="post">
+    <div class="top-bar">
+        <div class="profile-area">
+            {% if student.avatar %}
+            <img src="{{ student.avatar.url }}" alt="Profile" class="profile-img" />
+            {% else %}
+            <img src="https://placehold.co/150x150/png?text=Kid" alt="Default" class="profile-img" />
+            {% endif %}
+            <div class="greeting">
+                <h2 class="mb-0 fw-bold">Hi, {{ student.nickname }}!</h2>
+                <span class="fs-5">{{ student.level }} | {{ student.section }}</span>
+            </div>
+        </div>
+        <form action="{% url 'logout' %}" method="post" class="m-0">
             {% csrf_token %}
-            <button type="submit" class="btn-logout shadow">Log Out</button>
+            <button type="submit" class="btn-logout">🚪 Exit</button>
         </form>
     </div>
 
-    <div class="container mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="dashboard-card">
-                    <div class="profile-header">
-                        {% if student.avatar %}
-                        <img src="{{ student.avatar.url }}" alt="Profile" class="profile-img shadow" />
-                        {% else %}
-                        <img src="https://placehold.co/150x150/png?text=Kid" alt="Default" class="profile-img shadow" />
-                        {% endif %}
+    <div class="stats-ribbon">
+        <div class="stat-badge">⭐ <span class="text-primary">{{ words_learned|default:"0" }}</span> Signs</div>
+        <div class="stat-badge">🏆 <span class="text-success">{{ quizzes_passed|default:"0" }}</span> Quizzes</div>
+        <div class="stat-badge">📖 <span class="text-info">{{ story_quizzes_passed|default:"0" }}</span> Stories</div>
+    </div>
 
-                        <h2 class="mt-3 fw-bold">
-                            Hello, {{ student.nickname }}!
-                        </h2>
-                        <p class="fs-5">
-                            {{ student.level }} | {{ student.section }}
-                        </p>
-                    </div>
+    <div class="action-grid">
+        <a href="{% url 'learning:theme_list' %}" class="action-btn btn-learn">
+            <span class="emoji">🚀</span>
+            <span class="btn-text">Learn Signs</span>
+        </a>
 
-                    <div class="p-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="stat-box">
-                                    <h5>Guardian</h5>
-                                    <p class="mb-0 fw-bold">
-                                        {{ student.guardian_name }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="stat-box" style="background-color: #87ceeb">
-                                    <h5>My Progress</h5>
-                                    <p class="mb-0 fw-bold fs-5">
-                                        <span class="text-primary">{{ words_learned|default:"0" }}</span> Signs
-                                        Learned<br>
-                                        <span class="text-success">{{ quizzes_passed|default:"0" }}</span> Word Quizzes
-                                        Passed<br>
-                                        <span class="text-info">{{ story_quizzes_passed|default:"0" }}</span> Story
-                                        Quizzes
-                                        Passed
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+        <a href="{% url 'learning:story_list' %}" class="action-btn btn-quiz">
+            <span class="emoji">🎮</span>
+            <span class="btn-text">Play Quizzes</span>
+        </a>
 
-                        <hr class="my-4" style="border-top: 2px dashed #ccc;">
+        <a href="{% url 'student:translator' %}" class="action-btn btn-finger">
+            <span class="emoji">🔤</span>
+            <span class="btn-text">Fingerspell</span>
+        </a>
 
-                        <div class="text-center mb-4">
-                            <h4 class="fw-bold mb-3" style="color: #6610f2;">Ready for Class?</h4>
-                            <a href="{% url 'learning:theme_list' %}"
-                                class="btn btn-green-chunky text-white btn-lg rounded-pill px-5 py-3 action-btn">
-                                <span class="fs-4 me-2">🚀</span> <span class="fs-4 fw-bold">Start Learning Signs</span>
-                            </a>
-                        </div>
-
-                        <h5 class="text-center fw-bold text-muted mb-3">More Fun Activities</h5>
-
-                        <div class="row g-3 justify-content-center">
-                            <div class="col-md-4">
-                                <a href="{% url 'student:translator' %}"
-                                    class="btn btn-purple-chunky text-white w-100 py-3 action-btn rounded-4">
-                                    <div class="fs-2 mb-1">🔤</div>
-                                    <h6 class="fw-bold mb-0">Fingerspell</h6>
-                                </a>
-                            </div>
-
-                            <div class="col-md-4">
-                                <a href="{% url 'student:restructure' %}"
-                                    class="btn btn-pink-chunky text-white w-100 py-3 action-btn rounded-4">
-                                    <div class="fs-2 mb-1">🧠</div>
-                                    <h6 class="fw-bold mb-0">Structure NLP</h6>
-                                </a>
-                            </div>
-
-                            <div class="col-md-4">
-                                <a href="{% url 'learning:story_list' %}"
-                                    class="btn btn-cyan-chunky text-white w-100 py-3 action-btn rounded-4">
-                                    <div class="fs-2 mb-1">📖</div>
-                                    <h6 class="fw-bold mb-0">Play Quizzes</h6>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+        <a href="{% url 'student:restructure' %}" class="action-btn btn-sentence">
+            <span class="emoji">🧩</span>
+            <span class="btn-text">Make Sentences</span>
+        </a>
     </div>
 </body>
 

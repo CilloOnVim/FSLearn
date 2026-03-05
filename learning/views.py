@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.contrib import messages
 from .forms import SectionForm, ThemeForm, WordForm, StoryForm, QuizQuestionForm, ChoiceFormSet
-from .models import Section, Theme, Word, SentenceQuiz, QuizQuestion
+from .models import Section, Theme, Word, SentenceQuiz, QuizQuestion, Story
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from student.nlp_utils import translate_to_fsl
@@ -253,7 +253,7 @@ def create_quiz(request):
 # 9. DELETE QUIZ
 @login_required
 def delete_quiz(request, quiz_id):
-    quiz = get_object_or_404(SentenceQuiz, id=quiz_id)
+    quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
     quiz.delete()
     messages.success(request, "Quiz deleted.")
     return redirect("learning:manage_quizzes")
@@ -281,37 +281,51 @@ def sentence_quiz_list(request):
 def take_sentence_quiz(request, quiz_id):
     """The actual drag-and-drop player"""
     quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
+    structure = quiz.structure_json
 
-    # 1. Get the correct FSL sequence (e.g., "YESTERDAY APPLE ME EAT")
-    correct_sequence_str = quiz.structure_json.get('complete', '')
+    # 1. Map every word to its specific color category based on the NLP JSON
+    word_categories = {}
+    
+    if structure.get('time'):
+        for w in structure['time'].split():
+            word_categories[w] = 'time'
+            
+    if structure.get('topic'):
+        for w in structure['topic'].split():
+            word_categories[w] = 'topic'
+            
+    if structure.get('comment'):
+        for w in structure['comment'].split():
+            word_categories[w] = 'action'
+
+    # 2. Get the correct FSL sequence
+    correct_sequence_str = structure.get('complete', '')
     correct_words = correct_sequence_str.split()
 
-    # 2. Build the tile data and fetch videos
+    # 3. Build the tile data, fetch videos, AND inject the color category
     tiles = []
     for index, word in enumerate(correct_words):
         fsl_word = FSLWord.objects.filter(word__iexact=word).first()
         video_url = fsl_word.video.url if fsl_word and fsl_word.video else None
 
         tiles.append({
-            "id": f"tile_{index}", # Unique ID for the frontend
+            "id": f"tile_{index}", 
             "word": word,
-            "video_url": video_url
+            "video_url": video_url,
+            "category": word_categories.get(word, 'default') # THIS IS THE MAGIC LINE
         })
 
-    # 3. Shuffle the tiles so the student has to solve it
+    # 4. Shuffle the tiles
     shuffled_tiles = list(tiles)
     random.shuffle(shuffled_tiles)
 
     context = {
         "quiz": quiz,
         "shuffled_tiles": shuffled_tiles,
-        # Pass the correct sequence to JavaScript for validation
         "correct_sequence_json": json.dumps(correct_words) 
     }
     
     return render(request, "learning/take_quiz.html", context)
-
-
 
 # ==========================================
 # --- UPDATE (EDIT) VIEWS ---
@@ -412,6 +426,15 @@ def add_story(request):
         form = StoryForm()
         
     return render(request, "learning/upload_story.html", {"form": form})
+
+def story_library(request):
+    # Fetch all stories, ordering them so the newest ones show up first
+    stories = Story.objects.all().order_by('-story_id') 
+    
+    context = {
+        'stories': stories
+    }
+    return render(request, 'learning/story_library.html', context)
 
 
 # ==========================================

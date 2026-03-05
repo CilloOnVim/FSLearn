@@ -1,190 +1,340 @@
 {% load static %}
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>Sentence Puzzle | FSLearn</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        body { 
-            font-family: "Fredoka", sans-serif; 
-            background-color: #E0F7FA; 
-            background-image: radial-gradient(#B2EBF2 20%, transparent 20%), radial-gradient(#B2EBF2 20%, transparent 20%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            padding-bottom: 50px;
-        }
-        
-        .header-bg { 
-            background-color: #FFD54F; 
-            color: #5D4037; 
-            padding: 20px; 
-            text-align: center; 
-            border-bottom: 4px solid #FBC02D;
-            border-radius: 30px 30px 0 0;
+        :root {
+            --mint: #20c997;
+            --mint-dark: #128c68;
+            --purple: #6f42c1;
+            --purple-dark: #4e2d8b;
+            --cyan: #0dcaf0;
+            --cyan-dark: #0aa2c0;
+            --yellow: #ffd700;
+            --yellow-dark: #d4b200;
+            --pink: #ff6b6b;
+            --pink-dark: #c92a2a;
         }
 
-        .board-card {
-            background: white; 
-            border-radius: 30px; 
-            border: 4px solid #4DD0E1;
-            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.1); 
-            margin-top: 20px;
-        }
-
-        /* Drag and Drop Zones */
-        .drop-zone {
-            min-height: 200px;
-            background-color: #F5F5F5;
-            border: 4px dashed #B0BEC5;
-            border-radius: 20px;
-            padding: 20px;
+        body {
+            font-family: "Fredoka", sans-serif;
+            background-color: #f0f8ff;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Strict no-scroll on the body */
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
+            flex-direction: column;
         }
-        
+
+        /* Top Navigation Bar */
+        .top-bar {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .btn-back {
+            background-color: var(--purple);
+            color: white !important;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            box-shadow: 0 5px 0px var(--purple-dark);
+            transition: all 0.1s;
+        }
+
+        .btn-back:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .target-sentence {
+            background-color: var(--yellow);
+            color: #333;
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            box-shadow: 0 4px 0px var(--yellow-dark);
+        }
+
+        /* Main Game Board */
+        .game-workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px 40px;
+            overflow: hidden;
+        }
+
+        /* Flex constraints to stop the bulldozing */
+        .board-section {
+            display: flex;
+            flex-direction: column;
+            flex: 3; 
+            min-height: 0; 
+        }
+
+        .bank-section {
+            display: flex;
+            flex-direction: column;
+            flex: 2; 
+            min-height: 0; 
+        }
+
+        .zone-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* 3 Distinct Drop Buckets */
+        .drop-board {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .drop-slot {
+            flex: 1;
+            border-radius: 25px;
+            border: 6px dashed;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            overflow-y: auto;
+        }
+
+        .drop-slot::-webkit-scrollbar {
+            width: 8px;
+        }
+        .drop-slot::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 10px;
+        }
+
+        .slot-time {
+            background-color: rgba(13, 202, 240, 0.15);
+            border-color: var(--cyan);
+        }
+
+        .slot-topic {
+            background-color: rgba(255, 215, 0, 0.15);
+            border-color: var(--yellow);
+        }
+
+        .slot-action {
+            background-color: rgba(32, 201, 151, 0.15);
+            border-color: var(--mint);
+        }
+
+        /* Word Bank */
         .word-bank {
-            min-height: 200px;
-            background-color: #E8F5E9;
-            border: 4px solid #A5D6A7;
-            border-radius: 20px;
+            flex: 1;
+            background-color: #e9ecef;
+            border: 6px solid #ced4da;
+            border-radius: 35px;
             padding: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
+            min-height: 0;
         }
 
-        /* The Draggable Tiles */
+        .word-bank::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .word-bank::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: 10px;
+        }
+
+        /* Massive Draggable Tiles */
         .fsl-tile {
-            width: 140px;
+            width: 160px; 
             background: white;
-            border: 4px solid #AB47BC;
-            border-radius: 15px;
+            border: 5px solid var(--purple);
+            border-radius: 20px;
             overflow: hidden;
             cursor: grab;
-            box-shadow: 0 5px 0px #8E24AA;
+            box-shadow: 0 6px 0px var(--purple-dark);
             transition: transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
         }
+
         .fsl-tile:active {
             cursor: grabbing;
-            transform: scale(0.95);
+            transform: translateY(6px) scale(0.98);
+            box-shadow: 0 0px 0px transparent;
         }
+
+        /* COLOR CODING CLASSES FOR TILES */
+        .tile-time { border-color: var(--cyan); box-shadow: 0 6px 0px var(--cyan-dark); }
+        .tile-topic { border-color: var(--yellow); box-shadow: 0 6px 0px var(--yellow-dark); }
+        .tile-action { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
+        .tile-default { border-color: var(--purple); box-shadow: 0 6px 0px var(--purple-dark); }
+
         .tile-video-container {
             height: 100px;
-            background-color: #000;
+            background-color: #f8f9fa;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 3rem;
         }
+
         .tile-video-container video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .tile-label {
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             font-weight: 700;
-            color: #4A148C;
+            color: #333;
             text-transform: uppercase;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            background-color: white;
+        }
+
+        /* Action Area */
+        .action-area {
+            padding: 10px;
+            text-align: center;
+            flex-shrink: 0;
         }
 
         .btn-check-answer {
-            background-color: #FF7043; 
+            background-color: var(--pink);
             border: none;
-            border-radius: 20px;
-            padding: 15px 40px;
-            font-size: 1.8rem;
-            font-weight: bold;
+            border-radius: 50px;
+            padding: 15px 50px;
+            font-size: 2.2rem;
+            font-weight: 700;
             color: white;
-            box-shadow: 0 6px 0 #D84315;
+            box-shadow: 0 8px 0 var(--pink-dark);
             transition: all 0.1s;
+            width: 100%;
+            max-width: 500px;
         }
+
         .btn-check-answer:active {
-            transform: translateY(6px);
-            box-shadow: none;
+            transform: translateY(8px);
+            box-shadow: 0 0px 0px transparent;
         }
-        
-        /* Modal Customizations */
+
+        /* Modals */
         .modal-content {
-            border-radius: 30px;
-            border: 6px solid;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 40px;
+            border: 8px solid;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 900px) {
+            .game-workspace { overflow-y: auto; }
+            body { overflow: auto; }
+            .fsl-tile { width: 140px; }
+            .tile-video-container { height: 90px; }
+            .drop-board { flex-direction: column; }
         }
     </style>
 </head>
+
 <body>
-    <div class="container mt-4">
-        
-        <div class="mb-3">
-            <a href="{% url 'learning:quiz_list' %}" class="btn btn-light rounded-pill fw-bold text-muted border-2" style="border-color: #ccc;">
-                ⬅️ Back to Puzzles
-            </a>
-        </div>
 
-        <div class="board-card">
-            <div class="header-bg">
-                <h2 class="fw-bold mb-1">Make the Sentence!</h2>
-                <h4 class="bg-white d-inline-block px-4 py-2 rounded-pill mt-2 border border-warning shadow-sm text-dark">
-                    "{{ quiz.original_text }}"
-                </h4>
+    <div class="top-bar">
+        <a href="{% url 'learning:quiz_list' %}" class="btn-back">🔙 Back</a>
+        <h2 class="target-sentence">"{{ quiz.original_text }}"</h2>
+        <div style="width: 100px;"></div>
+    </div>
+
+    <div class="game-workspace">
+
+        <div class="board-section">
+            <div class="d-flex justify-content-between gap-3 mb-2 flex-shrink-0">
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--cyan);">1. Time ⏰</span>
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--mint);">2. Action 🏃</span>
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--yellow);">3. Thing 📦</span>
             </div>
 
-            <div class="p-4 p-md-5">
-                
-                <h4 class="fw-bold text-muted mb-3">🧩 Drag words here in FSL order:</h4>
-                <div id="dropZone" class="drop-zone mb-5"></div>
-
-                <h4 class="fw-bold text-muted mb-3">📦 Word Bank:</h4>
-                <div id="wordBank" class="word-bank mb-5">
-                    {% for tile in shuffled_tiles %}
-                        <div class="fsl-tile" data-word="{{ tile.word }}">
-                            <div class="tile-video-container">
-                                {% if tile.video_url %}
-                                    <video autoplay loop muted playsinline>
-                                        <source src="{{ tile.video_url }}" type="video/mp4">
-                                    </video>
-                                {% else %}
-                                    <span class="fs-1">🤷‍♂️</span>
-                                {% endif %}
-                            </div>
-                            <div class="tile-label">{{ tile.word }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div class="text-center">
-                    <button onclick="checkAnswer()" class="btn-check-answer">
-                        ✔️ Check Answer
-                    </button>
-                </div>
-
+            <div class="drop-board">
+                <div id="dropTime" class="drop-slot slot-time"></div>
+                <div id="dropAction" class="drop-slot slot-action"></div>
+                <div id="dropTopic" class="drop-slot slot-topic"></div>
             </div>
         </div>
+
+        <div class="bank-section">
+            <h3 class="zone-title" style="color: #6c757d;">📦 Word Bank:</h3>
+            <div id="wordBank" class="word-bank">
+                {% for tile in shuffled_tiles %}
+                <div class="fsl-tile tile-{{ tile.category|default:'default' }}" data-word="{{ tile.word }}" data-category="{{ tile.category|default:'default' }}">
+                    <div class="tile-video-container">
+                        {% if tile.video_url %}
+                        <video autoplay loop muted playsinline>
+                            <source src="{{ tile.video_url }}" type="video/mp4">
+                        </video>
+                        {% else %}
+                        <span>🤷‍♂️</span>
+                        {% endif %}
+                    </div>
+                    <div class="tile-label">{{ tile.word }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button onclick="checkAnswer()" class="btn-check-answer">✔️ Check Answer</button>
+        </div>
+
     </div>
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content text-center" style="border-color: #FFD54F; background-color: #FFFDE7;">
+            <div class="modal-content text-center" style="border-color: var(--yellow); background-color: #fff;">
                 <div class="modal-body p-5">
-                    <div class="display-1 mb-3">🌟</div>
-                    <h1 class="fw-bold mb-3" style="color: #F57F17;">EXCELLENT!</h1>
-                    <p class="fs-4 text-muted">You built the FSL sentence perfectly!</p>
-                    <button type="button" class="btn btn-warning btn-lg rounded-pill fw-bold mt-3 px-5 shadow-sm" onclick="window.location.href='{% url 'learning:quiz_list' %}'">
-                        Play Another Puzzle 🚀
+                    <div style="font-size: 6rem; line-height: 1;">🌟</div>
+                    <h1 class="fw-bold mb-3" style="color: var(--pink); font-size: 3rem;">EXCELLENT!</h1>
+                    <p class="fs-3 text-muted">You built the sentence perfectly!</p>
+                    <button type="button" class="btn btn-warning btn-lg rounded-pill fw-bold mt-4 px-5"
+                        style="font-size: 1.5rem;" onclick="window.location.href='{% url 'learning:quiz_list' %}'">
+                        Play Another 🚀
                     </button>
                 </div>
             </div>
@@ -193,17 +343,18 @@
 
     <div class="modal fade" id="tryAgainModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center" style="border-color: #FF7043; background-color: #FBE9E7;">
+            <div class="modal-content text-center" style="border-color: var(--pink); background-color: #fff;">
                 <div class="modal-body p-4">
-                    <div class="display-3 mb-2">🤔</div>
-                    <h3 class="fw-bold text-danger">Not quite!</h3>
-                    <p class="text-muted fw-bold">Remember the rule:</p>
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                        <span class="badge bg-info text-dark">Time ⏰</span>
-                        <span class="badge bg-warning text-dark">Thing 📦</span>
-                        <span class="badge bg-success text-white">Action 🏃</span>
+                    <div style="font-size: 5rem; line-height: 1;">🤔</div>
+                    <h2 class="fw-bold text-danger mt-3">Not quite!</h2>
+                    <p class="text-muted fs-5 fw-bold mt-3 mb-2">Match the colors!</p>
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        <span class="badge fs-6 text-dark" style="background-color: var(--cyan);">Blue ⏰</span>
+                        <span class="badge fs-6 text-dark" style="background-color: var(--mint);">Green 🏃</span>
+                        <span class="badge fs-6 text-dark" style="background-color: var(--yellow);">Yellow 📦</span>
                     </div>
-                    <button type="button" class="btn btn-outline-danger rounded-pill fw-bold w-100" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-danger rounded-pill fw-bold w-100 fs-5"
+                        data-bs-dismiss="modal">
                         Try Again
                     </button>
                 </div>
@@ -213,12 +364,13 @@
 
     <div class="modal fade" id="missingTilesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center" style="border-color: #B0BEC5;">
+            <div class="modal-content text-center" style="border-color: #adb5bd; background-color: #fff;">
                 <div class="modal-body p-4">
-                    <div class="display-4 mb-2">👇</div>
-                    <h4 class="fw-bold text-dark">Use all words!</h4>
-                    <p class="text-muted small">You left some words in the Word Bank.</p>
-                    <button type="button" class="btn btn-secondary rounded-pill fw-bold w-100" data-bs-dismiss="modal">
+                    <div style="font-size: 5rem; line-height: 1;">👇</div>
+                    <h3 class="fw-bold text-dark mt-3">Use all words!</h3>
+                    <p class="text-muted fs-5">You left some words in the box.</p>
+                    <button type="button" class="btn btn-secondary rounded-pill fw-bold w-100 fs-5 mt-2"
+                        data-bs-dismiss="modal">
                         Okay
                     </button>
                 </div>
@@ -229,7 +381,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // --- API Tracking Helpers ---
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -245,65 +396,51 @@
             return cookieValue;
         }
 
-        function saveQuizProgress(quizId, isPassed) {
-            const formData = new FormData();
-            formData.append("passed", isPassed);
-
-            fetch(`/student/api/quiz/${quizId}/save/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log("Database updated: Quiz score saved.");
-                }
-            })
-            .catch(error => console.error("Network error:", error));
-        }
-
-        // --- Drag and Drop Logic ---
-        const dropZone = document.getElementById('dropZone');
         const wordBank = document.getElementById('wordBank');
+        const dropTime = document.getElementById('dropTime');
+        const dropTopic = document.getElementById('dropTopic');
+        const dropAction = document.getElementById('dropAction');
 
-        new Sortable(wordBank, {
-            group: 'shared', 
-            animation: 150,
-            ghostClass: 'opacity-50'
+        const baseConfig = { animation: 150, ghostClass: 'opacity-50' };
+
+        new Sortable(wordBank, { group: 'shared', ...baseConfig });
+        
+        new Sortable(dropTime, {
+            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'time'; } },
+            ...baseConfig
         });
 
-        new Sortable(dropZone, {
-            group: 'shared',
-            animation: 150,
-            ghostClass: 'opacity-50'
+        new Sortable(dropTopic, {
+            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'topic'; } },
+            ...baseConfig
         });
 
-        // Validation Logic
+        new Sortable(dropAction, {
+            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'action'; } },
+            ...baseConfig
+        });
+
         const correctSequence = JSON.parse('{{ correct_sequence_json|safe }}');
-
-        // Modal Instances
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
         const tryAgainModal = new bootstrap.Modal(document.getElementById('tryAgainModal'));
         const missingTilesModal = new bootstrap.Modal(document.getElementById('missingTilesModal'));
 
         function checkAnswer() {
-            const droppedTiles = dropZone.querySelectorAll('.fsl-tile');
-            
-            // Check if they moved all tiles
-            if (droppedTiles.length < correctSequence.length) {
+            let currentSequence = [];
+
+            // JS VALIDATION UPDATED TO TEACHER'S ORDER: Time -> Action -> Topic(Thing)
+            [dropTime, dropAction, dropTopic].forEach(zone => {
+                const droppedTiles = zone.querySelectorAll('.fsl-tile');
+                droppedTiles.forEach(tile => {
+                    currentSequence.push(tile.getAttribute('data-word'));
+                });
+            });
+
+            if (currentSequence.length < correctSequence.length) {
                 missingTilesModal.show();
                 return;
             }
 
-            // Extract the word data-attributes in order
-            let currentSequence = [];
-            droppedTiles.forEach(tile => {
-                currentSequence.push(tile.getAttribute('data-word'));
-            });
-
-            // Compare arrays
             let isCorrect = true;
             for (let i = 0; i < correctSequence.length; i++) {
                 if (currentSequence[i] !== correctSequence[i]) {
@@ -313,31 +450,31 @@
             }
 
             if (isCorrect) {
-                // Fire the progress tracker to the backend
-                saveQuizProgress("{{ quiz.sentencequiz_id }}", true);
-
-                // Fire Confetti
                 var duration = 3 * 1000;
                 var animationEnd = Date.now() + duration;
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1060 }; // zIndex high to appear over modal
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1060 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-                function randomInRange(min, max) {
-                  return Math.random() * (max - min) + min;
-                }
-
-                var interval = setInterval(function() {
-                  var timeLeft = animationEnd - Date.now();
-
-                  if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                  }
-
-                  var particleCount = 50 * (timeLeft / duration);
-                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) { return clearInterval(interval); }
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
                 }, 250);
 
                 successModal.show();
+
+                setTimeout(() => {
+                    const formData = new FormData();
+                    formData.append("passed", true);
+                    fetch(`/student/api/quiz/{{ quiz.sentencequiz_id }}/save/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                        body: formData
+                    }).catch(error => console.error("Network error:", error));
+                }, 500);
+
             } else {
                 tryAgainModal.show();
             }

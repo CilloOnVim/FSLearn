@@ -3,89 +3,283 @@
 <html lang="en">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ word.name }} | FSLearn</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --mint: #20c997;
+            --mint-dark: #128c68;
+            --purple: #6f42c1;
+            --purple-dark: #4e2d8b;
+            --cyan: #0dcaf0;
+            --cyan-dark: #0aa2c0;
+            --yellow: #ffd700;
+            --yellow-dark: #d4b200;
+            --pink: #ff6b6b;
+            --pink-dark: #c92a2a;
+            --gray: #adb5bd;
+            --gray-dark: #6c757d;
+        }
+
         body {
             font-family: 'Fredoka', sans-serif;
-            background-color: #212529;
-            color: white;
+            background-color: #f0f8ff;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            margin: 0;
+            overflow: hidden;
         }
 
-        .content-box {
-            background: #343a40;
-            border-radius: 20px;
+        /* Top Bar */
+        .top-bar {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .btn-close-custom {
+            background-color: var(--pink);
+            color: white !important;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+            box-shadow: 0 5px 0px var(--pink-dark);
+        }
+
+        .btn-close-custom:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .theme-badge {
+            background-color: var(--cyan);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            box-shadow: 0 4px 0px var(--cyan-dark);
+        }
+
+        /* Main Content Area */
+        .main-workspace {
+            flex-grow: 1;
+            display: flex;
             padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Video Area */
+        .video-box {
+            flex: 1.8;
+            /* Gives the video mostly space but leaves plenty for the right panel */
+            background: white;
+            border-radius: 35px;
+            border: 5px solid var(--mint);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
             height: 100%;
         }
 
         video {
-            border-radius: 15px;
+            border-radius: 20px;
             width: 100%;
-            max-height: 400px;
-            background: black;
+            height: 100%;
+            object-fit: contain;
+            /* This strictly prevents cropping */
+            background: #e9ecef;
+        }
+
+        /* Word Detail Area */
+        .word-box {
+            flex: 1.2;
+            /* Allows right panel to be wider for the bigger image */
+            background: white;
+            border-radius: 35px;
+            border: 5px solid var(--yellow);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .word-image {
+            width: 85%;
+            max-width: 450px;
+            max-height: 45vh;
+            /* Prevents blowing out the container height */
+            object-fit: contain;
+            border-radius: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .word-title {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin: 0 0 15px 0;
+            line-height: 1;
+        }
+
+        .word-desc {
+            font-size: 1.5rem;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .nav-btn {
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: white !important;
+            transition: all 0.1s;
+            border: none;
+        }
+
+        .btn-prev {
+            background-color: var(--cyan);
+            box-shadow: 0 6px 0px var(--cyan-dark);
+        }
+
+        .btn-prev:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .btn-prev:disabled {
+            background-color: var(--gray);
+            box-shadow: 0 6px 0px var(--gray-dark);
+            cursor: not-allowed;
+        }
+
+        .btn-next {
+            background-color: var(--mint);
+            box-shadow: 0 6px 0px var(--mint-dark);
+        }
+
+        .btn-next:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .btn-finish {
+            background-color: var(--yellow);
+            color: #333 !important;
+            box-shadow: 0 6px 0px var(--yellow-dark);
+        }
+
+        .btn-finish:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        @media (max-width: 900px) {
+            .main-workspace {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            body {
+                overflow: auto;
+            }
+
+            .word-title {
+                font-size: 3rem;
+            }
+
+            .nav-btn {
+                font-size: 1.4rem;
+                padding: 12px 25px;
+            }
+
+            .video-box,
+            .word-box {
+                height: auto;
+                min-height: 300px;
+            }
         }
     </style>
 </head>
 
-<body class="p-3">
-    <div class="container h-100">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="{% url 'learning:word_list' word.section.pk %}" class="btn btn-outline-light rounded-pill">✕
-                Close</a>
-            <span class="badge bg-primary">{{ word.section.theme.title }} > {{ word.section.title }}</span>
-        </div>
+<body>
 
-        <div class="row h-75">
-            <div class="col-lg-8 mb-3">
-                <div class="content-box d-flex align-items-center justify-content-center">
-                    {% if word.video %}
-                    <video controls autoplay muted>
-                        <source src="{{ word.video.url }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    {% else %}
-                    <div class="text-center text-muted">No video available</div>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="top-bar">
+        <a href="{% url 'learning:word_list' word.section.pk %}" class="btn-close-custom">✖ Exit</a>
+        <div class="theme-badge">{{ word.section.theme.title }} ➔ {{ word.section.title }}</div>
+    </div>
 
-            <div class="col-lg-4 mb-3">
-                <div class="content-box text-center">
-                    {% if word.image %}
-                    <img src="{{ word.image.url }}" class="img-fluid rounded mb-3" style="max-height: 150px;">
-                    {% endif %}
+    <div class="main-workspace">
 
-                    <h1 class="display-4 fw-bold text-warning">{{ word.name }}</h1>
-                    <p class="lead">{{ word.description }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between mt-3">
-            {% if previous_word %}
-            <a href="{% url 'learning:word_detail' previous_word.slug %}"
-                class="btn btn-lg btn-secondary rounded-pill px-5">← Previous</a>
+        <div class="video-box">
+            {% if word.video %}
+            <video controls autoplay loop muted>
+                <source src="{{ word.video.url }}" type="video/mp4">
+            </video>
             {% else %}
-            <button class="btn btn-lg btn-dark rounded-pill px-5" disabled>← Previous</button>
-            {% endif %}
-
-            {% if next_word %}
-            <a href="{% url 'learning:word_detail' next_word.slug %}"
-                class="btn btn-lg btn-success rounded-pill px-5 shadow">Next Word →</a>
-            {% else %}
-            <a href="{% url 'learning:word_list' word.section.pk %}"
-                class="btn btn-lg btn-primary rounded-pill px-5">Finish! 🎉</a>
+            <div style="font-size: 2rem; color: #ccc; font-weight: bold;">No video yet 🙈</div>
             {% endif %}
         </div>
+
+        <div class="word-box">
+            {% if word.image %}
+            <img src="{{ word.image.url }}" class="word-image" alt="{{ word.name }}">
+            {% endif %}
+
+            <h1 class="word-title">{{ word.name }}</h1>
+
+            {% if word.description %}
+            <p class="word-desc">{{ word.description }}</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="bottom-controls">
+        {% if previous_word %}
+        <a href="{% url 'learning:word_detail' previous_word.slug %}" class="nav-btn btn-prev">⬅️ Back</a>
+        {% else %}
+        <button class="nav-btn btn-prev" disabled>⬅️ Back</button>
+        {% endif %}
+
+        {% if next_word %}
+        <a href="{% url 'learning:word_detail' next_word.slug %}" class="nav-btn btn-next">Next ➡️</a>
+        {% else %}
+        <a href="{% url 'learning:word_list' word.section.pk %}" class="nav-btn btn-finish">🎉 Finish!</a>
+        {% endif %}
     </div>
 
     <script>
-        // Standard Django helper to grab the CSRF token from cookies
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -103,9 +297,6 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const wordId = "{{ word.pk }}";
-
-            // Record progress after 2 seconds to ensure the student actually looked at it
-            // This is more reliable than video 'ended' since they might click Next before it fully finishes.
             setTimeout(() => recordWordProgress(wordId), 2000);
         });
 
@@ -118,13 +309,9 @@
                 },
             })
                 .then(response => {
-                    if (response.ok) {
-                        console.log("Database updated: Word marked as learned.");
-                    } else {
-                        console.error("Failed to save progress. Is the user logged in as a student?");
-                    }
+                    if (response.ok) console.log("Progress saved!");
                 })
-                .catch(error => console.error("Network error:", error));
+                .catch(error => console.error("Error saving progress.", error));
         }
     </script>
 </body>

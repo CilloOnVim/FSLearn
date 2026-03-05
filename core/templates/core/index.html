@@ -6,300 +6,231 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to FSLearn!</title>
-    <!-- Google Fonts -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
         :root {
-            --primary-blue: #0d6efd;
-            --soft-blue: #f0f8ff;
-            --mint-green: #20c997;
-            --warm-yellow: #ffd700;
-            --playful-pink: #d63384;
-            --energetic-orange: #fd7e14;
-            --text-dark: #2b3035;
+            --mint: #20c997;
+            --mint-dark: #128c68;
+            --teacher-blue: #0d6efd;
         }
 
+        html,
         body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
             font-family: "Fredoka", sans-serif;
-            background-color: var(--soft-blue);
-            color: var(--text-dark);
-            overflow-x: hidden;
-        }
-
-        /* Navbar tweaks */
-        .navbar {
-            background-color: var(--warm-yellow);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 1rem 0;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .navbar-brand {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--playful-pink) !important;
+            background: linear-gradient(135deg, #cceeff, #fdf6ff);
             display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Main Container */
+        .main-wrapper {
+            width: 100%;
+            max-width: 900px;
+            padding: 15px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 35px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            height: calc(100vh - 30px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            /* Spreads out the content */
+            align-items: center;
+        }
+
+        /* Header Area */
+        .header-area {
+            margin-bottom: 10px;
+        }
+
+        .logo-area {
+            display: flex;
+            justify-content: center;
             align-items: center;
             gap: 10px;
         }
 
-        /* Hero Section */
-        .hero-section {
-            padding: 60px 0;
-            position: relative;
+        .logo-icon {
+            font-size: 3rem;
+            line-height: 1;
         }
 
-        .hero-bg-shapes {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.2;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape-1 {
-            width: 150px;
-            height: 150px;
-            background: var(--playful-pink);
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .shape-2 {
-            width: 200px;
-            height: 200px;
-            background: var(--mint-green);
-            bottom: 20%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .shape-3 {
-            width: 100px;
-            height: 100px;
-            background: var(--warm-yellow);
-            top: 30%;
-            right: 30%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(10deg);
-            }
-
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-        }
-
-        .hero-content {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border: 4px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-title {
+        .title {
             font-size: 3rem;
             font-weight: 700;
-            color: var(--primary-blue);
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+            color: var(--teacher-blue);
+            margin: 0;
         }
 
-        .hero-subtitle {
-            font-size: 1.25rem;
+        .subtitle {
+            font-size: 1.2rem;
             color: #555;
-            margin-bottom: 30px;
-            font-weight: 500;
+            margin-top: 5px;
+            margin-bottom: 0;
         }
 
-        .hero-illustration {
-            max-width: 100%;
-            height: auto;
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            background-color: #e9ecef;
-            /* Fallback */
-            border: 3px solid white;
-        }
-
-        /* Login Card & Buttons */
-        .login-choice-card {
-            margin-top: -30px;
-            /* Overlap the hero section slightly */
-            position: relative;
-            z-index: 10;
-        }
-
-        .role-card {
-            background: white;
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-            border: 2px solid rgba(0, 0, 0, 0.02);
-        }
-
-        .role-title {
-            color: #6610f2;
-            font-weight: 700;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-
-        .btn-custom {
-            border-radius: 50px;
-            padding: 15px 40px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: none;
-            display: inline-flex;
+        /* Carousel Area */
+        .carousel-wrapper {
+            width: 100%;
+            max-width: 500px;
+            flex-grow: 1;
+            display: flex;
             align-items: center;
-            gap: 12px;
-            position: relative;
-            top: 0;
-            box-shadow: 0 6px 0px rgba(0, 0, 0, 0.15), 0 15px 20px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            min-height: 200px;
+            /* Prevents layout shifting */
         }
 
-        .btn-custom:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 11px 0px rgba(0, 0, 0, 0.15), 0 20px 25px rgba(0, 0, 0, 0.15);
-            color: white;
-            /* Ensure text stays white on hover */
+        .carousel-inner {
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
         }
 
-        .btn-custom:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
+        .carousel-item img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
         }
 
-        .btn-student {
-            background-color: var(--mint-green);
-            color: white;
+        /* Call to Action Area */
+        .action-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
         }
 
-        .btn-teacher {
-            background-color: var(--energetic-orange);
-            color: white;
+        /* Student Button - Massive & Primary */
+        .student-btn {
+            background-color: var(--mint);
+            color: white !important;
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 20px 50px;
+            border-radius: 50px;
+            border: none;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 0px var(--mint-dark), 0 15px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
         }
 
-        .btn-icon {
-            font-size: 1.8rem;
-            line-height: 1;
+        .student-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0px var(--mint-dark);
+        }
+
+        /* Teacher Button - Secondary & Clean */
+        .teacher-link {
+            color: #6c757d;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .teacher-link:hover {
+            background-color: #f8f9fa;
+            color: var(--teacher-blue);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .student-btn {
+                font-size: 1.6rem;
+                padding: 15px 30px;
+            }
+
+            .logo-icon {
+                font-size: 2.2rem;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <span style="font-size: 2rem;">🖐️</span> FSLearn
-            </a>
-        </div>
-    </nav>
+    <div class="main-wrapper">
+        <div class="content-card">
 
-    <!-- Space for fixed navbar -->
-    <div style="height: 80px;"></div>
+            <div class="header-area">
+                <div class="logo-area">
+                    <div class="logo-icon">🖐️</div>
+                    <h1 class="title">FSLearn</h1>
+                </div>
+                <p class="subtitle">Learn Filipino Sign Language!</p>
+            </div>
 
-    <div class="hero-section">
-        <div class="hero-bg-shapes">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-        </div>
-
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="hero-content">
-                        <h1 class="hero-title">Welcome to FSLearn!</h1>
-                        <p class="hero-subtitle">The fun and interactive way to learn Filipino Sign Language together.
-                        </p>
-
-                        <!-- A single welcoming illustration is better than a complex carousel for this audience -->
-                        <img class="hero-illustration"
-                            src="https://placehold.co/800x350/87CEEB/FFFFFF?text=Let's+Learn+Sign+Language!"
-                            alt="Kids learning sign language together" />
-
-                        <div class="d-flex justify-content-center gap-4 flex-wrap mt-2">
-                            <div class="badge rounded-pill bg-light text-dark shadow-sm px-3 py-2 fs-6">
-                                ✨ Fun Lessons
-                            </div>
-                            <div class="badge rounded-pill bg-light text-dark shadow-sm px-3 py-2 fs-6">
-                                🧩 Interactive Puzzles
-                            </div>
-                            <div class="badge rounded-pill bg-light text-dark shadow-sm px-3 py-2 fs-6">
-                                📖 Story Quizzes
-                            </div>
+            <div class="carousel-wrapper">
+                <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"
+                            aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"
+                            aria-label="Slide 2"></button>
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"
+                            aria-label="Slide 3"></button>
+                    </div>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="https://placehold.co/600x350/87CEEB/FFFFFF?text=Fun+Games!" alt="Fun Games">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/600x350/FFB6C1/FFFFFF?text=Learn+Signs!" alt="Learn Signs">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/600x350/98FB98/333333?text=Earn+Badges!" alt="Earn Badges">
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Wave Divider -->
-    <div style="overflow: hidden; line-height: 0; margin-top: -40px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 220">
-            <path fill="#ffffff" fill-opacity="1"
-                d="M0,160L48,165.3C96,171,192,181,288,170.7C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,220L1392,220C1344,220,1248,220,1152,220C1056,220,960,220,864,220C768,220,672,220,576,220C480,220,384,220,288,220C192,220,96,220,48,220L0,220Z">
-            </path>
-        </svg>
-    </div>
+            <div class="action-area">
+                <a href="{% url 'core:login' %}?role=student" class="student-btn">
+                    <span>🎓</span> Play Now!
+                </a>
 
-    <!-- White background section for login choice -->
-    <div style="background-color: #ffffff; padding-bottom: 80px;">
-        <div class="container login-choice-card">
-            <div class="row justify-content-center text-center">
-                <div class="col-md-9">
-                    <div class="role-card">
-                        <h2 class="role-title">Are you ready to play?</h2>
-                        <p class="text-muted mb-4 fs-5">Choose how you want to log in below:</p>
-
-                        <div class="d-flex justify-content-center gap-4 flex-wrap">
-                            <a href="{% url 'core:login' %}?role=student" class="btn btn-custom btn-student">
-                                <span class="btn-icon">🎓</span> I am a Student
-                            </a>
-                            <a href="{% url 'core:login' %}?role=teacher" class="btn btn-custom btn-teacher">
-                                <span class="btn-icon">🍎</span> I am a Teacher
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <a href="{% url 'core:login' %}?role=teacher" class="teacher-link">
+                    🍎 Teacher Login
+                </a>
             </div>
+
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

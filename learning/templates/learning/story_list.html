@@ -1,168 +1,149 @@
-{% extends 'learning/base.html' %}
 {% load static %}
 
 {% block content %}
 <style>
-    /* Custom Styling for the Hub Cards */
-    .hub-card {
-        border: none;
-        border-radius: 20px;
-        transition: transform 0.3s, box-shadow 0.3s;
-        cursor: pointer;
-        overflow: hidden;
-        height: 100%;
-        text-align: center;
-        background: #2b3035;
-        /* Dark card background */
-        color: white;
+    :root {
+        --mint: #20c997;
+        --mint-dark: #128c68;
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --cyan: #0dcaf0;
+        --cyan-dark: #0aa2c0;
+        --pink: #ff6b6b;
     }
 
-    .hub-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        background: #343a40;
+    body {
+        background-color: #f0f8ff;
+        font-family: "Fredoka", sans-serif;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden; /* Page is completely locked */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Transparent Floating Header */
+    .floating-header {
+        padding: 30px 40px 0 40px; /* Pushed down slightly from the very top */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+
+    .btn-back {
+        background-color: var(--purple);
+        color: white !important;
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 700;
+        font-size: 1.5rem;
+        text-decoration: none;
+        box-shadow: 0 6px 0px var(--purple-dark);
+        transition: all 0.1s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-back:active {
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    .page-title {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--pink);
+        margin: 0;
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Soft shadow to make it pop */
+    }
+
+    /* The Main Action Area */
+    .hub-workspace {
+        flex-grow: 1;
+        display: flex;
+        gap: 40px;
+        padding: 40px;
+        align-items: stretch;
+    }
+
+    /* Massive Hub Cards */
+    .hub-card {
+        flex: 1;
+        border-radius: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        color: white !important;
+        transition: all 0.15s;
+    }
+
+    .hub-card-stories {
+        background-color: var(--cyan);
+        box-shadow: 0 15px 0px var(--cyan-dark);
+    }
+
+    .hub-card-puzzles {
+        background-color: var(--mint);
+        box-shadow: 0 15px 0px var(--mint-dark);
+    }
+
+    .hub-card:active {
+        transform: translateY(15px);
+        box-shadow: 0 0px 0px transparent;
     }
 
     .hub-icon {
-        font-size: 4rem;
-        margin-bottom: 15px;
+        font-size: 10rem;
+        line-height: 1;
+        margin-bottom: 20px;
+        text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
-    /* Section Visibility Toggles */
-    .content-section {
-        display: none;
-        /* Hidden by default */
-        animation: fadeIn 0.5s ease-in-out;
-    }
-
-    .content-section.active {
-        display: block;
-        /* Show when active */
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .btn-chunky {
-        background-color: #6f42c1;
-        color: white;
-        border-radius: 50px;
-        padding: 10px 25px;
+    .hub-title {
+        font-size: 4.5rem;
         font-weight: 700;
-        text-decoration: none;
-        border: none;
-        box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        display: inline-block;
+        text-align: center;
+        margin: 0;
+        line-height: 1.1;
     }
 
-    .btn-chunky:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
-        color: white;
-    }
-
-    .btn-chunky:active {
-        transform: translateY(4px);
-        box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* Responsive scaling for smaller tablets */
+    @media (max-width: 900px) {
+        .hub-workspace {
+            flex-direction: column;
+        }
+        .hub-icon {
+            font-size: 6rem;
+        }
+        .hub-title {
+            font-size: 3rem;
+        }
+        .page-title {
+            font-size: 2.5rem;
+        }
     }
 </style>
 
-<div class="container mt-4">
+<div class="floating-header">
+    <a href="{% url 'student:student_dashboard' %}" class="btn-back"><span>🔙</span> Back</a>
+    <h1 class="page-title">Let's Play!</h1>
+    <div style="width: 140px;"></div> </div>
 
-    <div class="d-flex justify-content-start mb-4">
-        <a href="{% url 'student:student_dashboard' %}" class="btn-chunky">
-            <span class="fs-5 me-2">🔙</span> Back to Dashboard
-        </a>
-    </div>
+<div class="hub-workspace">
 
-    <div class="text-center mb-5 text-white">
-        <h1 class="display-4 fw-bold">Welcome to the Learning Hub</h1>
-        <p class="lead text-white-50">Choose your path to start learning Filipino Sign Language.</p>
-    </div>
+    <a href="{% url 'learning:story_library' %}" class="hub-card hub-card-stories">
+        <div class="hub-icon">📺</div>
+        <h2 class="hub-title">Watch<br>Stories</h2>
+    </a>
 
-    <div class="row g-4 mb-5 justify-content-center">
-
-        <div class="col-md-5">
-            <div class="card hub-card p-5" onclick="showSection('stories')">
-                <div class="hub-icon">📺</div>
-                <h2 class="fw-bold">Story Quizzes</h2>
-                <p class="text-white-50">Watch short FSL stories and test your comprehension.</p>
-                <button class="btn btn-primary rounded-pill px-4 mt-3">Go to Stories</button>
-            </div>
-        </div>
-
-        <div class="col-md-5">
-            <a href="{% url 'learning:quiz_list' %}" class="text-decoration-none">
-                <div class="card hub-card p-5">
-                    <div class="hub-icon">🧩</div>
-                    <h2 class="fw-bold">Sentence Puzzles</h2>
-                    <p class="text-white-50">Practice constructing FSL sentences with drag-and-drop tiles.</p>
-                    <button class="btn btn-success rounded-pill px-4 mt-3">Start Playing</button>
-                </div>
-            </a>
-        </div>
-
-    </div>
-
-    <hr class="border-secondary mb-5">
-
-    <div id="stories-section" class="content-section">
-        <h2 class="text-white mb-4">📺 Available Stories</h2>
-        <div class="row">
-            {% for story in stories %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm bg-dark text-white border-secondary">
-                    {% if story.thumbnail %}
-                    <img src="{{ story.thumbnail.url }}" class="card-img-top" alt="{{ story.title }}"
-                        style="height: 200px; object-fit: cover;">
-                    {% else %}
-                    <div class="bg-secondary card-img-top d-flex align-items-center justify-content-center"
-                        style="height: 200px;">
-                        <span class="fs-1">📺</span>
-                    </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ story.title }}</h5>
-                        <p class="card-text text-white-50">{{ story.description|truncatewords:10 }}</p>
-                        <a href="{% url 'learning:story_view' story.story_id %}"
-                            class="btn btn-outline-light w-100 mt-2">
-                            ▶ Watch & Quiz
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12 text-center text-white-50">
-                <h3>No stories available yet!</h3>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+    <a href="{% url 'learning:quiz_list' %}" class="hub-card hub-card-puzzles">
+        <div class="hub-icon">🧩</div>
+        <h2 class="hub-title">Make<br>Sentences</h2>
+    </a>
 
 </div>
-
-<script>
-    function showSection(sectionName) {
-        // Hide the stories section first to reset
-        document.getElementById('stories-section').classList.remove('active');
-
-        // Show the selected section (only stories uses this now)
-        const selected = document.getElementById(sectionName + '-section');
-        if (selected) {
-            selected.classList.add('active');
-            selected.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
-</script>
-
 {% endblock %}
