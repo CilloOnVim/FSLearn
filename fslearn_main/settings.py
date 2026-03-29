@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -128,3 +129,49 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# 2. Where Django collects all static files for production (Do NOT put your dev files here)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 3. (Optional but recommended) If you ever want a global static folder outside of your apps
+STATICFILES_DIRS = [
+    BASE_DIR / 'static', 
+]
+
+# Add this to the very bottom of your settings.py
+
+UNFOLD = {
+    "SITE_TITLE": "FSLearn Admin",
+    "SITE_HEADER": "FSLearn Dashboard",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "Curriculum & Content",
+                "separator": True,
+                "items": [
+                    {"title": "Themes & Sections", "icon": "menu_book", "link": "/admin/learning/theme/"},
+                    {"title": "Vocabulary (Words)", "icon": "spellcheck", "link": "/admin/learning/word/"},
+                    {"title": "Stories", "icon": "video_library", "link": "/admin/learning/story/"},
+                ],
+            },
+            {
+                "title": "Students & Progress",
+                "separator": True,
+                "items": [
+                    {"title": "Student Profiles", "icon": "face", "link": "/admin/student/studentprofile/"},
+                    {"title": "Word Progress", "icon": "trending_up", "link": "/admin/student/wordprogress/"},
+                ],
+            },
+            {
+                "title": "Teachers & Staff",
+                "separator": True,
+                "items": [
+                    {"title": "Teacher Profiles", "icon": "school", "link": "/admin/teacher/teacherprofile/"},
+                    {"title": "System Users", "icon": "manage_accounts", "link": "/admin/auth/user/"},
+                ],
+            },
+        ],
+    },
+}

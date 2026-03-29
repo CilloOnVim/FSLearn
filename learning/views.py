@@ -1,23 +1,15 @@
-from re import A
-
+import json
+import random
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.contrib import messages
+from django.core.serializers.json import DjangoJSONEncoder
+
 from .forms import SectionForm, ThemeForm, WordForm, StoryForm, QuizQuestionForm, ChoiceFormSet
 from .models import Section, Theme, Word, SentenceQuiz, QuizQuestion, Story
-import json
-from django.core.serializers.json import DjangoJSONEncoder
-from student.nlp_utils import translate_to_fsl
-import random
-
-# ... existing imports ...
-from student.nlp_utils import translate_to_fsl 
-from .models import SentenceQuiz
-from .models import Story  # Import the new models
 from student.models import FSLWord
-
-# Create your views here.
+from student.nlp_utils import translate_to_fsl
 
 
 # 1. THEME LIST
@@ -29,7 +21,7 @@ def theme_list(request):
 # 2. SECTION LIST
 def section_list(request, theme_id):
     theme = get_object_or_404(Theme, pk=theme_id)
-    sections = theme.sections.all()  # Uses the 'related_name' from models.py
+    sections = theme.sections.all()  
     return render(
         request, "learning/section_list.html", {"theme": theme, "sections": sections}
     )
@@ -48,8 +40,6 @@ def word_list(request, section_id):
 def word_detail(request, word_slug):
     word = get_object_or_404(Word, slug=word_slug)
 
-    # Logic for "Next" and "Previous" buttons
-    # We find neighbors by ordering
     section_words = list(word.section.words.all())
     current_index = section_words.index(word)
 
@@ -68,18 +58,12 @@ def word_detail(request, word_slug):
 
 
 # THE HUB (The Menu Page)
-# views.py
-
 @login_required
 def manage_content(request):
-    # Check if teacher
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("learning:story_list")
     
-    # FETCH DATA: Get all themes, and pre-load their sections and words.
-    # 'sections__words' joins the 3 tables efficiently in one go.
     themes = Theme.objects.prefetch_related('sections__words').all()
-    
     return render(request, "learning/manage_content.html", {
         "themes": themes
     })
@@ -88,16 +72,13 @@ def manage_content(request):
 # 1. ADD WORD
 @login_required
 def upload_word(request):
-    # Security Check: Kick them out if they aren't a teacher
     if not hasattr(request.user, "teacher_profile"):
         return redirect("index")
 
     if request.method == "POST":
-        # request.FILES is required to handle video/image uploads!
         form = WordForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            # Redirect back to dashboard or show a success message
             return redirect("teacher:teacher_dashboard")
     else:
         form = WordForm()
@@ -136,12 +117,13 @@ def add_section(request):
         form = SectionForm()
     return render(request, "learning/upload_section.html", {"form": form})
 
+
 # 5. STORY LIST (Pick a story)
 @login_required
 def story_list(request):
     stories = Story.objects.all()
-    # POINTS TO THE NEW MENU FILE
     return render(request, "learning/story_list.html", {"stories": stories})
+
 
 # 6. STORY PLAYER & QUIZ (The logic)
 def story_view(request, story_id):
@@ -151,7 +133,6 @@ def story_view(request, story_id):
     questions = story.questions.all()
     
     for q in questions:
-        # CRITICAL FIX: Skip questions if they have no video, otherwise the page crashes
         if not q.video:
             continue
 
@@ -164,7 +145,7 @@ def story_view(request, story_id):
             })
             
         questions_data.append({
-            "video_url": q.video.url, # This now matches what your JS expects
+            "video_url": q.video.url, 
             "text": q.text,
             "choices": choices
         })
@@ -173,7 +154,6 @@ def story_view(request, story_id):
         "story": story,
         "quiz_data_json": json.dumps(questions_data, cls=DjangoJSONEncoder)
     }
-    # POINTS TO THE RENAMED PLAYER FILE
     return render(request, "learning/story_detail.html", context)
 
 
@@ -186,6 +166,7 @@ def manage_quizzes(request):
     quizzes = SentenceQuiz.objects.all().order_by('-created_at')
     return render(request, "learning/manage_quizzes.html", {"quizzes": quizzes})
 
+
 # 8. CREATE QUIZ (The Magic Builder)
 @login_required
 def create_quiz(request):
@@ -196,39 +177,43 @@ def create_quiz(request):
 
     if request.method == "POST":
         sentence = request.POST.get("sentence", "").strip()
-        action = request.POST.get("action") # 'analyze' or 'save'
+        action = request.POST.get("action") 
 
         if sentence:
-            # 1. Run the NLP (Time-Topic-Comment)
-            # This returns dict like: {'time': 'TODAY', 'topic': 'APPLE', 'comment': 'EAT', 'complete': '...'}
             nlp_result = translate_to_fsl(sentence) 
             
-            # 2. Check Database for Videos
-            # We want to tell the teacher which words are missing videos!
             analysis_report = []
-            
-            # Combine all words into one list to check them
             words_to_check = []
-            if nlp_result.get('time'): words_to_check.append((nlp_result['time'], 'Time'))
-            if nlp_result.get('topic'): words_to_check.append((nlp_result['topic'], 'Topic'))
-            if nlp_result.get('comment'): words_to_check.append((nlp_result['comment'], 'Action'))
+            
+            def process_slot(text_block, category_name):
+                if text_block:
+                    for word in text_block.split():
+                        clean_word = word.strip(".,!?")
+                        if clean_word:
+                            words_to_check.append((clean_word, category_name))
+
+            # Processes in the exact order the teacher requested
+            process_slot(nlp_result.get('time'), 'Time')
+            process_slot(nlp_result.get('comment_subject'), 'Subject') # Separated!
+            process_slot(nlp_result.get('comment_verb'), 'Action')     # Separated!
+            process_slot(nlp_result.get('topic'), 'Topic')
 
             all_good = True
 
             for word_text, category in words_to_check:
-                # Check FSLWord table (case insensitive)
-                # We assume your model is FSLWord (student app) or Word (learning app). 
-                # Based on previous chat, you had FSLWord in student/models.py. 
-                # If it's in 'learning', change FSLWord to Word.
-                from student.models import FSLWord 
-                
-                exists = FSLWord.objects.filter(word__iexact=word_text).exists()
+                if word_text.startswith("fs-"):
+                    exists = True
+                    display_word = word_text.replace("fs-", "") + " (Fingerspell)"
+                else:
+                    exists = FSLWord.objects.filter(word__iexact=word_text).exists()
+                    display_word = word_text
                 
                 analysis_report.append({
-                    "word": word_text,
+                    "word": display_word,
                     "category": category,
                     "has_video": exists
                 })
+                
                 if not exists:
                     all_good = False
 
@@ -239,7 +224,6 @@ def create_quiz(request):
                 "all_good": all_good
             }
 
-            # 3. Save if requested
             if action == "save":
                 SentenceQuiz.objects.create(
                     original_text=sentence,
@@ -249,6 +233,7 @@ def create_quiz(request):
                 return redirect("learning:manage_quizzes")
 
     return render(request, "learning/create_quiz.html", context)
+
 
 # 9. DELETE QUIZ
 @login_required
@@ -261,13 +246,10 @@ def delete_quiz(request, quiz_id):
 
 @login_required
 def sentence_quiz_list(request):
-    """Shows all available puzzles to the student and checks progress"""
     quizzes = SentenceQuiz.objects.all().order_by('-created_at')
     
     passed_quiz_ids = []
-    # Only try to fetch scores if the user is actually a student
     if hasattr(request.user, 'student_profile'):
-        # This creates a flat list of ID numbers (e.g., [1, 4, 5]) for quizzes they passed
         passed_quiz_ids = request.user.student_profile.quiz_scores.filter(
             is_passed=True
         ).values_list('quiz_id', flat=True)
@@ -277,55 +259,59 @@ def sentence_quiz_list(request):
         "passed_quiz_ids": passed_quiz_ids
     })
 
+
 @login_required
 def take_sentence_quiz(request, quiz_id):
     """The actual drag-and-drop player"""
     quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
     structure = quiz.structure_json
 
-    # 1. Map every word to its specific color category based on the NLP JSON
-    word_categories = {}
-    
-    if structure.get('time'):
-        for w in structure['time'].split():
-            word_categories[w] = 'time'
-            
-    if structure.get('topic'):
-        for w in structure['topic'].split():
-            word_categories[w] = 'topic'
-            
-    if structure.get('comment'):
-        for w in structure['comment'].split():
-            word_categories[w] = 'action'
-
-    # 2. Get the correct FSL sequence
-    correct_sequence_str = structure.get('complete', '')
-    correct_words = correct_sequence_str.split()
-
-    # 3. Build the tile data, fetch videos, AND inject the color category
+    correct_sequence = []
     tiles = []
-    for index, word in enumerate(correct_words):
-        fsl_word = FSLWord.objects.filter(word__iexact=word).first()
-        video_url = fsl_word.video.url if fsl_word and fsl_word.video else None
 
-        tiles.append({
-            "id": f"tile_{index}", 
-            "word": word,
-            "video_url": video_url,
-            "category": word_categories.get(word, 'default') # THIS IS THE MAGIC LINE
-        })
+    def process_category(text_block, category_name):
+        if not text_block: 
+            return
+            
+        words = text_block.split()
+        for word in words:
+            clean_word = word.strip(".,!?")
+            if not clean_word: 
+                continue
 
-    # 4. Shuffle the tiles
+            if clean_word.startswith("fs-"):
+                display_word = clean_word.replace("fs-", "")
+                video_url = None 
+            else:
+                display_word = clean_word
+                word_obj = FSLWord.objects.filter(word__iexact=clean_word).first()
+                video_url = word_obj.video.url if word_obj and word_obj.video else None
+
+            tiles.append({
+                "word": display_word,
+                "category": category_name, 
+                "video_url": video_url
+            })
+            
+            correct_sequence.append(display_word)
+
+    # CRITICAL ORDERING FOR DOM CHECK: Time -> Subject -> Action -> Topic
+    process_category(structure.get('time'), 'time')
+    process_category(structure.get('comment_subject'), 'subject') # Separated Subject
+    process_category(structure.get('comment_verb'), 'action')     # Separated Action
+    process_category(structure.get('topic'), 'topic')
+
     shuffled_tiles = list(tiles)
     random.shuffle(shuffled_tiles)
 
     context = {
         "quiz": quiz,
         "shuffled_tiles": shuffled_tiles,
-        "correct_sequence_json": json.dumps(correct_words) 
+        "correct_sequence_json": json.dumps(correct_sequence) 
     }
     
     return render(request, "learning/take_quiz.html", context)
+
 
 # ==========================================
 # --- UPDATE (EDIT) VIEWS ---
@@ -337,7 +323,6 @@ def edit_theme(request, pk):
     theme = get_object_or_404(Theme, pk=pk)
     
     if request.method == "POST":
-        # 'instance=theme' is the magic keyword that updates instead of creates
         form = ThemeForm(request.POST, request.FILES, instance=theme)
         if form.is_valid():
             form.save()
@@ -346,7 +331,6 @@ def edit_theme(request, pk):
     else:
         form = ThemeForm(instance=theme)
         
-    # We recycle your existing upload template!
     return render(request, "learning/upload_theme.html", {"form": form, "is_edit": True})
 
 @login_required
@@ -388,7 +372,7 @@ def edit_word(request, pk):
 def delete_theme(request, pk):
     if not hasattr(request.user, "teacher_profile"): return redirect("index")
     theme = get_object_or_404(Theme, pk=pk)
-    theme.delete() # Because of CASCADE in models, this deletes its sections and words too!
+    theme.delete() 
     messages.success(request, "Theme and all related content deleted.")
     return redirect("learning:manage_content")
 
@@ -416,7 +400,6 @@ def add_story(request):
         return redirect("index")
 
     if request.method == "POST":
-        # request.FILES is absolutely mandatory here. If you forget it, the video will not upload!
         form = StoryForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
@@ -428,7 +411,6 @@ def add_story(request):
     return render(request, "learning/upload_story.html", {"form": form})
 
 def story_library(request):
-    # Fetch all stories, ordering them so the newest ones show up first
     stories = Story.objects.all().order_by('-story_id') 
     
     context = {
@@ -436,6 +418,14 @@ def story_library(request):
     }
     return render(request, 'learning/story_library.html', context)
 
+# -> NEW MATH QUIZ VIEW <-
+@login_required
+def math_quiz(request):
+    """
+    Renders the math quiz page for kindergarteners.
+    The actual math logic is handled client-side via JavaScript.
+    """
+    return render(request, "learning/math_quiz.html")
 
 # ==========================================
 # --- STORY QUIZ MANAGEMENT VIEWS ---
@@ -451,17 +441,15 @@ def add_question(request, story_id):
         formset = ChoiceFormSet(request.POST, request.FILES)
         
         if form.is_valid() and formset.is_valid():
-            # Save the question first, but don't commit yet so we can attach the story
             question = form.save(commit=False)
             question.story = story
             question.save()
             
-            # Now save the choices and link them to the question we just saved
             formset.instance = question
             formset.save()
             
             messages.success(request, "Question and choices added successfully.")
-            return redirect("learning:manage_content") # Or redirect to a story detail management page
+            return redirect("learning:manage_content") 
     else:
         form = QuizQuestionForm()
         formset = ChoiceFormSet()
@@ -496,7 +484,6 @@ def edit_question(request, pk):
 def delete_question(request, pk):
     if not hasattr(request.user, "teacher_profile"): return redirect("index")
     question = get_object_or_404(QuizQuestion, pk=pk)
-    # This automatically deletes the QuizChoices too because of CASCADE
     question.delete()
     messages.success(request, "Question deleted.")
     return redirect("learning:manage_content")
@@ -522,9 +509,6 @@ def edit_story(request, pk):
 def delete_story(request, pk):
     if not hasattr(request.user, "teacher_profile"): return redirect("index")
     story = get_object_or_404(Story, pk=pk)
-    story.delete() # This nukes the story AND all attached questions/choices
+    story.delete() 
     messages.success(request, "Story and all associated quizzes deleted.")
     return redirect("learning:manage_content")
-
-
-

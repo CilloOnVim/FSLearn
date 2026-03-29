@@ -38,6 +38,9 @@ urlpatterns = [
     path("puzzles/", views.sentence_quiz_list, name="quiz_list"),
     path("puzzles/<int:quiz_id>/", views.take_sentence_quiz, name="take_quiz"),
     path("manage/story/add/", views.add_story, name="add_story"),
+    
+    # -> NEW MATH QUIZ ROUTE <-
+    path("math-magic/", views.math_quiz, name="math_quiz"),
 
     # --- STORY QUIZ CRUD ---
     # Notice the add route needs the story_id so it knows which story to attach the quiz to
@@ -48,4 +51,3 @@ urlpatterns = [
     path("manage/story/<int:pk>/delete/", views.delete_story, name="delete_story"),
     path('story_library/', views.story_library, name='story_library'),
 ]
-

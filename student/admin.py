@@ -1,24 +1,33 @@
-# Register your models here.
 from django.contrib import admin
-
-from .models import FSLSign, StudentProfile, FSLWord
-
-
-@admin.register(FSLSign)
-class FSLSignAdmin(admin.ModelAdmin):
-    list_display = ("char", "media_file")  # Shows these columns in the list
-    search_fields = ("char",)  # Lets you search by letter
-
+from unfold.admin import ModelAdmin
+from .models import FSLSign, FSLWord, StudentProfile, WordProgress, QuizProgress, StoryQuizProgress
 
 @admin.register(StudentProfile)
-class StudentProfileAdmin(admin.ModelAdmin):
-    # These are the columns you will see in the list
-    list_display = ("nickname", "level", "section", "guardian_name", "user")
+class StudentProfileAdmin(ModelAdmin):
+    list_display = ('nickname', 'level', 'section', 'guardian_name')
+    list_filter = ('level', 'section')
+    search_fields = ('nickname', 'guardian_name', 'user__username')
+    
+    # Groups the inputs into clean, visual cards
+    fieldsets = (
+        ("Account Link", {"fields": ("user",)}),
+        ("Student Details", {"fields": ("nickname", "avatar")}),
+        ("Enrollment Info", {"fields": ("level", "section")}),
+        ("Guardian Info", {"fields": ("guardian_name",)}),
+    )
 
-    # This lets you search by the kid's name or the parent's name
-    search_fields = ("nickname", "guardian_name", "user__username")
+@admin.register(WordProgress)
+class WordProgressAdmin(ModelAdmin):
+    list_display = ('student', 'word', 'completed_at')
+    list_filter = ('student__level',)
+    search_fields = ('student__nickname', 'word__name')
 
-    # Filter sidebar to quickly see all "Kinder 1" students
-    list_filter = ("level", "section")
+@admin.register(StoryQuizProgress)
+class StoryQuizProgressAdmin(ModelAdmin):
+    list_display = ('student', 'story', 'score', 'is_passed')
+    list_filter = ('is_passed',)
 
-admin.site.register(FSLWord)
+# Simple registers for the rest
+admin.site.register(FSLSign, ModelAdmin)
+admin.site.register(FSLWord, ModelAdmin)
+admin.site.register(QuizProgress, ModelAdmin)

@@ -45,9 +45,12 @@ def run_bulk_upload(videos_folder):
 
     print(f"\n🚀 Done! Successfully added {added_count} new words to the dictionary.")
 
-if __name__ == "__main__":
-    # --- CHANGE THIS PATH TO WHERE YOUR VIDEOS ARE STORED ---
-    # You can put a folder named 'raw_clips' next to manage.py and drop your videos there
-    TARGET_FOLDER = "EDITED" 
+    if __name__ == "__main__":
+ 
+        TARGET_FOLDER = r"THEME 4\Environmental Care & Protection\Environmental Problems\""
+        run_bulk_upload(TARGET_FOLDER)
+
+   
+
+
     
-    run_bulk_upload(TARGET_FOLDER)

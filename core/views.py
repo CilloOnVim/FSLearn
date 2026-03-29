@@ -64,3 +64,5 @@ def login_view(request):
             messages.error(request, "Invalid username or password.")
 
         return render(request, 'core/login.html', {'form': form, 'welcome_message': 'Please try again.'})
+    
+

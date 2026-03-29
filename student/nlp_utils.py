@@ -1,9 +1,14 @@
-# student/nlp_utils.py
+# fsl_nlp/nlp_utils.py
 import spacy
 
+# Ensure you have the model downloaded: python -m spacy download en_core_web_sm
 nlp = spacy.load("en_core_web_sm")
 
-# ... (Keep your FORCE_TIME_WORDS set here) ...
+STOP_WORDS = {
+    "the", "a", "an", "to", "is", "are", "am", "was", "were", 
+    "do", "does", "did", "of", "in", "on", "at"
+}
+
 FORCE_TIME_WORDS = {
     "MORNING", "AFTERNOON", "EVENING", "NIGHT", "NOON", "NOW",
     "TODAY", "TOMORROW", "YESTERDAY", "TONIGHT", "SUNDAY", "MONDAY",
@@ -15,63 +20,119 @@ def translate_to_fsl(english_sentence):
     doc = nlp(english_sentence)
 
     structure = {
-        "question": [], "time": [], "object": [],
-        "subject": [], "action": [], "negation": [],
+        "time": [],
+        "topic": [],           # The Object or focal point
+        "comment_subject": [], # The Pronoun/Subject 
+        "comment_verb": []     # The Action
     }
+    
+    # NEW: Memory bank to prevent double-printing words we already combined
+    skip_tokens = set()
 
     for token in doc:
-        word_lemma = token.lemma_.upper()
-
-        # 1. Skip Stop Words
-        if token.text.lower() in ["the", "a", "an", "to", "is", "are", "am", "do", "does", "of", "in", "on", "at"]:
+        if token in skip_tokens:
             continue
 
-        # --- NEW: NAME DETECTION LOGIC ---
-        # If Spacy thinks this is a Person, force fingerspelling tag
-        if token.ent_type_ == "PERSON":
+        word_lemma = token.lemma_.upper()
+        
+        # 1. Stop Word Filter
+        if token.text.lower() in STOP_WORDS:
+            continue
+
+        # ==========================================
+        # 2. CONTEXTUAL DISAMBIGUATION BLOCK
+        # ==========================================
+        
+        # Disambiguate "LIKE"
+        if word_lemma == "LIKE":
+            if token.pos_ == "VERB":
+                word_lemma = "LIKE (GUSTO)"
+            else:
+                word_lemma = "LIKE (PAREHO)"
+
+        # Disambiguate Directional "HELP"
+        elif word_lemma in ["HELP", "HELPING"]:
+            # Look at the words attached to 'help' to find the receiver
+            for child in token.children:
+                if child.dep_ in ["dobj", "dative", "pobj"]:
+                    if child.text.lower() in ["me", "us"]:
+                        # Direction is inward (to me)
+                        word_lemma = "HELP"
+                        skip_tokens.add(child) # Consume 'me' so it doesn't print again
+                        break
+                    else:
+                        # Direction is outward to someone else (you, the girl, the boy). 
+                        word_lemma = "HELPING"
+                        
+                        # CRITICAL: If the object is literally "you", we consume/delete it.
+                        # If the object is a noun like "girl", we leave it alone for the Topic.
+                        if child.text.lower() == "you":
+                            skip_tokens.add(child)
+                        break
+
+        # ==========================================
+
+        # 3. Fingerspelling for Proper Nouns
+        elif token.ent_type_ == "PERSON":
             word_lemma = f"fs-{word_lemma}" 
 
-        # 2. Classification Logic
-        if word_lemma in FORCE_TIME_WORDS:
-            structure["time"].append(word_lemma)
-        elif token.tag_ in ["WDT", "WP", "WRB"]:
-            structure["question"].append(word_lemma)
-        elif token.ent_type_ in ["TIME", "DATE"] or token.dep_ == "npadvmod":
-            structure["time"].append(word_lemma)
-        elif token.dep_ == "neg":
-            structure["negation"].append(word_lemma)
-        elif token.dep_ in ["dobj", "pobj", "attr"] or (token.dep_ == "nsubj" and token.head.pos_ == "ADJ"):
-            structure["object"].append(word_lemma)
+        # 4. Time Extraction
+        if word_lemma in FORCE_TIME_WORDS or token.ent_type_ in ["TIME", "DATE"]:
+            if word_lemma not in structure["time"]: 
+                structure["time"].append(word_lemma)
+                
+        # 5. Topic Extraction (Direct Objects)
+        elif token.dep_ in ["dobj", "pobj", "attr"]:
+            structure["topic"].append(word_lemma)
+            
+        # 6. Comment - Subject Extraction
         elif token.dep_ in ["nsubj", "nsubjpass", "prt", "poss"]:
-            if word_lemma == "I": word_lemma = "ME"
-            if token.text.lower() == "my": word_lemma = "ME"
-            structure["subject"].append(word_lemma)
-        elif token.pos_ in ["VERB", "ADJ", "ADV"] and token.dep_ != "npadvmod":
-            structure["action"].append(word_lemma)
-        else:
-            # Catch-all
-            structure["action"].append(word_lemma)
+            if word_lemma == "I": 
+                word_lemma = "ME"
+            if token.text.lower() == "my": 
+                word_lemma = "MY"
+            structure["comment_subject"].append(word_lemma)
+            
+        # Included our custom override words here so they get sorted properly
+        # 7. Comment - Verb Extraction
+        elif token.pos_ in ["VERB", "ADJ", "ROOT"] or token.dep_ == "ROOT" or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
+            structure["comment_verb"].append(word_lemma)
+        
 
-    def join_or_none(lst):
-        return " ".join(lst) if lst else ""
+    time_part = " ".join(structure["time"])
+    topic_part = " ".join(structure["topic"])
+    comment_part = " ".join(structure["comment_subject"] + structure["comment_verb"])
 
-    time_part = join_or_none(structure["question"] + structure["time"])
-    topic_part = join_or_none(structure["object"])
-    comment_part = join_or_none(structure["subject"] + structure["action"] + structure["negation"])
-
+    # Build the final ordered FSL sequence: Time -> Comment -> Topic
     full_sequence = []
-    if structure["question"] or structure["time"]:
-        full_sequence.extend(structure["question"] + structure["time"])
-    if structure["subject"] or structure["action"] or structure["negation"]:
-        full_sequence.extend(structure["subject"] + structure["action"] + structure["negation"])
-    if structure["object"]:
-        full_sequence.extend(structure["object"])
+    if time_part:
+        full_sequence.append(time_part)
+    if comment_part:
+        full_sequence.append(comment_part)
+    if topic_part:
+        full_sequence.append(topic_part)
 
     complete_output = " ".join(full_sequence)
-    
+
     return {
         "time": time_part,
+        "comment_subject": " ".join(structure["comment_subject"]), 
+        "comment_verb": " ".join(structure["comment_verb"]),       
         "topic": topic_part,
         "comment": comment_part,
         "complete": complete_output
     }
+
+
+# --- Test Cases ---
+if __name__ == "__main__":
+    sentences = [
+        "I like the museum",
+        "It looks like a museum",
+        "The teacher is helping me",
+        "I am helping you today"
+    ]
+    
+    for s in sentences:
+        print(f"English: {s}")
+        print(f"FSL Output: {translate_to_fsl(s)['complete']}\n")

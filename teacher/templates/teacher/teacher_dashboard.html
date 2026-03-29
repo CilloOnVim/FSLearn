@@ -128,10 +128,11 @@
                     <hr class="my-4" />
 
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary rounded-pill">
+                        <a href="{% url 'teacher:edit_profile' %}" class="btn btn-outline-primary rounded-pill">
                             Edit Profile
-                        </button>
+                        </a>
                     </div>
+
                 </div>
             </div>
 
@@ -149,7 +150,7 @@
                                 <p class="card-text">
                                     View and manage your class roster.
                                 </p>
-                                <a href="#" class="btn btn-light btn-sm rounded-pill stretched-link">View Class</a>
+                                <a href="{% url 'teacher:my_students' %}" class="btn btn-light btn-sm rounded-pill stretched-link">View Class</a>
                             </div>
                         </div>
                     </div>

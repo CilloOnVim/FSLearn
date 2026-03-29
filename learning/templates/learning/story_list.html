@@ -10,6 +10,8 @@
         --cyan: #0dcaf0;
         --cyan-dark: #0aa2c0;
         --pink: #ff6b6b;
+        --yellow: #ffc107;
+        --yellow-dark: #cc9a06;
     }
 
     body {
@@ -17,14 +19,13 @@
         font-family: "Fredoka", sans-serif;
         height: 100vh;
         margin: 0;
-        overflow: hidden; /* Page is completely locked */
+        overflow: hidden;
         display: flex;
         flex-direction: column;
     }
 
-    /* Transparent Floating Header */
     .floating-header {
-        padding: 30px 40px 0 40px; /* Pushed down slightly from the very top */
+        padding: 30px 40px 0 40px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -56,19 +57,17 @@
         font-weight: 700;
         color: var(--pink);
         margin: 0;
-        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Soft shadow to make it pop */
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
 
-    /* The Main Action Area */
     .hub-workspace {
         flex-grow: 1;
         display: flex;
-        gap: 40px;
+        gap: 30px; /* Reduced gap slightly to fit 3 cards nicely */
         padding: 40px;
         align-items: stretch;
     }
 
-    /* Massive Hub Cards */
     .hub-card {
         flex: 1;
         border-radius: 50px;
@@ -91,50 +90,48 @@
         box-shadow: 0 15px 0px var(--mint-dark);
     }
 
+    .hub-card-math {
+        background-color: var(--yellow);
+        box-shadow: 0 15px 0px var(--yellow-dark);
+    }
+
     .hub-card:active {
         transform: translateY(15px);
         box-shadow: 0 0px 0px transparent;
     }
 
     .hub-icon {
-        font-size: 10rem;
+        font-size: 8rem; /* Scaled down slightly for 3 cards */
         line-height: 1;
         margin-bottom: 20px;
         text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     .hub-title {
-        font-size: 4.5rem;
+        font-size: 3.5rem;
         font-weight: 700;
         text-align: center;
         margin: 0;
         line-height: 1.1;
     }
 
-    /* Responsive scaling for smaller tablets */
     @media (max-width: 900px) {
         .hub-workspace {
             flex-direction: column;
         }
-        .hub-icon {
-            font-size: 6rem;
-        }
-        .hub-title {
-            font-size: 3rem;
-        }
-        .page-title {
-            font-size: 2.5rem;
-        }
+        .hub-icon { font-size: 5rem; }
+        .hub-title { font-size: 2.5rem; }
+        .page-title { font-size: 2.5rem; }
     }
 </style>
 
 <div class="floating-header">
     <a href="{% url 'student:student_dashboard' %}" class="btn-back"><span>🔙</span> Back</a>
     <h1 class="page-title">Let's Play!</h1>
-    <div style="width: 140px;"></div> </div>
+    <div style="width: 140px;"></div> 
+</div>
 
 <div class="hub-workspace">
-
     <a href="{% url 'learning:story_library' %}" class="hub-card hub-card-stories">
         <div class="hub-icon">📺</div>
         <h2 class="hub-title">Watch<br>Stories</h2>
@@ -142,8 +139,12 @@
 
     <a href="{% url 'learning:quiz_list' %}" class="hub-card hub-card-puzzles">
         <div class="hub-icon">🧩</div>
-        <h2 class="hub-title">Make<br>Sentences</h2>
+        <h2 class="hub-title">Sentence<br>Puzzle</h2>
     </a>
 
+    <a href="{% url 'learning:math_quiz' %}" class="hub-card hub-card-math">
+        <div class="hub-icon">🔢</div>
+        <h2 class="hub-title">Math<br>Magic</h2>
+    </a>
 </div>
 {% endblock %}

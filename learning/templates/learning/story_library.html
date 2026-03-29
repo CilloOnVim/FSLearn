@@ -1,4 +1,3 @@
-{% extends 'learning/base.html' %}
 {% load static %}
 
 {% block content %}
@@ -8,7 +7,6 @@
         --purple: #6f42c1;
         --purple-dark: #4e2d8b;
         --cyan: #0dcaf0;
-        --cyan-dark: #0aa2c0;
         --yellow: #ffd700;
         --yellow-dark: #d4b200;
         --pink: #ff6b6b;
@@ -20,22 +18,17 @@
         height: 100vh;
         margin: 0;
         overflow: hidden;
-        /* Locks the main page from scrolling */
         display: flex;
         flex-direction: column;
     }
 
-    /* Fixed Top Bar */
-    .top-bar {
-        background-color: var(--cyan);
-        padding: 15px 30px;
+    /* Floating Header from the Hub */
+    .floating-header {
+        padding: 30px 40px 0 40px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        z-index: 10;
         flex-shrink: 0;
-        border-bottom: 5px solid var(--cyan-dark);
     }
 
     .btn-back {
@@ -47,7 +40,7 @@
         font-size: 1.5rem;
         text-decoration: none;
         box-shadow: 0 6px 0px var(--purple-dark);
-        transition: transform 0.1s, box-shadow 0.1s;
+        transition: all 0.1s;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -55,51 +48,48 @@
 
     .btn-back:active {
         transform: translateY(6px);
-        box-shadow: 0 0px 0px var(--purple-dark);
+        box-shadow: 0 0px 0px transparent;
     }
 
     .page-title {
-        font-size: 3rem;
+        font-size: 4rem;
         font-weight: 700;
-        color: white;
+        color: var(--pink);
         margin: 0;
-        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
 
-    /* Scrollable Library Area */
+    /* Full Screen Library Area */
     .library-workspace {
         flex-grow: 1;
-        padding: 30px;
+        width: 100%;
+        padding: 40px;
         overflow-y: auto;
-        /* Only this grid section scrolls */
         background-color: #f0f8ff;
+        box-sizing: border-box;
     }
 
-    /* Custom Chunky Scrollbar for Kids */
+    /* Custom Chunky Scrollbar */
     .library-workspace::-webkit-scrollbar {
         width: 15px;
     }
-
     .library-workspace::-webkit-scrollbar-track {
         background: #e9ecef;
         border-radius: 10px;
     }
-
     .library-workspace::-webkit-scrollbar-thumb {
         background: var(--pink);
         border-radius: 10px;
         border: 3px solid #e9ecef;
     }
 
-    /* Massive Grid */
+    /* Optimized Grid */
     .story-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 30px;
-        max-width: 1400px;
-        margin: 0 auto;
+        width: 100%;
         padding-bottom: 40px;
-        /* Extra padding at the bottom */
     }
 
     /* Individual Story Cards */
@@ -112,6 +102,7 @@
         flex-direction: column;
         transition: transform 0.2s, border-color 0.2s;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        min-height: 350px;
     }
 
     .story-card:hover {
@@ -120,7 +111,7 @@
     }
 
     .story-thumb-wrapper {
-        height: 220px;
+        height: 200px;
         background-color: #e9ecef;
         display: flex;
         align-items: center;
@@ -169,14 +160,30 @@
         transform: translateY(6px);
         box-shadow: 0 0px 0px var(--yellow-dark);
     }
+
+    /* Mobile scaling for the header */
+    @media (max-width: 900px) {
+        .floating-header {
+            padding: 20px;
+        }
+        .page-title { 
+            font-size: 2.5rem; 
+        }
+        .btn-back {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+        }
+        /* Hide the spacer on mobile so things center better */
+        .spacer {
+            display: none;
+        }
+    }
 </style>
 
-<div class="top-bar">
-    <a href="{% url 'learning:story_list' %}" class="btn-back">
-        <span>🔙</span> Back
-    </a>
+<div class="floating-header">
+    <a href="{% url 'learning:story_list' %}" class="btn-back"><span>🔙</span> Back</a>
     <h1 class="page-title">📺 Story Library</h1>
-    <div style="width: 130px;"></div>
+    <div class="spacer" style="width: 140px;"></div> 
 </div>
 
 <div class="library-workspace">

@@ -72,30 +72,48 @@ def restructure_sentence_view(request):
 # --- HELPER FUNCTION (Paste this above or below the view) ---
 def get_fingerspell_sequence(text):
     """
-    Breaks a text into individual letters and finds their videos.
-    Returns a list of dictionaries.
+    Breaks a text into individual letters/digraphs (handles Filipino 'NG') 
+    and finds their videos. Returns a list of dictionaries.
     """
     sequence = []
-    for char in text:
-        # Skip non-alphabet characters (like numbers/punctuation if you don't have signs for them)
-        if not char.isalpha():
+    i = 0
+    text_length = len(text)
+    
+    # Store the original word for the UI display
+    original_word = text.upper()
+
+    while i < text_length:
+        # 1. Peek ahead to catch the "NG" digraph (Requirement for Q8)
+        if i + 1 < text_length and text[i:i+2].upper() == "NG":
+            char = "NG"
+            i += 2  # Skip the 'G' in the next iteration
+        else:
+            char = text[i].upper()
+            i += 1
+            
+        # Skip non-alphabet characters
+        if not char.isalpha() and char not in ["Ñ", "NG"]:
             continue
             
+        # 2. Database Lookup
         letter_obj = FSLSign.objects.filter(char__iexact=char).first()
+        
         if letter_obj and letter_obj.media_file:
             sequence.append({
-                "word": char.upper(),
+                "word": f"{original_word} ({char})", # Displays e.g., "ASTRONAUT (N)" or "ASTRONAUT (NG)"
                 "video_url": letter_obj.media_file.url,
                 "type": "letter"
             })
         else:
             # Absolute worst case: No video for the letter
             sequence.append({
-                "word": char.upper(),
+                "word": f"{original_word} ({char})",
                 "video_url": None,
                 "type": "text"
             })
+            
     return sequence
+
 
 # --- 3. DASHBOARD ---
 @login_required

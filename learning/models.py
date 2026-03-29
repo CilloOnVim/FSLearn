@@ -44,11 +44,19 @@ class Word(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            new_slug = base_slug
+            counter = 1
+            # Keep incrementing the counter until we find a slug that isn't taken
+            while Word.objects.filter(slug=new_slug).exists():
+                new_slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = new_slug
         super().save(*args, **kwargs)
+
 
 # --- 4. STORY MODEL ---
 class Story(models.Model):

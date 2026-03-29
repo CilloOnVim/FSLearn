@@ -31,7 +31,7 @@
             background-color: #f0f8ff;
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* Strict no-scroll on the body */
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
         }
@@ -86,7 +86,6 @@
             overflow: hidden;
         }
 
-        /* Flex constraints to stop the bulldozing */
         .board-section {
             display: flex;
             flex-direction: column;
@@ -132,28 +131,12 @@
             overflow-y: auto;
         }
 
-        .drop-slot::-webkit-scrollbar {
-            width: 8px;
-        }
-        .drop-slot::-webkit-scrollbar-thumb {
-            background: #adb5bd;
-            border-radius: 10px;
-        }
+        .drop-slot::-webkit-scrollbar { width: 8px; }
+        .drop-slot::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 10px; }
 
-        .slot-time {
-            background-color: rgba(13, 202, 240, 0.15);
-            border-color: var(--cyan);
-        }
-
-        .slot-topic {
-            background-color: rgba(255, 215, 0, 0.15);
-            border-color: var(--yellow);
-        }
-
-        .slot-action {
-            background-color: rgba(32, 201, 151, 0.15);
-            border-color: var(--mint);
-        }
+        .slot-time { background-color: rgba(13, 202, 240, 0.15); border-color: var(--cyan); }
+        .slot-topic { background-color: rgba(255, 215, 0, 0.15); border-color: var(--yellow); }
+        .slot-action { background-color: rgba(32, 201, 151, 0.15); border-color: var(--mint); }
 
         /* Word Bank */
         .word-bank {
@@ -171,14 +154,8 @@
             min-height: 0;
         }
 
-        .word-bank::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .word-bank::-webkit-scrollbar-thumb {
-            background: var(--cyan);
-            border-radius: 10px;
-        }
+        .word-bank::-webkit-scrollbar { width: 8px; }
+        .word-bank::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
 
         /* Massive Draggable Tiles */
         .fsl-tile {
@@ -201,10 +178,11 @@
             box-shadow: 0 0px 0px transparent;
         }
 
-        /* COLOR CODING CLASSES FOR TILES */
+        /* COLOR CODING CLASSES FOR TILES (UPDATED WITH SUBJECT) */
         .tile-time { border-color: var(--cyan); box-shadow: 0 6px 0px var(--cyan-dark); }
         .tile-topic { border-color: var(--yellow); box-shadow: 0 6px 0px var(--yellow-dark); }
         .tile-action { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
+        .tile-subject { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
         .tile-default { border-color: var(--purple); box-shadow: 0 6px 0px var(--purple-dark); }
 
         .tile-video-container {
@@ -286,13 +264,13 @@
     <div class="game-workspace">
 
         <div class="board-section">
-            <div class="d-flex justify-content-between gap-3 mb-2 flex-shrink-0">
-                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--cyan);">1. Time ⏰</span>
-                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--mint);">2. Action 🏃</span>
-                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" style="background-color: var(--yellow);">3. Thing 📦</span>
+            <div class="d-flex justify-content-between gap-3 mb-2 flex-shrink-0" id="boardHeaders">
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" id="headerTime" style="background-color: var(--cyan);">1. Time ⏰</span>
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" id="headerAction" style="background-color: var(--mint);">2. Who & Action 🧑‍🤝‍🧑🏃</span>
+                <span class="badge fs-5 text-dark shadow-sm w-100 py-2" id="headerTopic" style="background-color: var(--yellow);">3. Thing 📦</span>
             </div>
 
-            <div class="drop-board">
+            <div class="drop-board" id="dropBoard">
                 <div id="dropTime" class="drop-slot slot-time"></div>
                 <div id="dropAction" class="drop-slot slot-action"></div>
                 <div id="dropTopic" class="drop-slot slot-topic"></div>
@@ -401,6 +379,20 @@
         const dropTopic = document.getElementById('dropTopic');
         const dropAction = document.getElementById('dropAction');
 
+        // AUTO-HIDE LOGIC: Hide columns if the sentence doesn't use them
+        const allTiles = Array.from(document.querySelectorAll('.fsl-tile'));
+        const hasTopic = allTiles.some(tile => tile.getAttribute('data-category') === 'topic');
+        const hasTime = allTiles.some(tile => tile.getAttribute('data-category') === 'time');
+
+        if (!hasTopic) {
+            document.getElementById('dropTopic').style.display = 'none';
+            document.getElementById('headerTopic').style.display = 'none';
+        }
+        if (!hasTime) {
+            document.getElementById('dropTime').style.display = 'none';
+            document.getElementById('headerTime').style.display = 'none';
+        }
+
         const baseConfig = { animation: 150, ghostClass: 'opacity-50' };
 
         new Sortable(wordBank, { group: 'shared', ...baseConfig });
@@ -415,8 +407,29 @@
             ...baseConfig
         });
 
+        // UPDATED: Accepts BOTH subject and action, and auto-sorts them correctly
         new Sortable(dropAction, {
-            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'action'; } },
+            group: { 
+                name: 'shared', 
+                put: function (to, from, dragEl) { 
+                    const cat = dragEl.getAttribute('data-category');
+                    return cat === 'action' || cat === 'subject'; 
+                } 
+            },
+            onSort: function(evt) {
+                // Auto-sorts so Subject ALWAYS comes before Action in the DOM to prevent failing the check
+                const container = evt.to;
+                const tiles = Array.from(container.children);
+                tiles.sort((a, b) => {
+                    const catA = a.getAttribute('data-category');
+                    const catB = b.getAttribute('data-category');
+                    if (catA === 'subject' && catB === 'action') return -1;
+                    if (catA === 'action' && catB === 'subject') return 1;
+                    return 0;
+                });
+                // Re-append in correct order
+                tiles.forEach(tile => container.appendChild(tile));
+            },
             ...baseConfig
         });
 
@@ -428,12 +441,14 @@
         function checkAnswer() {
             let currentSequence = [];
 
-            // JS VALIDATION UPDATED TO TEACHER'S ORDER: Time -> Action -> Topic(Thing)
+            // Reads the visible boxes from left to right
             [dropTime, dropAction, dropTopic].forEach(zone => {
-                const droppedTiles = zone.querySelectorAll('.fsl-tile');
-                droppedTiles.forEach(tile => {
-                    currentSequence.push(tile.getAttribute('data-word'));
-                });
+                if(zone.style.display !== 'none') {
+                    const droppedTiles = zone.querySelectorAll('.fsl-tile');
+                    droppedTiles.forEach(tile => {
+                        currentSequence.push(tile.getAttribute('data-word'));
+                    });
+                }
             });
 
             if (currentSequence.length < correctSequence.length) {

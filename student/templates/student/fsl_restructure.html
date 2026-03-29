@@ -15,6 +15,11 @@
             background-image: radial-gradient(#B2EBF2 20%, transparent 20%), radial-gradient(#B2EBF2 20%, transparent 20%);
             background-size: 20px 20px;
             background-position: 0 0, 10px 10px;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Forces single page */
+            display: flex;
+            flex-direction: column;
         }
 
         .dashboard-card {
@@ -23,23 +28,33 @@
             border: 4px solid #4DD0E1;
             box-shadow: 0 8px 0px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            min-height: 80vh;
-            /* Make it tall enough */
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .header-bg {
             background-color: #FFD54F;
             color: #5D4037;
-            padding: 20px;
+            padding: 15px; /* Reduced from 20px */
             text-align: center;
             border-bottom: 4px solid #FBC02D;
+        }
+
+        .header-bg h1 {
+            font-size: 2.5rem; /* Scaled down slightly */
+            margin-bottom: 0;
+        }
+
+        .header-bg p {
+            font-size: 1.2rem !important;
         }
 
         .magic-input {
             border: 3px solid #B0BEC5;
             border-radius: 20px;
-            font-size: 1.5rem;
-            padding: 15px;
+            font-size: 1.2rem;
+            padding: 10px 15px;
             background-color: #FAFAFA;
         }
 
@@ -53,45 +68,46 @@
             background-color: #FF7043;
             border: none;
             border-radius: 20px;
-            padding: 15px 30px;
-            font-size: 1.5rem;
+            padding: 10px 25px;
+            font-size: 1.2rem;
             font-weight: bold;
             color: white;
-            box-shadow: 0 6px 0 #D84315;
+            box-shadow: 0 4px 0 #D84315;
             transition: all 0.1s;
         }
 
         .btn-magic:active {
-            transform: translateY(6px);
+            transform: translateY(4px);
             box-shadow: none;
         }
 
         /* Cinema Player Styles */
         .cinema-container {
-            /* BIGGER: Increased from 600px to 900px */
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            width: 100%;
         }
 
         .video-stage {
-            border: 8px solid #AB47BC;
+            border: 6px solid #AB47BC; /* Slightly thinner */
             border-radius: 25px;
             overflow: hidden;
             background: #000;
             position: relative;
-
-            /* HEAD FIX: Changed from 16/9 to 4/3 to match your video source */
             aspect-ratio: 4/3;
-
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            max-height: 40vh; /* The critical fix to stop vertical stretching */
+            width: auto;
+            max-width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         }
 
         .video-stage video {
             width: 100%;
             height: 100%;
-            /* This ensures no black bars, but since we fixed the aspect-ratio above, 
-               it won't chop the head off anymore. */
             object-fit: cover;
         }
 
@@ -99,28 +115,24 @@
             background-color: #F3E5F5;
             color: #6A1B9A;
             border: 3px dashed #AB47BC;
-            border-radius: 20px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 2.5rem;
+            border-radius: 15px;
+            padding: 10px 20px;
+            margin-top: 15px;
+            font-size: 1.8rem;
             font-weight: 700;
             text-transform: uppercase;
             text-align: center;
-            transition: transform 0.2s;
         }
 
         .word-counter {
             color: #888;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .replay-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255, 255, 255, 0.8);
             display: flex;
             align-items: center;
@@ -129,22 +141,18 @@
         }
 
         .btn-replay {
-            font-size: 2rem;
-            padding: 15px 40px;
+            font-size: 1.5rem;
+            padding: 10px 30px;
             border-radius: 50px;
             background-color: #26C6DA;
             color: white;
             border: none;
-            box-shadow: 0 6px 0 #0097A7;
+            box-shadow: 0 4px 0 #0097A7;
             font-weight: bold;
         }
 
-        .btn-replay:hover {
-            transform: scale(1.05);
-        }
-
         .btn-replay:active {
-            transform: scale(0.95) translateY(6px);
+            transform: translateY(4px);
             box-shadow: none;
         }
 
@@ -152,24 +160,17 @@
             background-color: #6f42c1;
             color: white;
             border-radius: 50px;
-            padding: 10px 25px;
+            padding: 8px 20px;
             font-weight: 700;
             text-decoration: none;
             border: none;
-            box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 0px #4e2d8b;
             display: inline-block;
-        }
-
-        .btn-chunky:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
-            color: white;
         }
 
         .btn-chunky:active {
             transform: translateY(4px);
-            box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
         }
 
         .hidden {
@@ -179,26 +180,26 @@
 </head>
 
 <body>
-    <div class="container mt-4 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="d-flex justify-content-start mb-4">
+    <div class="container h-100 py-3 d-flex flex-column">
+        <div class="row justify-content-center flex-grow-1" style="min-height: 0;">
+            <div class="col-md-10 d-flex flex-column">
+                <div class="d-flex justify-content-start mb-3">
                     <a href="{% url 'student:student_dashboard' %}" class="btn-chunky">
-                        <span class="fs-5 me-2">🔙</span> Back Home
+                        <span class="fs-6 me-1">🔙</span> Back Home
                     </a>
                 </div>
 
                 <div class="dashboard-card">
                     <div class="header-bg">
-                        <h1 class="fw-bold display-4">✨ Word Magic ✨</h1>
-                        <p class="mb-0 fs-4">Turn your sentences into Sign Language!</p>
+                        <h1 class="fw-bold">✨ Word Magic ✨</h1>
+                        <p class="mb-0">Turn your sentences into Sign Language!</p>
                     </div>
 
-                    <div class="p-4 p-md-5">
-                        <form method="POST">
+                    <div class="p-3 p-md-4 flex-grow-1 d-flex flex-column">
+                        <form method="POST" class="mb-2">
                             {% csrf_token %}
-                            <div class="mb-4">
-                                <label class="form-label fw-bold fs-5 text-muted ms-2">Type here:</label>
+                            <div>
+                                <label class="form-label fw-bold fs-6 text-muted ms-2 mb-1">Type here:</label>
                                 <div class="d-flex gap-2 flex-column flex-md-row">
                                     <input type="text" name="sentence" class="form-control magic-input"
                                         placeholder="e.g. I eat apple today" value="{{ original }}" required
@@ -211,8 +212,7 @@
                         </form>
 
                         {% if visual_sequence %}
-                        <div class="cinema-container mt-5">
-
+                        <div class="cinema-container">
                             <div class="video-stage">
                                 <video id="mainVideo" playsinline muted>
                                     <source src="" type="video/mp4">
@@ -231,19 +231,17 @@
                             </div>
 
                             <div class="text-center word-counter">
-                                Word <span id="currentIndex">1</span> of <span id="totalIndex">{{ visual_sequence|length
-                                    }}</span>
+                                Word <span id="currentIndex">1</span> of <span id="totalIndex">{{ visual_sequence|length }}</span>
                             </div>
-
                         </div>
                         {% elif results %}
-                        <div class="text-center py-5">
-                            <p class="text-muted">No videos found for this sentence.</p>
+                        <div class="text-center py-4 flex-grow-1 d-flex align-items-center justify-content-center">
+                            <p class="text-muted m-0">No videos found for this sentence.</p>
                         </div>
                         {% else %}
-                        <div class="text-center py-5 opacity-50">
+                        <div class="text-center py-4 opacity-50 flex-grow-1 d-flex flex-column align-items-center justify-content-center">
                             <div class="fs-1">🧙‍♂️</div>
-                            <p class="fw-bold">Waiting for your words...</p>
+                            <p class="fw-bold m-0">Waiting for your words...</p>
                         </div>
                         {% endif %}
                     </div>
@@ -253,15 +251,13 @@
     </div>
 
     <script>
-        // 1. Prepare the data from Django context
-        // We build a Javascript array of objects
         const sequenceData = [
             {% for item in visual_sequence %}
-        {
-            word: "{{ item.word|escapejs }}",
+            {
+                word: "{{ item.word|escapejs }}",
                 video_url: "{% if item.video_url %}{{ item.video_url }}{% else %}null{% endif %}"
-        },
-        {% endfor %}
+            },
+            {% endfor %}
         ];
 
         let currentIdx = 0;
@@ -271,37 +267,29 @@
         const currentIdxEl = document.getElementById('currentIndex');
 
         function playNext() {
-            // Check if we reached the end
             if (currentIdx >= sequenceData.length) {
                 showReplayButton();
                 return;
             }
 
             const item = sequenceData[currentIdx];
-
-            // Update Text UI
             wordEl.innerText = item.word;
             currentIdxEl.innerText = currentIdx + 1;
 
             if (item.video_url && item.video_url !== 'null') {
-                // Load and play video
                 videoEl.src = item.video_url;
                 videoEl.play().catch(e => {
                     console.log("Autoplay blocked, showing replay button", e);
                     showReplayButton();
                 });
 
-                // When video ends, play next
                 videoEl.onended = function () {
                     currentIdx++;
                     playNext();
                 };
             } else {
-                // Handle "No Video" case (Fingerspelling fallback usually handles this, 
-                // but if a file is truly missing, we show a placeholder for 2 seconds)
                 wordEl.innerText = item.word + " (No Video)";
                 videoEl.src = "";
-                // Wait 2 seconds then move on
                 setTimeout(() => {
                     currentIdx++;
                     playNext();
@@ -320,9 +308,7 @@
             wordEl.innerText = "✨ GREAT JOB! ✨";
         }
 
-        // Auto-start on load if data exists
         if (sequenceData.length > 0) {
-            // A small delay ensures the DOM is ready
             setTimeout(startPlayback, 500);
         }
     </script>

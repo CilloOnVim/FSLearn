@@ -20,4 +20,7 @@ urlpatterns = [
     path("manage/section/<int:pk>/delete/", learning_views.delete_section, name="delete_section"),
     path("manage/word/<int:pk>/delete/", learning_views.delete_word, name="delete_word"),
     path("class_progress/", views.class_progress_report, name="class_progress_report"),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('my-students/', views.my_students, name='my_students'),
+    path('my-students/remove/<int:student_id>/', views.remove_student, name='remove_student'),
 ]
