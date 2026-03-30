@@ -1,12 +1,25 @@
+import os
+from django.core.files.storage import FileSystemStorage
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+# This function dynamically checks your .env file
+def get_video_storage():
+    if os.environ.get('ENVIRONMENT') == 'production':
+        return VideoMediaCloudinaryStorage()
+    return FileSystemStorage()
+
 class FSLSign(models.Model):
     fslsign_id = models.BigAutoField(primary_key=True)
     char = models.CharField(max_length=5, unique=True, help_text="The letter or number (e.g., 'A', '1')")
-    media_file = models.FileField(upload_to="fsl_clips/", help_text="Upload the hand sign clip here")
+    media_file = models.FileField(
+        upload_to="fsl_clips/", 
+        storage=get_video_storage, # <-- FIXED
+        help_text="Upload the hand sign clip here"
+    )
 
     def __str__(self):
         return f"Sign for {self.char}"
@@ -14,7 +27,11 @@ class FSLSign(models.Model):
 class FSLWord(models.Model):
     fslword_id = models.BigAutoField(primary_key=True)
     word = models.CharField(max_length=100, unique=True, help_text="e.g. 'EAT', 'APPLE'")
-    video = models.FileField(upload_to="fsl_words/", help_text="Upload word video here")
+    video = models.FileField(
+        upload_to="fsl_words/", 
+        storage=get_video_storage, # <-- FIXED
+        help_text="Upload word video here"
+    )
 
     def __str__(self):
         return f"Word: {self.word.upper()}"

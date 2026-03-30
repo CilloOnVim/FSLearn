@@ -1,5 +1,14 @@
+import os
+from django.core.files.storage import FileSystemStorage
+from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 from django.db import models
 from django.utils.text import slugify
+
+# This function dynamically checks your .env file
+def get_video_storage():
+    if os.environ.get('ENVIRONMENT') == 'production':
+        return VideoMediaCloudinaryStorage()
+    return FileSystemStorage()
 
 # --- 1. THEME MODEL ---
 class Theme(models.Model):
@@ -34,7 +43,11 @@ class Word(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name="words")
     name = models.CharField(max_length=100, help_text="e.g., 'MASAYA (Happy)'")
     slug = models.SlugField(unique=True, blank=True, help_text="Auto-generated from Name (e.g., 'masaya-happy')")
-    video = models.FileField(upload_to="words/videos/", help_text="Upload the MP4 sign language clip here")
+    video = models.FileField(
+        upload_to="words/videos/", 
+        storage=get_video_storage, # <-- FIXED
+        help_text="Upload the MP4 sign language clip here"
+    )
     image = models.ImageField(upload_to="words/images/", help_text="Upload the illustration/drawing here")
     description = models.TextField(help_text="Instructions: e.g., 'Smile with both hands moving up...'")
     order = models.PositiveIntegerField(default=1)
@@ -63,7 +76,11 @@ class Story(models.Model):
     story_id = models.BigAutoField(primary_key=True)
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="stories")
     title = models.CharField(max_length=200)
-    video = models.FileField(upload_to="stories/videos/", help_text="The main story video")
+    video = models.FileField(
+        upload_to="stories/videos/", 
+        storage=get_video_storage, # <-- FIXED
+        help_text="The main story video"
+    )
     thumbnail = models.ImageField(upload_to="stories/thumbnails/", blank=True, null=True)
     description = models.TextField(blank=True)
 
@@ -74,7 +91,11 @@ class Story(models.Model):
 class QuizQuestion(models.Model):
     question_id = models.BigAutoField(primary_key=True)
     story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name="questions")
-    video = models.FileField(upload_to="stories/quiz_videos/", help_text="Video of the teacher asking the question")
+    video = models.FileField(
+        upload_to="stories/quiz_videos/", 
+        storage=get_video_storage, # <-- FIXED
+        help_text="Video of the teacher asking the question"
+    )
     text = models.CharField(max_length=255, help_text="Text version of the question (optional)")
     
     def __str__(self):

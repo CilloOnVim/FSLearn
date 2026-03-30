@@ -10,6 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv() # IF YOU FORGOT THIS, NOTHING WORKS
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,8 +35,7 @@ SECRET_KEY = "django-insecure-902t&hqz#-&_$#r=4+%@lb!6aaj_(*jvxtrgp85bxla48_ebrk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 # Application definition
 
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
     "student",
     "teacher",
     "learning",
+    "cloudinary",
 ]
 
 MIDDLEWARE = [
@@ -82,16 +88,40 @@ WSGI_APPLICATION = "fslearn_main.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "fslearnDB",
-        "USER": "fslearnadmin",
-        "PASSWORD": "Password123!",
-        "HOST": "localhost",
-        "PORT": "5432",
+# --- DATABASE & STORAGE CONFIGURATION ---
+if os.environ.get('ENVIRONMENT') == 'production':
+    # LIVE: Use Neon Cloud DB and Cloudinary Storage
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
-}
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    # LOCAL: Use Local fslearnDB and Local /media/ folder
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "fslearnDB",
+            "USER": "fslearnadmin",
+            "PASSWORD": "Password123!",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 
 # Password validation
@@ -173,5 +203,22 @@ UNFOLD = {
                 ],
             },
         ],
+    },
+}
+
+# --- CLOUDINARY MEDIA STORAGE ---
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dedrisaul',
+    'API_KEY': '233719653582825',
+    'API_SECRET': 'FQA0vhml9-kJrgO3WytxaL2LK-8',
+}
+
+# Modern Django Storage Configuration
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }

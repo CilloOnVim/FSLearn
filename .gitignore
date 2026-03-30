@@ -47,3 +47,5 @@ media/
 
 # Temporary data lists
 filelist.txt
+
+.env
