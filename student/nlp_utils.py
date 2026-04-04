@@ -1,8 +1,22 @@
 # fsl_nlp/nlp_utils.py
 import spacy
+from student.models import FSLWord
 
 # Ensure you have the model downloaded: python -m spacy download en_core_web_sm
 nlp = spacy.load("en_core_web_sm")
+
+# --- CUSTOM ENTITY RULER FOR HISTORICAL NAMES ---
+if not nlp.has_pipe("entity_ruler"):
+    ruler = nlp.add_pipe("entity_ruler", before="ner")
+    
+    # Add all your custom historical figures or special names here
+    patterns = [
+        {"label": "PERSON", "pattern": [{"LOWER": "andres"}, {"LOWER": "bonifacio"}]},
+        {"label": "PERSON", "pattern": [{"LOWER": "jose"}, {"LOWER": "rizal"}]},
+        {"label": "PERSON", "pattern": [{"LOWER": "apolinario"}, {"LOWER": "mabini"}]}
+    ]
+    ruler.add_patterns(patterns)
+# -------------------------------------------------
 
 STOP_WORDS = {
     "the", "a", "an", "to", "is", "are", "am", "was", "were", 
@@ -19,6 +33,11 @@ FORCE_TIME_WORDS = {
 def translate_to_fsl(english_sentence):
     doc = nlp(english_sentence)
 
+    # Merge named entities so names like "John Smith" become a single token
+    with doc.retokenize() as retokenizer:
+        for ent in doc.ents:
+            retokenizer.merge(ent)
+
     structure = {
         "time": [],
         "topic": [],           # The Object or focal point
@@ -26,7 +45,6 @@ def translate_to_fsl(english_sentence):
         "comment_verb": []     # The Action
     }
     
-    # NEW: Memory bank to prevent double-printing words we already combined
     skip_tokens = set()
 
     for token in doc:
@@ -43,38 +61,30 @@ def translate_to_fsl(english_sentence):
         # 2. CONTEXTUAL DISAMBIGUATION BLOCK
         # ==========================================
         
-        # Disambiguate "LIKE"
         if word_lemma == "LIKE":
             if token.pos_ == "VERB":
                 word_lemma = "LIKE (GUSTO)"
             else:
                 word_lemma = "LIKE (PAREHO)"
 
-        # Disambiguate Directional "HELP"
         elif word_lemma in ["HELP", "HELPING"]:
-            # Look at the words attached to 'help' to find the receiver
             for child in token.children:
                 if child.dep_ in ["dobj", "dative", "pobj"]:
                     if child.text.lower() in ["me", "us"]:
-                        # Direction is inward (to me)
                         word_lemma = "HELP"
-                        skip_tokens.add(child) # Consume 'me' so it doesn't print again
+                        skip_tokens.add(child)
                         break
                     else:
-                        # Direction is outward to someone else (you, the girl, the boy). 
                         word_lemma = "HELPING"
-                        
-                        # CRITICAL: If the object is literally "you", we consume/delete it.
-                        # If the object is a noun like "girl", we leave it alone for the Topic.
                         if child.text.lower() == "you":
                             skip_tokens.add(child)
                         break
 
         # ==========================================
-
-        # 3. Fingerspelling for Proper Nouns
+        # 3. Handle Proper Nouns (Tag them, don't shred them yet)
         elif token.ent_type_ == "PERSON":
-            word_lemma = f"fs-{word_lemma}" 
+            # Turns "Jose Rizal" into "name-JOSE_RIZAL" so it survives the string split later
+            word_lemma = f"name-{token.text.upper().replace(' ', '_')}"
 
         # 4. Time Extraction
         if word_lemma in FORCE_TIME_WORDS or token.ent_type_ in ["TIME", "DATE"]:
@@ -93,7 +103,6 @@ def translate_to_fsl(english_sentence):
                 word_lemma = "MY"
             structure["comment_subject"].append(word_lemma)
             
-        # Included our custom override words here so they get sorted properly
         # 7. Comment - Verb Extraction
         elif token.pos_ in ["VERB", "ADJ", "ROOT"] or token.dep_ == "ROOT" or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
             structure["comment_verb"].append(word_lemma)
@@ -103,7 +112,6 @@ def translate_to_fsl(english_sentence):
     topic_part = " ".join(structure["topic"])
     comment_part = " ".join(structure["comment_subject"] + structure["comment_verb"])
 
-    # Build the final ordered FSL sequence: Time -> Comment -> Topic
     full_sequence = []
     if time_part:
         full_sequence.append(time_part)
@@ -124,15 +132,61 @@ def translate_to_fsl(english_sentence):
     }
 
 
-# --- Test Cases ---
-if __name__ == "__main__":
-    sentences = [
-        "I like the museum",
-        "It looks like a museum",
-        "The teacher is helping me",
-        "I am helping you today"
-    ]
+# --- QUIZ VALIDATOR HELPER ---
+def validate_quiz_sentence(sentence):
+    """
+    Analyzes a sentence for the quiz generator, checking if all words
+    have corresponding videos in the database.
+    """
+    nlp_result = translate_to_fsl(sentence)
     
-    for s in sentences:
-        print(f"English: {s}")
-        print(f"FSL Output: {translate_to_fsl(s)['complete']}\n")
+    analysis_report = []
+    words_to_check = []
+    
+    def process_slot(text_block, category_name):
+        if text_block:
+            for word in text_block.split():
+                clean_word = word.strip(".,!?")
+                if clean_word:
+                    words_to_check.append((clean_word, category_name))
+
+    # Processes in the exact order the teacher requested
+    process_slot(nlp_result.get('time'), 'Time')
+    process_slot(nlp_result.get('comment_subject'), 'Subject')
+    process_slot(nlp_result.get('comment_verb'), 'Action')
+    process_slot(nlp_result.get('topic'), 'Topic')
+
+    all_good = True
+
+    for word_text, category in words_to_check:
+        # 1. Handle Explicit Fingerspelling
+        if word_text.startswith("fs-"):
+            exists = True
+            display_word = word_text.replace("fs-", "") + " (Fingerspell)"
+            
+        # 2. Handle Name Tags (So it doesn't break on "Jose Rizal")
+        elif word_text.startswith("name-"):
+            clean_name = word_text.replace("name-", "").replace("_", " ")
+            exists = FSLWord.objects.filter(word__iexact=clean_name).exists()
+            display_word = clean_name
+            if not exists:
+                all_good = False
+                
+        # 3. Standard Vocabulary
+        else:
+            exists = FSLWord.objects.filter(word__iexact=word_text).exists()
+            display_word = word_text
+            if not exists:
+                all_good = False
+        
+        analysis_report.append({
+            "word": display_word,
+            "category": category,
+            "has_video": exists
+        })
+
+    return {
+        "nlp_result": nlp_result,
+        "report": analysis_report,
+        "all_good": all_good
+    }

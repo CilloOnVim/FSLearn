@@ -1,298 +1,294 @@
+{% extends 'learning/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ story.title }} | FSLearn</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        :root {
-            --mint: #20c997;
-            --mint-dark: #128c68;
-            --purple: #6f42c1;
-            --purple-dark: #4e2d8b;
-            --cyan: #0dcaf0;
-            --cyan-dark: #0aa2c0;
-            --yellow: #ffd700;
-            --yellow-dark: #d4b200;
-            --pink: #ff6b6b;
-            --pink-dark: #c92a2a;
-        }
+{% block title %}{{ story.title }} | FSLearn{% endblock %}
 
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: #f0f8ff;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+    :root {
+        --mint: #20c997;
+        --mint-dark: #128c68;
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --cyan: #0dcaf0;
+        --cyan-dark: #0aa2c0;
+        --yellow: #ffd700;
+        --yellow-dark: #d4b200;
+        --pink: #ff6b6b;
+        --pink-dark: #c92a2a;
+    }
 
-        /* Top Bar */
-        .top-bar {
-            background-color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-        }
+    #game-wrapper {
+        background-color: #f0f8ff;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
 
-        .btn-exit {
-            background-color: var(--pink);
-            color: white !important;
-            border-radius: 50px;
-            padding: 10px 25px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            text-decoration: none;
-            box-shadow: 0 5px 0px var(--pink-dark);
-            transition: all 0.1s;
-        }
+    /* Top Bar */
+    .top-bar {
+        background-color: white;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+    }
 
-        .btn-exit:active {
-            transform: translateY(5px);
-            box-shadow: 0 0px 0px transparent;
-        }
+    .btn-exit {
+        background-color: var(--pink);
+        color: white !important;
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        text-decoration: none;
+        box-shadow: 0 5px 0px var(--pink-dark);
+        transition: all 0.1s;
+    }
 
-        .phase-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--purple);
-            margin: 0;
-        }
+    .btn-exit:active {
+        transform: translateY(5px);
+        box-shadow: 0 0px 0px transparent;
+    }
 
-        .score-badge {
-            background-color: var(--yellow);
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            box-shadow: 0 4px 0px var(--yellow-dark);
-        }
+    .phase-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--purple);
+        margin: 0;
+    }
 
-        /* Main Split Workspace */
+    .score-badge {
+        background-color: var(--yellow);
+        color: #333;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        box-shadow: 0 4px 0px var(--yellow-dark);
+    }
+
+    /* Main Split Workspace */
+    .content-stage {
+        flex-grow: 1;
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        overflow: hidden;
+    }
+
+    /* LEFT SIDE: Video */
+    .video-container {
+        flex: 1.8;
+        background: white;
+        border-radius: 35px;
+        border: 5px solid var(--cyan);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        padding: 15px;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 20px;
+        background-color: #e9ecef;
+    }
+
+    /* RIGHT SIDE: Quiz Panel */
+    .quiz-container {
+        flex: 1.2;
+        background: white;
+        border-radius: 35px;
+        border: 5px solid var(--mint);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    /* Start Screen */
+    .start-panel {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .btn-start {
+        background-color: var(--yellow);
+        color: #333;
+        font-size: 2.5rem;
+        font-weight: 700;
+        padding: 20px 40px;
+        border-radius: 50px;
+        border: none;
+        box-shadow: 0 8px 0px var(--yellow-dark);
+        width: 100%;
+        transition: all 0.1s;
+    }
+
+    .btn-start:active {
+        transform: translateY(8px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    /* Active Quiz Screen */
+    .question-text {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--purple);
+        margin-bottom: 30px;
+        line-height: 1.2;
+    }
+
+    .choices-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 20px;
+        flex-grow: 1;
+    }
+
+    .choice-card {
+        background: #f8f9fa;
+        color: #333;
+        border-radius: 25px;
+        border: 5px solid #dee2e6;
+        cursor: pointer;
+        transition: all 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        box-shadow: 0 6px 0px #dee2e6;
+    }
+
+    .choice-card:active {
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    .choice-card.correct {
+        background: #d1e7dd;
+        border-color: var(--mint);
+        box-shadow: 0 6px 0px var(--mint-dark);
+        color: var(--mint-dark);
+    }
+
+    .choice-card.wrong {
+        background: #f8d7da;
+        border-color: var(--pink);
+        box-shadow: 0 6px 0px var(--pink-dark);
+        color: var(--pink-dark);
+    }
+
+    /* Result Screen */
+    .result-panel {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .result-emoji {
+        font-size: 8rem;
+        line-height: 1;
+        margin: 0;
+    }
+
+    .result-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--purple);
+        margin: 0;
+    }
+
+    .result-score {
+        font-size: 2rem;
+        color: #666;
+        font-weight: 600;
+    }
+
+    .btn-action {
+        font-size: 1.5rem;
+        font-weight: 700;
+        padding: 15px 30px;
+        border-radius: 40px;
+        width: 100%;
+        text-decoration: none;
+        display: block;
+        border: none;
+        transition: all 0.1s;
+    }
+
+    .btn-next-story {
+        background-color: var(--cyan);
+        color: white;
+        box-shadow: 0 6px 0px var(--cyan-dark);
+    }
+
+    .btn-next-story:active {
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    .btn-retry {
+        background-color: #e9ecef;
+        color: #333;
+        box-shadow: 0 6px 0px #ced4da;
+    }
+
+    .btn-retry:active {
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    @media (max-width: 900px) {
         .content-stage {
-            flex-grow: 1;
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            overflow: hidden;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
-        /* LEFT SIDE: Video */
+        #game-wrapper {
+            overflow: auto;
+        }
+
         .video-container {
-            flex: 1.8;
-            background: white;
-            border-radius: 35px;
-            border: 5px solid var(--cyan);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            padding: 15px;
+            min-height: 40vh;
+            flex: none;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 20px;
-            background-color: #e9ecef;
-        }
-
-        /* RIGHT SIDE: Quiz Panel */
         .quiz-container {
-            flex: 1.2;
-            background: white;
-            border-radius: 35px;
-            border: 5px solid var(--mint);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        /* Start Screen */
-        .start-panel {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .btn-start {
-            background-color: var(--yellow);
-            color: #333;
-            font-size: 2.5rem;
-            font-weight: 700;
-            padding: 20px 40px;
-            border-radius: 50px;
-            border: none;
-            box-shadow: 0 8px 0px var(--yellow-dark);
-            width: 100%;
-            transition: all 0.1s;
-        }
-
-        .btn-start:active {
-            transform: translateY(8px);
-            box-shadow: 0 0px 0px transparent;
-        }
-
-        /* Active Quiz Screen */
-        .question-text {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--purple);
-            margin-bottom: 30px;
-            line-height: 1.2;
-        }
-
-        .choices-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 20px;
-            flex-grow: 1;
+            min-height: 60vh;
+            flex: none;
         }
 
         .choice-card {
-            background: #f8f9fa;
-            color: #333;
-            border-radius: 25px;
-            border: 5px solid #dee2e6;
-            cursor: pointer;
-            transition: all 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: 700;
-            box-shadow: 0 6px 0px #dee2e6;
+            font-size: 1.8rem;
         }
+    }
+</style>
+{% endblock %}
 
-        .choice-card:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0px transparent;
-        }
-
-        .choice-card.correct {
-            background: #d1e7dd;
-            border-color: var(--mint);
-            box-shadow: 0 6px 0px var(--mint-dark);
-            color: var(--mint-dark);
-        }
-
-        .choice-card.wrong {
-            background: #f8d7da;
-            border-color: var(--pink);
-            box-shadow: 0 6px 0px var(--pink-dark);
-            color: var(--pink-dark);
-        }
-
-        /* Result Screen */
-        .result-panel {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .result-emoji {
-            font-size: 8rem;
-            line-height: 1;
-            margin: 0;
-        }
-
-        .result-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: var(--purple);
-            margin: 0;
-        }
-
-        .result-score {
-            font-size: 2rem;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .btn-action {
-            font-size: 1.5rem;
-            font-weight: 700;
-            padding: 15px 30px;
-            border-radius: 40px;
-            width: 100%;
-            text-decoration: none;
-            display: block;
-            border: none;
-            transition: all 0.1s;
-        }
-
-        .btn-next-story {
-            background-color: var(--cyan);
-            color: white;
-            box-shadow: 0 6px 0px var(--cyan-dark);
-        }
-
-        .btn-next-story:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0px transparent;
-        }
-
-        .btn-retry {
-            background-color: #e9ecef;
-            color: #333;
-            box-shadow: 0 6px 0px #ced4da;
-        }
-
-        .btn-retry:active {
-            transform: translateY(6px);
-            box-shadow: 0 0px 0px transparent;
-        }
-
-        @media (max-width: 900px) {
-            .content-stage {
-                flex-direction: column;
-                overflow-y: auto;
-            }
-
-            body {
-                overflow: auto;
-            }
-
-            .video-container {
-                min-height: 40vh;
-                flex: none;
-            }
-
-            .quiz-container {
-                min-height: 60vh;
-                flex: none;
-            }
-
-            .choice-card {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
+{% block layout %}
+<div id="game-wrapper">
     <div class="top-bar">
         <a href="{% url 'learning:story_list' %}" class="btn-exit">✖ Exit</a>
         <h4 class="phase-title" id="phaseTitle">{{ story.title }}</h4>
@@ -311,8 +307,8 @@
 
             <div id="startPanel" class="start-panel">
                 <div style="font-size: 6rem;">🎮</div>
-                <h3 class="fw-bold" style="color: var(--cyan); font-size: 2.5rem;">Ready to play?</h3>
-                <button onclick="startQuiz()" class="btn-start">🚀 Start Quiz</button>
+                <h3 class="fw-bold" style="color: var(--cyan); font-size: 2.5rem;" id="quizStatusText">Watch the story to unlock the quiz!</h3>
+                <button onclick="startQuiz()" class="btn-start" id="startQuizBtn" style="display: none;">🚀 Start Quiz</button>
             </div>
 
             <div id="quizPanel" style="display: none; height: 100%; flex-direction: column;">
@@ -335,121 +331,127 @@
     </div>
 
     <form style="display: none;">{% csrf_token %}</form>
+</div>
+{% endblock %}
 
-    <script>
-        const quizData = {{ quiz_data_json| safe }};
-        const storyId = {{ story.pk }};
+{% block extra_scripts %}
+<script>
+    const quizData = {{ quiz_data_json| safe }};
+    const storyId = {{ story.pk }};
 
-        const player = document.getElementById('mainPlayer');
-        const startPanel = document.getElementById('startPanel');
-        const quizPanel = document.getElementById('quizPanel');
-        const resultPanel = document.getElementById('resultPanel');
-        const choicesGrid = document.getElementById('choicesGrid');
-        const scoreBadge = document.getElementById('scoreBadge');
-        const phaseTitle = document.getElementById('phaseTitle');
+    const player = document.getElementById('mainPlayer');
+    const startPanel = document.getElementById('startPanel');
+    const quizPanel = document.getElementById('quizPanel');
+    const resultPanel = document.getElementById('resultPanel');
+    const choicesGrid = document.getElementById('choicesGrid');
+    const scoreBadge = document.getElementById('scoreBadge');
+    const phaseTitle = document.getElementById('phaseTitle');
 
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let isAnswering = false;
+    player.addEventListener('ended', function() {
+        document.getElementById('quizStatusText').innerText = "Ready to play?";
+        document.getElementById('startQuizBtn').style.display = 'block';
+    });
 
-        function startQuiz() {
-            if (quizData.length === 0) {
-                alert("No questions found for this story!");
-                return;
-            }
-            startPanel.style.display = 'none';
-            quizPanel.style.display = 'flex';
-            scoreBadge.style.display = 'block';
-            player.removeAttribute('controls');
-            loadQuestion(0);
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isAnswering = false;
+
+    function startQuiz() {
+        if (quizData.length === 0) {
+            alert("No questions found for this story!");
+            return;
+        }
+        startPanel.style.display = 'none';
+        quizPanel.style.display = 'flex';
+        scoreBadge.style.display = 'block';
+        player.removeAttribute('controls');
+        loadQuestion(0);
+    }
+
+    function loadQuestion(index) {
+        if (index >= quizData.length) {
+            endQuiz();
+            return;
+        }
+        currentQuestionIndex = index;
+        isAnswering = false;
+        const q = quizData[index];
+
+        player.src = q.video_url;
+        player.play();
+        phaseTitle.innerText = `Question ${index + 1} of ${quizData.length}`;
+        document.getElementById('questionText').innerText = q.text || "Choose the correct answer:";
+
+        choicesGrid.innerHTML = '';
+        q.choices.forEach(choice => {
+            const card = document.createElement('div');
+            card.className = 'choice-card';
+            card.innerHTML = choice.text;
+            card.onclick = () => handleAnswer(card, choice.is_correct);
+            choicesGrid.appendChild(card);
+        });
+    }
+
+    function handleAnswer(element, isCorrect) {
+        if (isAnswering) return;
+        isAnswering = true;
+
+        if (isCorrect) {
+            element.classList.add('correct');
+            score++;
+            scoreBadge.innerText = `⭐ ${score}`;
+        } else {
+            element.classList.add('wrong');
         }
 
-        function loadQuestion(index) {
-            if (index >= quizData.length) {
-                endQuiz();
-                return;
-            }
-            currentQuestionIndex = index;
-            isAnswering = false;
-            const q = quizData[index];
+        setTimeout(() => {
+            loadQuestion(currentQuestionIndex + 1);
+        }, 1500);
+    }
 
-            player.src = q.video_url;
-            player.play();
-            phaseTitle.innerText = `Question ${index + 1} of ${quizData.length}`;
-            document.getElementById('questionText').innerText = q.text || "Choose the correct answer:";
+    function endQuiz() {
+        quizPanel.style.display = 'none';
+        resultPanel.style.display = 'flex';
 
-            choicesGrid.innerHTML = '';
-            q.choices.forEach(choice => {
-                const card = document.createElement('div');
-                card.className = 'choice-card';
-                card.innerHTML = choice.text;
-                card.onclick = () => handleAnswer(card, choice.is_correct);
-                choicesGrid.appendChild(card);
+        phaseTitle.innerText = "Finished!";
+
+        const isPassed = score >= Math.ceil(quizData.length / 2); // Pass if >= 50%
+
+        if (isPassed) {
+            document.getElementById('resultIcon').innerText = "🏆";
+            document.getElementById('resultHeading').innerText = "Amazing!";
+
+            // FIRE THE CONFETTI
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#20c997', '#6f42c1', '#0dcaf0', '#ffd700', '#ff6b6b']
             });
+
+        } else {
+            document.getElementById('resultIcon').innerText = "💪";
+            document.getElementById('resultHeading').innerText = "Keep Trying!";
         }
 
-        function handleAnswer(element, isCorrect) {
-            if (isAnswering) return;
-            isAnswering = true;
+        document.getElementById('finalScore').innerText = `You got ${score} out of ${quizData.length} correct!`;
 
-            if (isCorrect) {
-                element.classList.add('correct');
-                score++;
-                scoreBadge.innerText = `⭐ ${score}`;
-            } else {
-                element.classList.add('wrong');
-            }
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let formData = new URLSearchParams();
+        formData.append('score', score);
+        formData.append('passed', isPassed);
 
-            setTimeout(() => {
-                loadQuestion(currentQuestionIndex + 1);
-            }, 1500);
-        }
-
-        function endQuiz() {
-            quizPanel.style.display = 'none';
-            resultPanel.style.display = 'flex';
-
-            phaseTitle.innerText = "Finished!";
-
-            const isPassed = score >= Math.ceil(quizData.length / 2); // Pass if >= 50%
-
-            if (isPassed) {
-                document.getElementById('resultIcon').innerText = "🏆";
-                document.getElementById('resultHeading').innerText = "Amazing!";
-
-                // FIRE THE CONFETTI
-                confetti({
-                    particleCount: 150,
-                    spread: 80,
-                    origin: { y: 0.6 },
-                    colors: ['#20c997', '#6f42c1', '#0dcaf0', '#ffd700', '#ff6b6b']
-                });
-
-            } else {
-                document.getElementById('resultIcon').innerText = "💪";
-                document.getElementById('resultHeading').innerText = "Keep Trying!";
-            }
-
-            document.getElementById('finalScore').innerText = `You got ${score} out of ${quizData.length} correct!`;
-
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            let formData = new URLSearchParams();
-            formData.append('score', score);
-            formData.append('passed', isPassed);
-
-            fetch(`/student/api/story-quiz/${storyId}/save/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => console.log("Score saved:", data))
-                .catch(err => console.error("Error saving score:", err));
-        }
-    </script>
-</body>
-
-</html>
+        fetch(`/student/api/story-quiz/${storyId}/save/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => console.log("Score saved:", data))
+            .catch(err => console.error("Error saving score:", err));
+    }
+</script>
+{% endblock %}

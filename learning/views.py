@@ -166,7 +166,6 @@ def manage_quizzes(request):
     quizzes = SentenceQuiz.objects.all().order_by('-created_at')
     return render(request, "learning/manage_quizzes.html", {"quizzes": quizzes})
 
-
 # 8. CREATE QUIZ (The Magic Builder)
 @login_required
 def create_quiz(request):
@@ -180,60 +179,93 @@ def create_quiz(request):
         action = request.POST.get("action") 
 
         if sentence:
-            nlp_result = translate_to_fsl(sentence) 
+            # Import your new helper at the top of the file if you haven't already:
+            from student.nlp_utils import validate_quiz_sentence
             
-            analysis_report = []
-            words_to_check = []
-            
-            def process_slot(text_block, category_name):
-                if text_block:
-                    for word in text_block.split():
-                        clean_word = word.strip(".,!?")
-                        if clean_word:
-                            words_to_check.append((clean_word, category_name))
-
-            # Processes in the exact order the teacher requested
-            process_slot(nlp_result.get('time'), 'Time')
-            process_slot(nlp_result.get('comment_subject'), 'Subject') # Separated!
-            process_slot(nlp_result.get('comment_verb'), 'Action')     # Separated!
-            process_slot(nlp_result.get('topic'), 'Topic')
-
-            all_good = True
-
-            for word_text, category in words_to_check:
-                if word_text.startswith("fs-"):
-                    exists = True
-                    display_word = word_text.replace("fs-", "") + " (Fingerspell)"
-                else:
-                    exists = FSLWord.objects.filter(word__iexact=word_text).exists()
-                    display_word = word_text
-                
-                analysis_report.append({
-                    "word": display_word,
-                    "category": category,
-                    "has_video": exists
-                })
-                
-                if not exists:
-                    all_good = False
+            # ONE CLEAN CALL. The view acts as a traffic cop, not a database worker.
+            validation_data = validate_quiz_sentence(sentence)
 
             context = {
                 "original": sentence,
-                "nlp_result": nlp_result,
-                "report": analysis_report,
-                "all_good": all_good
+                "nlp_result": validation_data["nlp_result"],
+                "report": validation_data["report"],
+                "all_good": validation_data["all_good"]
             }
 
             if action == "save":
                 SentenceQuiz.objects.create(
                     original_text=sentence,
-                    structure_json=nlp_result
+                    structure_json=validation_data["nlp_result"]
                 )
                 messages.success(request, "Quiz saved successfully!")
                 return redirect("learning:manage_quizzes")
 
     return render(request, "learning/create_quiz.html", context)
 
+
+# ... (Skip down to your take_sentence_quiz view) ...
+
+
+@login_required
+def take_sentence_quiz(request, quiz_id):
+    """The actual drag-and-drop player"""
+    quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
+    structure = quiz.structure_json
+
+    correct_sequence = []
+    tiles = []
+
+    def process_category(text_block, category_name):
+        if not text_block: 
+            return
+            
+        words = text_block.split()
+        for word in words:
+            clean_word = word.strip(".,!?")
+            if not clean_word: 
+                continue
+
+            # 1. Fingerspelling logic
+            if clean_word.startswith("fs-"):
+                display_word = clean_word.replace("fs-", "")
+                video_url = None 
+                
+            # 2. NEW: Name logic so the tiles render names correctly
+            elif clean_word.startswith("name-"):
+                display_word = clean_word.replace("name-", "").replace("_", " ")
+                word_obj = FSLWord.objects.filter(word__iexact=display_word).first()
+                video_url = word_obj.video.url if word_obj and word_obj.video else None
+                
+            # 3. Standard Vocabulary
+            else:
+                display_word = clean_word
+                word_obj = FSLWord.objects.filter(word__iexact=clean_word).first()
+                video_url = word_obj.video.url if word_obj and word_obj.video else None
+
+            tiles.append({
+                "word": display_word,
+                "category": category_name, 
+                "video_url": video_url
+            })
+            
+            correct_sequence.append(display_word)
+
+    # CRITICAL ORDERING FOR DOM CHECK: Time -> Subject -> Action -> Topic
+    process_category(structure.get('time'), 'time')
+    process_category(structure.get('comment_subject'), 'subject') 
+    process_category(structure.get('comment_verb'), 'action')     
+    process_category(structure.get('topic'), 'topic')
+
+    shuffled_tiles = list(tiles)
+    random.shuffle(shuffled_tiles)
+
+    context = {
+        "quiz": quiz,
+        "shuffled_tiles": shuffled_tiles,
+        "correct_sequence_json": json.dumps(correct_sequence) 
+    }
+    
+    return render(request, "learning/take_quiz.html", context)
 
 # 9. DELETE QUIZ
 @login_required
@@ -259,7 +291,6 @@ def sentence_quiz_list(request):
         "passed_quiz_ids": passed_quiz_ids
     })
 
-
 @login_required
 def take_sentence_quiz(request, quiz_id):
     """The actual drag-and-drop player"""
@@ -279,9 +310,19 @@ def take_sentence_quiz(request, quiz_id):
             if not clean_word: 
                 continue
 
+            # 1. Fingerspelling logic
             if clean_word.startswith("fs-"):
                 display_word = clean_word.replace("fs-", "")
                 video_url = None 
+                
+            # --- THE FIX YOU MISSED: Name logic so the tiles render names correctly ---
+            elif clean_word.startswith("name-"):
+                display_word = clean_word.replace("name-", "").replace("_", " ")
+                word_obj = FSLWord.objects.filter(word__iexact=display_word).first()
+                video_url = word_obj.video.url if word_obj and word_obj.video else None
+            # --------------------------------------------------------------------------
+            
+            # 3. Standard Vocabulary
             else:
                 display_word = clean_word
                 word_obj = FSLWord.objects.filter(word__iexact=clean_word).first()
@@ -297,8 +338,8 @@ def take_sentence_quiz(request, quiz_id):
 
     # CRITICAL ORDERING FOR DOM CHECK: Time -> Subject -> Action -> Topic
     process_category(structure.get('time'), 'time')
-    process_category(structure.get('comment_subject'), 'subject') # Separated Subject
-    process_category(structure.get('comment_verb'), 'action')     # Separated Action
+    process_category(structure.get('comment_subject'), 'subject') 
+    process_category(structure.get('comment_verb'), 'action')     
     process_category(structure.get('topic'), 'topic')
 
     shuffled_tiles = list(tiles)
@@ -311,7 +352,6 @@ def take_sentence_quiz(request, quiz_id):
     }
     
     return render(request, "learning/take_quiz.html", context)
-
 
 # ==========================================
 # --- UPDATE (EDIT) VIEWS ---

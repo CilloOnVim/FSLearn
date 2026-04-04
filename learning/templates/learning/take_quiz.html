@@ -1,259 +1,254 @@
+{% extends 'learning/base.html' %}
 {% load static %}
-<!doctype html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Sentence Puzzle | FSLearn</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+{% block title %}Sentence Puzzle | FSLearn{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <style>
-        :root {
-            --mint: #20c997;
-            --mint-dark: #128c68;
-            --purple: #6f42c1;
-            --purple-dark: #4e2d8b;
-            --cyan: #0dcaf0;
-            --cyan-dark: #0aa2c0;
-            --yellow: #ffd700;
-            --yellow-dark: #d4b200;
-            --pink: #ff6b6b;
-            --pink-dark: #c92a2a;
-        }
+<style>
+    :root {
+        --mint: #20c997;
+        --mint-dark: #128c68;
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --cyan: #0dcaf0;
+        --cyan-dark: #0aa2c0;
+        --yellow: #ffd700;
+        --yellow-dark: #d4b200;
+        --pink: #ff6b6b;
+        --pink-dark: #c92a2a;
+    }
 
-        body {
-            font-family: "Fredoka", sans-serif;
-            background-color: #f0f8ff;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-        }
+    #game-wrapper {
+        background-color: #f0f8ff;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden; 
+        display: flex;
+        flex-direction: column;
+    }
 
-        /* Top Navigation Bar */
-        .top-bar {
-            background-color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-            flex-shrink: 0;
-        }
+    /* Top Navigation Bar */
+    .top-bar {
+        background-color: white;
+        padding: 15px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+        flex-shrink: 0;
+    }
 
-        .btn-back {
-            background-color: var(--purple);
-            color: white !important;
-            border-radius: 50px;
-            padding: 10px 25px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            text-decoration: none;
-            box-shadow: 0 5px 0px var(--purple-dark);
-            transition: all 0.1s;
-        }
+    .btn-back {
+        background-color: var(--purple);
+        color: white !important;
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        text-decoration: none;
+        box-shadow: 0 5px 0px var(--purple-dark);
+        transition: all 0.1s;
+    }
 
-        .btn-back:active {
-            transform: translateY(5px);
-            box-shadow: 0 0px 0px transparent;
-        }
+    .btn-back:active {
+        transform: translateY(5px);
+        box-shadow: 0 0px 0px transparent;
+    }
 
-        .target-sentence {
-            background-color: var(--yellow);
-            color: #333;
-            padding: 10px 30px;
-            border-radius: 30px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0;
-            box-shadow: 0 4px 0px var(--yellow-dark);
-        }
+    .target-sentence {
+        background-color: var(--yellow);
+        color: #333;
+        padding: 10px 30px;
+        border-radius: 30px;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        box-shadow: 0 4px 0px var(--yellow-dark);
+    }
 
-        /* Main Game Board */
-        .game-workspace {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 20px 40px;
-            overflow: hidden;
-        }
+    /* Main Game Board */
+    .game-workspace {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px 40px;
+        overflow: hidden;
+    }
 
-        .board-section {
-            display: flex;
-            flex-direction: column;
-            flex: 3; 
-            min-height: 0; 
-        }
+    .board-section {
+        display: flex;
+        flex-direction: column;
+        flex: 3; 
+        min-height: 0; 
+    }
 
-        .bank-section {
-            display: flex;
-            flex-direction: column;
-            flex: 2; 
-            min-height: 0; 
-        }
+    .bank-section {
+        display: flex;
+        flex-direction: column;
+        flex: 2; 
+        min-height: 0; 
+    }
 
-        .zone-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--purple);
-            margin-bottom: 10px;
-            text-align: center;
-            flex-shrink: 0;
-        }
+    .zone-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--purple);
+        margin-bottom: 10px;
+        text-align: center;
+        flex-shrink: 0;
+    }
 
-        /* 3 Distinct Drop Buckets */
-        .drop-board {
-            display: flex;
-            gap: 15px;
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-        }
+    /* 3 Distinct Drop Buckets */
+    .drop-board {
+        display: flex;
+        gap: 15px;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+    }
 
-        .drop-slot {
-            flex: 1;
-            border-radius: 25px;
-            border: 6px dashed;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-            overflow-y: auto;
-        }
+    .drop-slot {
+        flex: 1;
+        border-radius: 25px;
+        border: 6px dashed;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s;
+        overflow-y: auto;
+    }
 
-        .drop-slot::-webkit-scrollbar { width: 8px; }
-        .drop-slot::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 10px; }
+    .drop-slot::-webkit-scrollbar { width: 8px; }
+    .drop-slot::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 10px; }
 
-        .slot-time { background-color: rgba(13, 202, 240, 0.15); border-color: var(--cyan); }
-        .slot-topic { background-color: rgba(255, 215, 0, 0.15); border-color: var(--yellow); }
-        .slot-action { background-color: rgba(32, 201, 151, 0.15); border-color: var(--mint); }
+    .slot-time { background-color: rgba(13, 202, 240, 0.15); border-color: var(--cyan); }
+    .slot-topic { background-color: rgba(255, 215, 0, 0.15); border-color: var(--yellow); }
+    .slot-action { background-color: rgba(32, 201, 151, 0.15); border-color: var(--mint); }
 
-        /* Word Bank */
-        .word-bank {
-            flex: 1;
-            background-color: #e9ecef;
-            border: 6px solid #ced4da;
-            border-radius: 35px;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-            min-height: 0;
-        }
+    /* Word Bank */
+    .word-bank {
+        flex: 1;
+        background-color: #e9ecef;
+        border: 6px solid #ced4da;
+        border-radius: 35px;
+        padding: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto;
+        min-height: 0;
+    }
 
-        .word-bank::-webkit-scrollbar { width: 8px; }
-        .word-bank::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+    .word-bank::-webkit-scrollbar { width: 8px; }
+    .word-bank::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
 
-        /* Massive Draggable Tiles */
-        .fsl-tile {
-            width: 160px; 
-            background: white;
-            border: 5px solid var(--purple);
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: grab;
-            box-shadow: 0 6px 0px var(--purple-dark);
-            transition: transform 0.1s;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
+    /* Massive Draggable Tiles */
+    .fsl-tile {
+        width: 160px; 
+        background: white;
+        border: 5px solid var(--purple);
+        border-radius: 20px;
+        overflow: hidden;
+        cursor: grab;
+        box-shadow: 0 6px 0px var(--purple-dark);
+        transition: transform 0.1s;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
 
-        .fsl-tile:active {
-            cursor: grabbing;
-            transform: translateY(6px) scale(0.98);
-            box-shadow: 0 0px 0px transparent;
-        }
+    .fsl-tile:active {
+        cursor: grabbing;
+        transform: translateY(6px) scale(0.98);
+        box-shadow: 0 0px 0px transparent;
+    }
 
-        /* COLOR CODING CLASSES FOR TILES (UPDATED WITH SUBJECT) */
-        .tile-time { border-color: var(--cyan); box-shadow: 0 6px 0px var(--cyan-dark); }
-        .tile-topic { border-color: var(--yellow); box-shadow: 0 6px 0px var(--yellow-dark); }
-        .tile-action { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
-        .tile-subject { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
-        .tile-default { border-color: var(--purple); box-shadow: 0 6px 0px var(--purple-dark); }
+    /* COLOR CODING CLASSES FOR TILES (UPDATED WITH SUBJECT) */
+    .tile-time { border-color: var(--cyan); box-shadow: 0 6px 0px var(--cyan-dark); }
+    .tile-topic { border-color: var(--yellow); box-shadow: 0 6px 0px var(--yellow-dark); }
+    .tile-action { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
+    .tile-subject { border-color: var(--mint); box-shadow: 0 6px 0px var(--mint-dark); }
+    .tile-default { border-color: var(--purple); box-shadow: 0 6px 0px var(--purple-dark); }
 
-        .tile-video-container {
-            height: 100px;
-            background-color: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
+    .tile-video-container {
+        height: 100px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
 
-        .tile-video-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .tile-video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-        .tile-label {
-            padding: 8px;
-            text-align: center;
-            font-weight: 700;
-            color: #333;
-            text-transform: uppercase;
-            font-size: 1.2rem;
-            background-color: white;
-        }
+    .tile-label {
+        padding: 8px;
+        text-align: center;
+        font-weight: 700;
+        color: #333;
+        text-transform: uppercase;
+        font-size: 1.2rem;
+        background-color: white;
+    }
 
-        /* Action Area */
-        .action-area {
-            padding: 10px;
-            text-align: center;
-            flex-shrink: 0;
-        }
+    /* Action Area */
+    .action-area {
+        padding: 10px;
+        text-align: center;
+        flex-shrink: 0;
+    }
 
-        .btn-check-answer {
-            background-color: var(--pink);
-            border: none;
-            border-radius: 50px;
-            padding: 15px 50px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: white;
-            box-shadow: 0 8px 0 var(--pink-dark);
-            transition: all 0.1s;
-            width: 100%;
-            max-width: 500px;
-        }
+    .btn-check-answer {
+        background-color: var(--pink);
+        border: none;
+        border-radius: 50px;
+        padding: 15px 50px;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: white;
+        box-shadow: 0 8px 0 var(--pink-dark);
+        transition: all 0.1s;
+        width: 100%;
+        max-width: 500px;
+    }
 
-        .btn-check-answer:active {
-            transform: translateY(8px);
-            box-shadow: 0 0px 0px transparent;
-        }
+    .btn-check-answer:active {
+        transform: translateY(8px);
+        box-shadow: 0 0px 0px transparent;
+    }
 
-        /* Modals */
-        .modal-content {
-            border-radius: 40px;
-            border: 8px solid;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
+    /* Modals */
+    .modal-content {
+        border-radius: 40px;
+        border: 8px solid;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
 
-        @media (max-width: 900px) {
-            .game-workspace { overflow-y: auto; }
-            body { overflow: auto; }
-            .fsl-tile { width: 140px; }
-            .tile-video-container { height: 90px; }
-            .drop-board { flex-direction: column; }
-        }
-    </style>
-</head>
+    @media (max-width: 900px) {
+        .game-workspace { overflow-y: auto; }
+        #game-wrapper { overflow: auto; }
+        .fsl-tile { width: 140px; }
+        .tile-video-container { height: 90px; }
+        .drop-board { flex-direction: column; }
+    }
+</style>
+{% endblock %}
 
-<body>
+{% block layout %}
+<div id="game-wrapper">
 
     <div class="top-bar">
         <a href="{% url 'learning:quiz_list' %}" class="btn-back">🔙 Back</a>
@@ -356,144 +351,145 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+{% endblock %}
 
-    <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        const wordBank = document.getElementById('wordBank');
-        const dropTime = document.getElementById('dropTime');
-        const dropTopic = document.getElementById('dropTopic');
-        const dropAction = document.getElementById('dropAction');
-
-        // AUTO-HIDE LOGIC: Hide columns if the sentence doesn't use them
-        const allTiles = Array.from(document.querySelectorAll('.fsl-tile'));
-        const hasTopic = allTiles.some(tile => tile.getAttribute('data-category') === 'topic');
-        const hasTime = allTiles.some(tile => tile.getAttribute('data-category') === 'time');
-
-        if (!hasTopic) {
-            document.getElementById('dropTopic').style.display = 'none';
-            document.getElementById('headerTopic').style.display = 'none';
-        }
-        if (!hasTime) {
-            document.getElementById('dropTime').style.display = 'none';
-            document.getElementById('headerTime').style.display = 'none';
-        }
-
-        const baseConfig = { animation: 150, ghostClass: 'opacity-50' };
-
-        new Sortable(wordBank, { group: 'shared', ...baseConfig });
-        
-        new Sortable(dropTime, {
-            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'time'; } },
-            ...baseConfig
-        });
-
-        new Sortable(dropTopic, {
-            group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'topic'; } },
-            ...baseConfig
-        });
-
-        // UPDATED: Accepts BOTH subject and action, and auto-sorts them correctly
-        new Sortable(dropAction, {
-            group: { 
-                name: 'shared', 
-                put: function (to, from, dragEl) { 
-                    const cat = dragEl.getAttribute('data-category');
-                    return cat === 'action' || cat === 'subject'; 
-                } 
-            },
-            onSort: function(evt) {
-                // Auto-sorts so Subject ALWAYS comes before Action in the DOM to prevent failing the check
-                const container = evt.to;
-                const tiles = Array.from(container.children);
-                tiles.sort((a, b) => {
-                    const catA = a.getAttribute('data-category');
-                    const catB = b.getAttribute('data-category');
-                    if (catA === 'subject' && catB === 'action') return -1;
-                    if (catA === 'action' && catB === 'subject') return 1;
-                    return 0;
-                });
-                // Re-append in correct order
-                tiles.forEach(tile => container.appendChild(tile));
-            },
-            ...baseConfig
-        });
-
-        const correctSequence = JSON.parse('{{ correct_sequence_json|safe }}');
-        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-        const tryAgainModal = new bootstrap.Modal(document.getElementById('tryAgainModal'));
-        const missingTilesModal = new bootstrap.Modal(document.getElementById('missingTilesModal'));
-
-        function checkAnswer() {
-            let currentSequence = [];
-
-            // Reads the visible boxes from left to right
-            [dropTime, dropAction, dropTopic].forEach(zone => {
-                if(zone.style.display !== 'none') {
-                    const droppedTiles = zone.querySelectorAll('.fsl-tile');
-                    droppedTiles.forEach(tile => {
-                        currentSequence.push(tile.getAttribute('data-word'));
-                    });
-                }
-            });
-
-            if (currentSequence.length < correctSequence.length) {
-                missingTilesModal.show();
-                return;
-            }
-
-            let isCorrect = true;
-            for (let i = 0; i < correctSequence.length; i++) {
-                if (currentSequence[i] !== correctSequence[i]) {
-                    isCorrect = false;
+{% block extra_scripts %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
             }
+        }
+        return cookieValue;
+    }
 
-            if (isCorrect) {
-                var duration = 3 * 1000;
-                var animationEnd = Date.now() + duration;
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1060 };
-                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+    const wordBank = document.getElementById('wordBank');
+    const dropTime = document.getElementById('dropTime');
+    const dropTopic = document.getElementById('dropTopic');
+    const dropAction = document.getElementById('dropAction');
 
-                var interval = setInterval(function () {
-                    var timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) { return clearInterval(interval); }
-                    var particleCount = 50 * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 250);
+    // AUTO-HIDE LOGIC: Hide columns if the sentence doesn't use them
+    const allTiles = Array.from(document.querySelectorAll('.fsl-tile'));
+    const hasTopic = allTiles.some(tile => tile.getAttribute('data-category') === 'topic');
+    const hasTime = allTiles.some(tile => tile.getAttribute('data-category') === 'time');
 
-                successModal.show();
+    if (!hasTopic) {
+        document.getElementById('dropTopic').style.display = 'none';
+        document.getElementById('headerTopic').style.display = 'none';
+    }
+    if (!hasTime) {
+        document.getElementById('dropTime').style.display = 'none';
+        document.getElementById('headerTime').style.display = 'none';
+    }
 
-                setTimeout(() => {
-                    const formData = new FormData();
-                    formData.append("passed", true);
-                    fetch(`/student/api/quiz/{{ quiz.sentencequiz_id }}/save/`, {
-                        method: 'POST',
-                        headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                        body: formData
-                    }).catch(error => console.error("Network error:", error));
-                }, 500);
+    const baseConfig = { animation: 150, ghostClass: 'opacity-50' };
 
-            } else {
-                tryAgainModal.show();
+    new Sortable(wordBank, { group: 'shared', ...baseConfig });
+    
+    new Sortable(dropTime, {
+        group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'time'; } },
+        ...baseConfig
+    });
+
+    new Sortable(dropTopic, {
+        group: { name: 'shared', put: function (to, from, dragEl) { return dragEl.getAttribute('data-category') === 'topic'; } },
+        ...baseConfig
+    });
+
+    // UPDATED: Accepts BOTH subject and action, and auto-sorts them correctly
+    new Sortable(dropAction, {
+        group: { 
+            name: 'shared', 
+            put: function (to, from, dragEl) { 
+                const cat = dragEl.getAttribute('data-category');
+                return cat === 'action' || cat === 'subject'; 
+            } 
+        },
+        onSort: function(evt) {
+            // Auto-sorts so Subject ALWAYS comes before Action in the DOM to prevent failing the check
+            const container = evt.to;
+            const tiles = Array.from(container.children);
+            tiles.sort((a, b) => {
+                const catA = a.getAttribute('data-category');
+                const catB = b.getAttribute('data-category');
+                if (catA === 'subject' && catB === 'action') return -1;
+                if (catA === 'action' && catB === 'subject') return 1;
+                return 0;
+            });
+            // Re-append in correct order
+            tiles.forEach(tile => container.appendChild(tile));
+        },
+        ...baseConfig
+    });
+
+    const correctSequence = JSON.parse('{{ correct_sequence_json|safe }}');
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    const tryAgainModal = new bootstrap.Modal(document.getElementById('tryAgainModal'));
+    const missingTilesModal = new bootstrap.Modal(document.getElementById('missingTilesModal'));
+
+    function checkAnswer() {
+        let currentSequence = [];
+
+        // Reads the visible boxes from left to right
+        [dropTime, dropAction, dropTopic].forEach(zone => {
+            if(zone.style.display !== 'none') {
+                const droppedTiles = zone.querySelectorAll('.fsl-tile');
+                droppedTiles.forEach(tile => {
+                    currentSequence.push(tile.getAttribute('data-word'));
+                });
+            }
+        });
+
+        if (currentSequence.length < correctSequence.length) {
+            missingTilesModal.show();
+            return;
+        }
+
+        let isCorrect = true;
+        for (let i = 0; i < correctSequence.length; i++) {
+            if (currentSequence[i] !== correctSequence[i]) {
+                isCorrect = false;
+                break;
             }
         }
-    </script>
-</body>
-</html>
+
+        if (isCorrect) {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1060 };
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function () {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { return clearInterval(interval); }
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+
+            successModal.show();
+
+            setTimeout(() => {
+                const formData = new FormData();
+                formData.append("passed", true);
+                fetch(`/student/api/quiz/{{ quiz.sentencequiz_id }}/save/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    body: formData
+                }).catch(error => console.error("Network error:", error));
+            }, 500);
+
+        } else {
+            tryAgainModal.show();
+        }
+    }
+</script>
+{% endblock %}

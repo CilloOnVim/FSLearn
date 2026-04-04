@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     "teacher",
     "learning",
     "cloudinary",
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -214,12 +216,6 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': 'FQA0vhml9-kJrgO3WytxaL2LK-8',
 }
 
-# Modern Django Storage Configuration
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

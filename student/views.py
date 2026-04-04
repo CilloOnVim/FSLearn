@@ -26,7 +26,6 @@ def translator_view(request):
     }
     return render(request, "student/fsl_translator.html", context)
 
-
 # --- 2. SENTENCE RESTRUCTURING (Uses FSLWord / Vocabulary) ---
 @login_required
 def restructure_sentence_view(request):
@@ -40,25 +39,56 @@ def restructure_sentence_view(request):
             visual_sequence = []
             
             for word_text in gloss_words:
-                # 1. Check for Explicit Fingerspelling Tag (from NLP)
+                
+                # 1. Check for Explicit Tag (from NLP like fs-SPACE)
                 if word_text.startswith("fs-"):
                     clean_name = word_text.replace("fs-", "")
-                    visual_sequence.extend(get_fingerspell_sequence(clean_name))
+                    sign_obj = FSLSign.objects.filter(char__iexact=clean_name).first()
+                    
+                    if sign_obj and sign_obj.media_file:
+                        visual_sequence.append({
+                            "word": clean_name, 
+                            "video_url": sign_obj.media_file.url,
+                            "type": "letter"
+                        })
+                    else:
+                        visual_sequence.append({
+                            "word": f"[{clean_name}]",
+                            "video_url": None,
+                            "type": "text"
+                        })
 
-                # 2. Check standard Word Database
+                # 2. Check for Name Tags (e.g., name-ANDRES_BONIFACIO)
+                elif word_text.startswith("name-"):
+                    # Strip the tag and put the space back
+                    clean_name = word_text.replace("name-", "").replace("_", " ")
+                    
+                    # Look for the full name in the vocabulary database first
+                    word_obj = FSLWord.objects.filter(word__iexact=clean_name).first()
+                    
+                    if word_obj and word_obj.video:
+                        # You have a custom sign for this person! Use it.
+                        visual_sequence.append({
+                            "word": clean_name,
+                            "video_url": word_obj.video.url,
+                            "type": "video"
+                        })
+                    else:
+                        # You don't have a video for them. Fallback to fingerspelling the whole string.
+                        visual_sequence.extend(get_fingerspell_sequence(clean_name))
+
+                # 3. Check standard Word Database
                 else:
                     word_obj = FSLWord.objects.filter(word__iexact=word_text).first()
                     
                     if word_obj and word_obj.video:
-                        # Success: We have a video for this word
                         visual_sequence.append({
                             "word": word_text,
                             "video_url": word_obj.video.url,
                             "type": "video"
                         })
                     else:
-                        # 3. FALLBACK: Word unknown? FINGERSPELL IT!
-                        # This catches "dlsud", "wifi", or any word you haven't filmed yet.
+                        # Unknown vocabulary word fallback
                         visual_sequence.extend(get_fingerspell_sequence(word_text))
 
             context = {
@@ -69,10 +99,10 @@ def restructure_sentence_view(request):
     
     return render(request, "student/fsl_restructure.html", context)
 
-# --- HELPER FUNCTION (Paste this above or below the view) ---
+# --- HELPER FUNCTION ---
 def get_fingerspell_sequence(text):
     """
-    Breaks a text into individual letters/digraphs (handles Filipino 'NG') 
+    Breaks a text into individual letters/digraphs (handles Filipino 'NG' and Spaces) 
     and finds their videos. Returns a list of dictionaries.
     """
     sequence = []
@@ -83,7 +113,7 @@ def get_fingerspell_sequence(text):
     original_word = text.upper()
 
     while i < text_length:
-        # 1. Peek ahead to catch the "NG" digraph (Requirement for Q8)
+        # 1. Peek ahead to catch the "NG" digraph
         if i + 1 < text_length and text[i:i+2].upper() == "NG":
             char = "NG"
             i += 2  # Skip the 'G' in the next iteration
@@ -91,8 +121,10 @@ def get_fingerspell_sequence(text):
             char = text[i].upper()
             i += 1
             
-        # Skip non-alphabet characters
-        if not char.isalpha() and char not in ["Ñ", "NG"]:
+        # --- THE FIX: Intercept spaces before the alpha check ---
+        if char == " ":
+            char = "SPACE"
+        elif not char.isalpha() and char not in ["Ñ", "NG"]:
             continue
             
         # 2. Database Lookup
@@ -100,7 +132,7 @@ def get_fingerspell_sequence(text):
         
         if letter_obj and letter_obj.media_file:
             sequence.append({
-                "word": f"{original_word} ({char})", # Displays e.g., "ASTRONAUT (N)" or "ASTRONAUT (NG)"
+                "word": f"{original_word} ({char})", # Displays "RON ANTHONY (SPACE)"
                 "video_url": letter_obj.media_file.url,
                 "type": "letter"
             })
@@ -113,7 +145,6 @@ def get_fingerspell_sequence(text):
             })
             
     return sequence
-
 
 # --- 3. DASHBOARD ---
 @login_required
@@ -152,7 +183,18 @@ def save_quiz_score(request, quiz_id):
         quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
         # Expecting the frontend to send a 'passed' boolean
         passed = request.POST.get("passed") == "true"
-        QuizProgress.objects.create(student=request.user.student_profile, quiz=quiz, is_passed=passed)
+        
+        progress, created = QuizProgress.objects.get_or_create(
+            student=request.user.student_profile, 
+            quiz=quiz,
+            defaults={'is_passed': passed}
+        )
+        
+        # If it already existed but wasn't passed, update it if they just passed
+        if not created and passed and not progress.is_passed:
+            progress.is_passed = True
+            progress.save()
+            
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)
 

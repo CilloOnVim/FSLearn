@@ -366,19 +366,26 @@
                 let nextChar = input[i + 1];
                 let token = char;
 
-                if (char === 'n' && nextChar === 'g') {
+                // Map the literal space character to your new database entry
+                if (char === ' ') {
+                    token = 'space';
+                } 
+                // Handle the Filipino 'ng' digraph
+                else if (char === 'n' && nextChar === 'g') {
                     if (signMap['ng']) {
                         token = 'ng';
                         i++;
                     }
                 }
 
+                // Look up the token in the Django dictionary
                 if (signMap[token]) {
                     const mediaUrl = signMap[token];
                     const isVideo = mediaUrl.endsWith('.mp4');
 
                     currentSequence.push({
-                        char: token,
+                        // Display the word 'SPACE' on the big screen instead of the token name
+                        char: token === 'space' ? 'SPACE' : token, 
                         url: mediaUrl,
                         isVideo: isVideo
                     });
@@ -391,9 +398,12 @@
                         ? `<video src="${mediaUrl}" muted></video>`
                         : `<img src="${mediaUrl}">`;
 
+                    // Keep the visual clean for the storyboard UI
+                    let displayChar = token === 'space' ? '___' : token;
+
                     card.innerHTML = `
                         ${mediaHtml}
-                        <div class="fw-bold mt-2 text-uppercase fs-3" style="color: var(--purple);">${token}</div>
+                        <div class="fw-bold mt-2 text-uppercase fs-3" style="color: var(--purple);">${displayChar}</div>
                     `;
                     grid.appendChild(card);
                 }
@@ -435,8 +445,19 @@
                 activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            bigLetter.innerText = item.char;
             placeholder.style.display = 'none';
+
+            // NEW: Handle the visual delay for the space character
+            if (item.isSpace) {
+                videoPlayer.style.display = 'none';
+                videoPlayer.pause();
+                imgPlayer.style.display = 'none';
+                bigLetter.innerText = "SPACE";
+                setTimeout(() => { playStep(index + 1); }, 1000); // 1-second pause
+                return;
+            }
+
+            bigLetter.innerText = item.char;
 
             if (item.isVideo) {
                 imgPlayer.style.display = 'none';
