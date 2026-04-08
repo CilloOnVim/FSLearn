@@ -23,4 +23,5 @@ urlpatterns = [
     path('edit-profile/', views.edit_profile, name='edit_profile'),
     path('my-students/', views.my_students, name='my_students'),
     path('my-students/remove/<int:student_id>/', views.remove_student, name='remove_student'),
+    path("progress/<int:student_id>/", views.student_progress_detail, name="student_progress_detail"),
 ]

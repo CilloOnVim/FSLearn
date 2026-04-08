@@ -143,6 +143,7 @@
                             <th class="text-center">Word Quizzes</th>
                             <th class="text-center">Story Quizzes</th>
                             <th>Status</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,13 +151,16 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    {% if kid.avatar %}
-                                        <img src="{{ kid.avatar.url }}" width="45" height="45" class="rounded-circle shadow-sm" style="object-fit: cover; border: 2px solid white;">
-                                    {% else %}
-                                        <div class="avatar-placeholder shadow-sm border border-2 border-white">
-                                            {{ kid.nickname|make_list|first|upper }}
-                                        </div>
-                                    {% endif %}
+                                    <div style="position: relative; display: inline-block;">
+                                        {% if kid.avatar %}
+                                            <img src="{{ kid.avatar.url }}" width="45" height="45" class="rounded-circle shadow-sm" style="object-fit: cover; border: 2px solid white;">
+                                        {% else %}
+                                            <div class="avatar-placeholder shadow-sm border border-2 border-white">
+                                                {{ kid.nickname|make_list|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <span class="online-indicator shadow-sm" style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; background-color: {% if kid.is_online %}#22c55e{% else %}#ef4444{% endif %};" title="{% if kid.is_online %}Online{% else %}Offline{% endif %}"></span>
+                                    </div>
                                     <div>
                                         <div class="fw-bold text-dark fs-5">{{ kid.nickname }}</div>
                                         <div class="text-muted small" style="font-size: 0.8rem;">Level {{ kid.level|default:"1" }}</div>
@@ -182,6 +186,9 @@
                                         <i class="bi bi-check-circle-fill"></i> On Track
                                     </span>
                                 {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'teacher:student_progress_detail' kid.pk %}" class="btn-chunky btn-chunky-secondary" style="font-size: 0.85rem; padding: 6px 16px;">View Details</a>
                             </td>
                         </tr>
                         {% endfor %}

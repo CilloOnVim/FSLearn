@@ -126,3 +126,25 @@ def remove_student(request, student_id):
         user_to_delete.delete()
         
     return redirect('teacher:my_students')
+
+@login_required
+def student_progress_detail(request, student_id):
+    if not hasattr(request.user, "teacher_profile"):
+        return redirect("index")
+    
+    teacher = request.user.teacher_profile
+    # Ensure this student belongs to the teacher to prevent unauthorized access
+    student = get_object_or_404(StudentProfile, pk=student_id, section=teacher.advisory_class)
+    
+    # Preload the related completions so we don't spam queries
+    completed_words = student.completed_words.all().order_by('-completed_at')
+    quiz_scores = student.quiz_scores.all().order_by('-completed_at')
+    story_quiz_scores = student.story_quiz_scores.all().order_by('-completed_at')
+
+    return render(request, "teacher/student_progress_detail.html", {
+        "teacher": teacher,
+        "student": student,
+        "completed_words": completed_words,
+        "quiz_scores": quiz_scores,
+        "story_quiz_scores": story_quiz_scores
+    })

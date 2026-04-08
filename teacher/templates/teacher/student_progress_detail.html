@@ -1,0 +1,260 @@
+{% extends 'learning/base.html' %}
+{% block title %}{{ student.nickname }}'s Progress | FSLearn{% endblock %}
+
+{% block content %}
+<style>
+    /* Page Header */
+    .page-header {
+        background: white;
+        border-radius: 20px;
+        padding: 20px 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Chunky Buttons */
+    .btn-chunky {
+        border-radius: 50px;
+        padding: 10px 24px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-chunky-secondary { background-color: #e2e8f0; color: #475569; box-shadow: 0 4px 0px #cbd5e1, 0 5px 10px rgba(0, 0, 0, 0.05); }
+    .btn-chunky-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 0px #cbd5e1, 0 8px 15px rgba(0, 0, 0, 0.1); color: #334155; }
+    .btn-chunky-secondary:active { transform: translateY(4px); box-shadow: 0 0px 0px #cbd5e1, 0 2px 5px rgba(0, 0, 0, 0.05); }
+
+    .profile-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+        padding: 30px;
+        border: none;
+        text-align: center;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        height: 100%;
+    }
+    .stat-card h4 {
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #334155;
+    }
+
+    .list-group-gamified .list-group-item {
+        border: none;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s ease;
+    }
+    .list-group-gamified .list-group-item:hover {
+        transform: scale(1.02);
+    }
+
+    .badge-gamified {
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-weight: 700;
+    }
+    .bg-green-soft { background-color: #dcfce7; color: #16a34a; }
+    .bg-blue-soft { background-color: #e0e7ff; color: #4f46e5; }
+    .bg-yellow-soft { background-color: #fef08a; color: #ca8a04; }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+</style>
+
+<div class="container py-4" style="max-width: 1200px;">
+    
+    <div class="page-header">
+        <h2 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-person-badge-fill text-primary me-2"></i> 
+            Student Details
+        </h2>
+        <a href="{% url 'teacher:class_progress_report' %}" class="btn-chunky btn-chunky-secondary">
+            <i class="bi bi-arrow-left-circle-fill fs-5"></i> Back to Class
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Student Profile Sidebar -->
+        <div class="col-md-4">
+            <div class="profile-card">
+                <div style="position: relative; display: inline-block;">
+                    {% if student.avatar %}
+                        <img src="{{ student.avatar.url }}" width="120" height="120" class="rounded-circle shadow-sm" style="object-fit: cover; border: 4px solid white;">
+                    {% else %}
+                        <div class="rounded-circle shadow-sm border border-4 border-white d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; background-color: #e2e8f0; color: #64748b; font-size: 3rem; font-weight: bold;">
+                            {{ student.nickname|make_list|first|upper }}
+                        </div>
+                    {% endif %}
+                    <span class="online-indicator shadow-sm" style="background-color: {% if student.is_online %}#22c55e{% else %}#ef4444{% endif %};" title="{% if student.is_online %}Online{% else %}Offline{% endif %}"></span>
+                </div>
+                <h3 class="fw-bold mt-3 mb-1">{{ student.nickname }}</h3>
+                <p class="text-muted fw-semibold">Level {{ student.level }}</p>
+                <p class="text-muted mb-0 small"><i class="bi bi-people-fill"></i> Guardian: {{ student.guardian_name }}</p>
+
+                <hr class="my-4 text-muted" style="opacity: 0.15;">
+                <div class="d-flex justify-content-around text-center">
+                    <div>
+                        <h4 class="fw-bold text-primary mb-0">{{ completed_words|length }}</h4>
+                        <small class="text-muted fw-bold">Words</small>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-success mb-0">{{ quiz_scores|length }}</h4>
+                        <small class="text-muted fw-bold">Quizzes</small>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-warning mb-0">{{ story_quiz_scores|length }}</h4>
+                        <small class="text-muted fw-bold">Stories</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Details -->
+        <div class="col-md-8">
+            <ul class="nav nav-pills mb-4" id="progressTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm me-2" id="words-tab" data-bs-toggle="pill" data-bs-target="#words" type="button" role="tab">Vocabulary</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm me-2" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes" type="button" role="tab">Sentence Quizzes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="stories-tab" data-bs-toggle="pill" data-bs-target="#stories" type="button" role="tab">Story Quizzes</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="progressTabsContent">
+                <!-- Vocabulary Tab -->
+                <div class="tab-pane fade show active" id="words" role="tabpanel">
+                    <div class="stat-card">
+                        <h4><i class="bi bi-spellcheck text-primary me-2"></i> Words Learned</h4>
+                        {% if completed_words %}
+                        <div class="list-group list-group-gamified">
+                            {% for record in completed_words %}
+                            <div class="list-group-item">
+                                <div class="fw-bold fs-5 text-dark">{{ record.word.word|upper }}</div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> Date: {{ record.completed_at|date:"M d, Y" }}</span>
+                                    <span class="badge-gamified bg-blue-soft"><i class="bi bi-check-circle-fill"></i> Learned</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-book fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                            <p class="text-muted">No words learned yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sentence Quizzes Tab -->
+                <div class="tab-pane fade" id="quizzes" role="tabpanel">
+                    <div class="stat-card">
+                        <h4><i class="bi bi-pencil-square text-success me-2"></i> Sentence Quizzes</h4>
+                        {% if quiz_scores %}
+                        <div class="list-group list-group-gamified">
+                            {% for record in quiz_scores %}
+                            <div class="list-group-item">
+                                <div>
+                                    <div class="fw-bold text-dark">{{ record.quiz.question_text|truncatechars:50 }}</div>
+                                    <div class="text-muted small">Theme: {{ record.quiz.theme.title }}</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> {{ record.completed_at|date:"M d, Y" }}</span>
+                                    {% if record.is_passed %}
+                                    <span class="badge-gamified bg-green-soft"><i class="bi bi-check-circle-fill"></i> Passed</span>
+                                    {% else %}
+                                    <span class="badge-gamified" style="background-color: #fef2f2; color: #ef4444;"><i class="bi bi-x-circle-fill"></i> Failed</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-pencil-square fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                            <p class="text-muted">No sentence quizzes taken yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Story Quizzes Tab -->
+                <div class="tab-pane fade" id="stories" role="tabpanel">
+                    <div class="stat-card">
+                        <h4><i class="bi bi-play-btn-fill text-warning me-2"></i> Story Comprehension</h4>
+                        {% if story_quiz_scores %}
+                        <div class="list-group list-group-gamified">
+                            {% for record in story_quiz_scores %}
+                            <div class="list-group-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if record.story.thumbnail %}
+                                        <img src="{{ record.story.thumbnail.url }}" width="60" class="rounded shadow-sm">
+                                    {% else %}
+                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 40px;">
+                                            <i class="bi bi-film text-secondary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold fs-5 text-dark">{{ record.story.title }}</div>
+                                        <div class="text-muted small">Score: {{ record.score }} pts</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-end justify-content-center gap-1">
+                                    {% if record.is_passed %}
+                                    <span class="badge-gamified bg-yellow-soft"><i class="bi bi-star-fill"></i> Passed</span>
+                                    {% else %}
+                                    <span class="badge-gamified" style="background-color: #fef2f2; color: #ef4444;"><i class="bi bi-x-circle-fill"></i> Failed</span>
+                                    {% endif %}
+                                    <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> {{ record.completed_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-camera-reels fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                            <p class="text-muted">No story quizzes taken yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Bootstrap Tabs JS if not loaded in base -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

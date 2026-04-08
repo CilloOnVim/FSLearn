@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
 from cloudinary_storage.storage import VideoMediaCloudinaryStorage
 from django.contrib.auth.models import User
@@ -48,9 +50,17 @@ class StudentProfile(models.Model):
     section = models.CharField(max_length=20, help_text="e.g. 'Blueberry Class' or 'Morning Session'")
     guardian_name = models.CharField(max_length=100, help_text="Parent/Guardian Name")
     avatar = models.ImageField(upload_to="student_avatars/", default="default_avatar.png")
+    last_active = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.nickname} ({self.level})"
+
+    @property
+    def is_online(self):
+        if self.last_active:
+            # Consider online if active within the last 5 minutes
+            return timezone.now() - self.last_active < timedelta(minutes=5)
+        return False
     
 class WordProgress(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="completed_words")
