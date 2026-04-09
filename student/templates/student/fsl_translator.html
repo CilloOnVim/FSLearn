@@ -376,7 +376,7 @@
                 if (signMap[token]) {
                     const mediaUrl = signMap[token];
                     // PATCHED: Check for Cloudinary URLs properly
-                    const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('.webm');
+                    const isVideo = mediaUrl.includes('/video/') || mediaUrl.includes('.mp4');
 
                     currentSequence.push({
                         char: token === 'space' ? 'SPACE' : token, 
