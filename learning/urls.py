@@ -14,7 +14,6 @@ urlpatterns = [
     path("word/<slug:word_slug>/", views.word_detail, name="word_detail"),
     
     # --- CRUD CREATE ---
-    path("manage/", views.manage_content, name="manage_content"),
     path("manage/theme/", views.add_theme, name="add_theme"),
     path("manage/section/", views.add_section, name="add_section"),
     path("manage/word/", views.upload_word, name="upload_word"),

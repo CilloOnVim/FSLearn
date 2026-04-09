@@ -57,16 +57,7 @@ def word_detail(request, word_slug):
     )
 
 
-# THE HUB (The Menu Page)
-@login_required
-def manage_content(request):
-    if not hasattr(request.user, "teacher_profile"):
-        return redirect("learning:story_list")
-    
-    themes = Theme.objects.prefetch_related('sections__words').all()
-    return render(request, "learning/manage_content.html", {
-        "themes": themes
-    })
+# THE HUB (was moved to teacher app)
 
 
 # 1. ADD WORD
@@ -96,7 +87,7 @@ def add_theme(request):
         form = ThemeForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = ThemeForm()
     return render(request, "learning/upload_theme.html", {"form": form})
@@ -112,7 +103,7 @@ def add_section(request):
         form = SectionForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = SectionForm()
     return render(request, "learning/upload_section.html", {"form": form})
@@ -367,7 +358,7 @@ def edit_theme(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Theme updated successfully.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = ThemeForm(instance=theme)
         
@@ -383,7 +374,7 @@ def edit_section(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Section updated.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = SectionForm(instance=section)
     return render(request, "learning/upload_section.html", {"form": form, "is_edit": True})
@@ -398,7 +389,7 @@ def edit_word(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Word updated.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = WordForm(instance=word)
     return render(request, "learning/upload_word.html", {"form": form, "is_edit": True})
@@ -414,7 +405,7 @@ def delete_theme(request, pk):
     theme = get_object_or_404(Theme, pk=pk)
     theme.delete() 
     messages.success(request, "Theme and all related content deleted.")
-    return redirect("learning:manage_content")
+    return redirect("teacher:manage_content")
 
 @login_required
 def delete_section(request, pk):
@@ -422,7 +413,7 @@ def delete_section(request, pk):
     section = get_object_or_404(Section, pk=pk)
     section.delete()
     messages.success(request, "Section deleted.")
-    return redirect("learning:manage_content")
+    return redirect("teacher:manage_content")
 
 @login_required
 def delete_word(request, pk):
@@ -430,7 +421,7 @@ def delete_word(request, pk):
     word = get_object_or_404(Word, pk=pk)
     word.delete()
     messages.success(request, "Word deleted.")
-    return redirect("learning:manage_content")
+    return redirect("teacher:manage_content")
 
 
 # --- ADD STORY ---
@@ -444,7 +435,7 @@ def add_story(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Story successfully uploaded.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = StoryForm()
         
@@ -489,7 +480,7 @@ def add_question(request, story_id):
             formset.save()
             
             messages.success(request, "Question and choices added successfully.")
-            return redirect("learning:manage_content") 
+            return redirect("teacher:manage_content") 
     else:
         form = QuizQuestionForm()
         formset = ChoiceFormSet()
@@ -511,7 +502,7 @@ def edit_question(request, pk):
             form.save()
             formset.save()
             messages.success(request, "Question updated successfully.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = QuizQuestionForm(instance=question)
         formset = ChoiceFormSet(instance=question)
@@ -526,7 +517,7 @@ def delete_question(request, pk):
     question = get_object_or_404(QuizQuestion, pk=pk)
     question.delete()
     messages.success(request, "Question deleted.")
-    return redirect("learning:manage_content")
+    return redirect("teacher:manage_content")
 
 
 @login_required
@@ -539,7 +530,7 @@ def edit_story(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Story updated successfully.")
-            return redirect("learning:manage_content")
+            return redirect("teacher:manage_content")
     else:
         form = StoryForm(instance=story)
         
@@ -551,4 +542,4 @@ def delete_story(request, pk):
     story = get_object_or_404(Story, pk=pk)
     story.delete() 
     messages.success(request, "Story and all associated quizzes deleted.")
-    return redirect("learning:manage_content")
+    return redirect("teacher:manage_content")

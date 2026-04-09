@@ -27,7 +27,6 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
-            /* Strict no-scroll page */
             display: flex;
             flex-direction: column;
         }
@@ -95,9 +94,7 @@
             width: 100%;
             height: 100%;
             max-height: 40vh;
-            /* Keeps it from blowing out the layout */
             object-fit: contain;
-            /* Prevents all cropping */
             border-radius: 20px;
             background-color: #e9ecef;
             display: none;
@@ -143,7 +140,6 @@
             flex-direction: column;
             gap: 20px;
             overflow: hidden;
-            /* Only the inner storyboard will scroll */
         }
 
         /* Giant Input Controls */
@@ -207,11 +203,9 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
             flex-grow: 1;
             overflow-y: auto;
-            /* This handles long words nicely */
             border: 5px solid #dee2e6;
         }
 
-        /* Chunky Scrollbar */
         .storyboard-box::-webkit-scrollbar {
             width: 12px;
         }
@@ -381,24 +375,26 @@
                 // Look up the token in the Django dictionary
                 if (signMap[token]) {
                     const mediaUrl = signMap[token];
-                    const isVideo = mediaUrl.endsWith('.mp4');
+                    // PATCHED: Check for Cloudinary URLs properly
+                    const isVideo = mediaUrl.includes('.mp4') || mediaUrl.includes('.webm');
 
                     currentSequence.push({
-                        // Display the word 'SPACE' on the big screen instead of the token name
                         char: token === 'space' ? 'SPACE' : token, 
                         url: mediaUrl,
-                        isVideo: isVideo
+                        isVideo: isVideo,
+                        // PATCHED: Define isSpace so the player knows to pause
+                        isSpace: token === 'space' 
                     });
 
                     const card = document.createElement('div');
                     card.className = 'sign-card shadow-sm';
                     card.id = `card-${currentSequence.length - 1}`;
 
+                    // PATCHED: Force videos to autoplay and loop silently in the grid
                     let mediaHtml = isVideo
-                        ? `<video src="${mediaUrl}" muted></video>`
+                        ? `<video src="${mediaUrl}" autoplay loop muted playsinline></video>`
                         : `<img src="${mediaUrl}">`;
 
-                    // Keep the visual clean for the storyboard UI
                     let displayChar = token === 'space' ? '___' : token;
 
                     card.innerHTML = `
@@ -447,7 +443,6 @@
 
             placeholder.style.display = 'none';
 
-            // NEW: Handle the visual delay for the space character
             if (item.isSpace) {
                 videoPlayer.style.display = 'none';
                 videoPlayer.pause();
@@ -470,7 +465,7 @@
                 videoPlayer.pause();
                 imgPlayer.style.display = 'block';
                 imgPlayer.src = item.url;
-                setTimeout(() => { playStep(index + 1); }, 1000); // 1 second hold for images
+                setTimeout(() => { playStep(index + 1); }, 1000); 
             }
         }
 

@@ -1,3 +1,5 @@
+print("HEY, THE SCRIPT IS EXECUTING!")
+
 import os
 import django
 from django.core.files import File

@@ -11,6 +11,7 @@ urlpatterns = [
     path("teacher_dashboard/", views.teacher_dashboard, name="teacher_dashboard"),
 
     # --- UPDATE (EDIT) PATHS ---
+    path("manage/", views.manage_content, name="manage_content"),
     path("manage/theme/<int:pk>/edit/", learning_views.edit_theme, name="edit_theme"),
     path("manage/section/<int:pk>/edit/", learning_views.edit_section, name="edit_section"),
     path("manage/word/<int:pk>/edit/", learning_views.edit_word, name="edit_word"),

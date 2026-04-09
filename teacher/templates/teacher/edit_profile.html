@@ -1,19 +1,9 @@
-{% extends 'learning/base.html' %} 
+{% extends 'teacher/teacher_base.html' %} 
 {% block title %}Edit Profile | FSLearn{% endblock %}
 
 {% block content %}
 <style>
-    /* Page Header */
-    .page-header {
-        background: white;
-        border-radius: 20px;
-        padding: 20px 30px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        margin-bottom: 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+    /* Page Header removed */
 
     /* Form Container */
     .profile-card { 
@@ -76,11 +66,8 @@
 
 <div class="container py-4" style="max-width: 900px;">
     
-    <div class="page-header">
+    <div class="mb-4">
         <h2 class="fw-bold mb-0 text-dark">Account Settings</h2>
-        <a href="{% url 'teacher:teacher_dashboard' %}" class="btn-chunky btn-chunky-secondary">
-            <i class="bi bi-arrow-left-circle-fill fs-5"></i> Back to Dashboard
-        </a>
     </div>
 
     <div class="profile-card">

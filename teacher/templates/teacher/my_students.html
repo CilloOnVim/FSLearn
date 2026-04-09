@@ -1,4 +1,4 @@
-{% extends 'learning/base.html' %}
+{% extends 'teacher/teacher_base.html' %}
 {% block title %}My Students | FSLearn{% endblock %}
 
 {% block content %}
@@ -134,27 +134,25 @@
         border-color: #EF4444;
     }
 
-    /* BRUTE FORCE FORM INJECTION */
-    .django-form p { margin-bottom: 1.2rem; }
-    .django-form label { font-weight: 600; margin-bottom: 0.5rem; color: #475569; display: block; font-size: 0.95rem; }
-    .django-form input[type="text"],
-    .django-form input[type="password"],
-    .django-form select {
-        display: block; width: 100%; padding: 0.75rem 1rem; font-size: 1rem; font-family: inherit; font-weight: 500;
-        color: #212529; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; transition: all 0.2s ease-in-out;
+    /* CUSTOM FORM GRID STYLING */
+    .compact-form-label { font-weight: 700; margin-bottom: 0.25rem; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .compact-form-input input, .compact-form-input select {
+        width: 100%; padding: 0.5rem 0.75rem; font-size: 0.95rem; font-weight: 500;
+        color: #212529; background-color: #fff; border: 2px solid #E2E8F0; border-radius: 8px; transition: all 0.2s ease-in-out;
     }
-    .django-form input:focus, .django-form select:focus { background-color: #fff; border-color: #6f42c1; outline: 0; box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.15); }
-    .django-form .helptext { display: block; font-size: 0.85rem; color: #94A3B8; margin-top: 0.25rem; }
-    .django-form ul.errorlist { color: #EF4444; padding-left: 0; list-style: none; font-size: 0.9rem; margin-top: 5px; font-weight: bold; }
+    .compact-form-input input:focus, .compact-form-input select:focus {
+        border-color: #6f42c1; outline: 0; box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.15);
+    }
+    .compact-form-input .helptext { display: block; font-size: 0.75rem; color: #94A3B8; margin-top: 2px; line-height: 1.2; }
+    .compact-form-input ul.errorlist { color: #EF4444; padding-left: 0; list-style: none; font-size: 0.8rem; margin-top: 2px; font-weight: bold; margin-bottom: 0px; }
 </style>
 
-<div class="container py-4" style="max-width: 1400px;">
+<div class="container pt-3 pb-4" style="max-width: 1400px;">
     
-    <div class="page-header">
-        <h2 class="fw-bold mb-0 text-dark">Manage Students</h2>
-        <a href="{% url 'teacher:teacher_dashboard' %}" class="btn-chunky btn-chunky-secondary">
-            <i class="bi bi-arrow-left-circle-fill fs-5"></i> Back to Dashboard
-        </a>
+    <div class="page-header border-0 bg-white d-flex align-items-center mb-3 p-3 shadow-sm" style="border-radius: 20px;">
+        <h3 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-people-fill text-primary me-3"></i> Manage Students
+        </h3>
     </div>
 
     <div class="row g-4">
@@ -196,31 +194,70 @@
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <div class="teacher-card" style="border-top: 5px solid #10B981;">
-                <h4 class="card-header-title">
-                    <i class="bi bi-person-plus-fill text-success me-3 fs-3"></i> Add New Student
-                </h4>
+        <div class="col-lg-5" style="position: sticky; top: 90px; align-self: flex-start;">
+            <div class="teacher-card" style="border-top: 5px solid #10B981; padding: 25px;">
+                <h5 class="card-header-title mb-3 pb-2">
+                    <i class="bi bi-person-plus-fill text-success me-2"></i> Add New Student
+                </h5>
                 
-                <form method="POST" class="django-form mt-3">
+                <form method="POST" class="django-form">
                     {% csrf_token %}
                     
-                    <div class="mb-4 p-3 rounded" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                        <h6 class="fw-bold text-uppercase text-secondary mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">
-                            <i class="bi bi-key-fill me-1"></i> Login Details
+                    <div class="row g-2 compact-form-input mb-3">
+                        <h6 class="col-12 fw-bold text-uppercase text-secondary mb-1 mt-0" style="font-size: 0.75rem; letter-spacing: 1px;">
+                            <i class="bi bi-key-fill me-1"></i> Login
                         </h6>
-                        {{ u_form.as_p }}
+                        
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ u_form.first_name.label }}</label>
+                            {{ u_form.first_name }}
+                            {{ u_form.first_name.errors }}
+                        </div>
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ u_form.last_name.label }}</label>
+                            {{ u_form.last_name }}
+                            {{ u_form.last_name.errors }}
+                        </div>
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ u_form.username.label }}</label>
+                            {{ u_form.username }}
+                            {{ u_form.username.errors }}
+                        </div>
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ u_form.password.label }}</label>
+                            {{ u_form.password }}
+                            {{ u_form.password.errors }}
+                        </div>
+                        
+                        {% if u_form.username.help_text or u_form.password.help_text %}
+                        <div class="col-12 mt-0">
+                            <span class="helptext">{{ u_form.username.help_text }} {{ u_form.password.help_text }}</span>
+                        </div>
+                        {% endif %}
+
+                        <h6 class="col-12 fw-bold text-uppercase text-secondary mb-1 mt-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+                            <i class="bi bi-person-badge-fill me-1"></i> Profile
+                        </h6>
+                        
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ p_form.nickname.label }}</label>
+                            {{ p_form.nickname }}
+                            {{ p_form.nickname.errors }}
+                        </div>
+                        <div class="col-6">
+                            <label class="compact-form-label">{{ p_form.level.label }}</label>
+                            {{ p_form.level }}
+                            {{ p_form.level.errors }}
+                        </div>
+                        <div class="col-12">
+                            <label class="compact-form-label">{{ p_form.guardian_name.label }}</label>
+                            {{ p_form.guardian_name }}
+                            {{ p_form.guardian_name.errors }}
+                        </div>
                     </div>
                     
-                    <div class="mb-4 p-3 rounded" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                        <h6 class="fw-bold text-uppercase text-secondary mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">
-                            <i class="bi bi-person-badge-fill me-1"></i> Profile Details
-                        </h6>
-                        {{ p_form.as_p }}
-                    </div>
-                    
-                    <button type="submit" class="btn-chunky btn-chunky-success mt-2">
-                        <i class="bi bi-check-circle-fill"></i> Add to Class
+                    <button type="submit" class="btn-chunky btn-chunky-success w-100 py-2" style="font-size: 1rem;">
+                        <i class="bi bi-check-circle-fill"></i> Add Student
                     </button>
                 </form>
             </div>

@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from student.models import StudentProfile
 from .forms import UserUpdateForm, TeacherProfileUpdateForm, StudentUserCreationForm, StudentProfileForm
 from django.shortcuts import get_object_or_404
+from learning.models import Theme
 
 
 def index(request):
@@ -147,4 +148,14 @@ def student_progress_detail(request, student_id):
         "completed_words": completed_words,
         "quiz_scores": quiz_scores,
         "story_quiz_scores": story_quiz_scores
+    })
+
+@login_required
+def manage_content(request):
+    if not hasattr(request.user, "teacher_profile"):
+        return redirect("index")
+    
+    themes = Theme.objects.prefetch_related('sections__words').all()
+    return render(request, "teacher/manage_content.html", {
+        "themes": themes
     })

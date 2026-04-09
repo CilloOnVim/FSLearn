@@ -1,9 +1,9 @@
-{% extends 'learning/base.html' %}
+{% extends 'teacher/teacher_base.html' %}
 {% load static %}
 
 {% block title %}Manage Content | FSLearn{% endblock %}
 
-{% block extra_head %}
+{% block teacher_head %}
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <style>
@@ -66,10 +66,10 @@
         background: white;
         border-radius: 24px;
         padding: 25px;
-        height: calc(100vh - 120px);
+        height: calc(100vh - 150px);
         overflow-y: auto;
         position: sticky;
-        top: 24px;
+        top: 90px;
         box-shadow: var(--card-shadow);
     }
 
@@ -160,15 +160,14 @@
 </style>
 {% endblock %}
 
-{% block layout %}
-<div class="p-4">
+{% block content %}
+<div class="pt-3 pb-4 px-4">
     <div class="container-fluid" style="max-width: 1400px;">
 
-        <div class="page-header d-flex justify-content-between align-items-center">
-            <h2 class="fw-bold mb-0">Teacher Dashboard</h2>
-            <a href="{% url 'teacher:teacher_dashboard' %}" class="btn-chunky">
-                <i class="bi bi-arrow-left-circle-fill fs-5"></i> Exit to Main
-            </a>
+        <div class="page-header border-0 bg-white d-flex align-items-center mb-3 p-3 shadow-sm" style="border-radius: 20px;">
+            <h3 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-book-half text-primary me-3"></i> Curriculum Management
+            </h3>
         </div>
 
         <div class="row g-4">

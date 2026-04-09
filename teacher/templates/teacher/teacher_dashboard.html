@@ -1,43 +1,35 @@
-{% extends 'learning/base.html' %}
+{% extends 'teacher/teacher_base.html' %}
 
 {% block title %}Teacher Dashboard | FSLearn{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-{% endblock %}
-
 {% block content %}
 <style>
-    /* Premium Profile Sidebar */
-    .sidebar-card {
+    /* Premium Profile Header */
+    .profile-welcome-card {
         background: white;
         border-radius: 20px;
         border: 1px solid #E2E8F0;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
-        text-align: center;
         padding: 40px 30px;
-        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 2rem;
     }
 
-    .profile-img {
-        width: 130px;
-        height: 130px;
+    .profile-img-large {
+        width: 120px;
+        height: 120px;
         object-fit: cover;
         border-radius: 50%;
         border: 4px solid #F1F5F9;
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        margin-bottom: 20px;
-        transition: transform 0.3s ease;
-    }
-
-    .profile-img:hover {
-        transform: scale(1.05);
     }
 
     .teacher-name {
         color: #1E293B;
         font-weight: 700;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         margin-bottom: 5px;
     }
 
@@ -45,7 +37,7 @@
         color: #64748B;
         font-weight: 600;
         font-size: 1.1rem;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     .license-badge {
@@ -56,7 +48,7 @@
         border-radius: 50px;
         font-weight: 700;
         font-size: 0.85rem;
-        letter-spacing: 0.5px;
+        display: inline-block;
     }
 
     /* Modern Action Widgets */
@@ -64,7 +56,7 @@
         color: #1E293B;
         font-weight: 700;
         margin-bottom: 1.5rem;
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 
     .action-widget {
@@ -80,6 +72,8 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        text-align: center;
+        text-decoration: none;
     }
 
     .action-widget::before {
@@ -126,113 +120,60 @@
         font-size: 0.95rem;
         margin-bottom: 0;
     }
-
-    /* Buttons */
-    .btn-edit {
-        background-color: white;
-        color: #4F46E5;
-        border: 2px solid #C7D2FE;
-        font-weight: 600;
-        padding: 10px;
-        transition: all 0.2s;
-    }
-
-    .btn-edit:hover {
-        background-color: #EEF2FF;
-        border-color: #8B5CF6;
-        color: #4F46E5;
-    }
-
-    .btn-logout {
-        background-color: #FEF2F2;
-        color: #EF4444;
-        border: 2px solid #FECACA;
-        font-weight: 600;
-        padding: 10px;
-        transition: all 0.2s;
-    }
-
-    .btn-logout:hover {
-        background-color: #EF4444;
-        color: white;
-        border-color: #EF4444;
-    }
 </style>
 
-<div class="container py-5">
+<div class="container py-5" style="max-width: 1200px;">
+    
+    <div class="profile-welcome-card flex-column flex-md-row text-center text-md-start">
+        {% if teacher.profile_picture %}
+            <img src="{{ teacher.profile_picture.url }}" alt="Teacher" class="profile-img-large" />
+        {% else %}
+            <div class="profile-img-large d-flex align-items-center justify-content-center bg-primary text-white" style="font-size: 3rem; font-weight: bold;">
+                {{ teacher.user.first_name|make_list|first|upper }}
+            </div>
+        {% endif %}
+        <div>
+            <h3 class="teacher-name">
+                Welcome back, {{ teacher.user.first_name }} {{ teacher.user.last_name }}!
+            </h3>
+            <p class="teacher-class">
+                Advisory Class: {{ teacher.advisory_class }}
+            </p>
+            <span class="license-badge">LPT: {{ teacher.license_number|default:"N/A" }}</span>
+        </div>
+    </div>
+
+    <h2 class="dashboard-header mb-4">Quick Actions</h2>
     <div class="row g-4">
-        
-        <div class="col-lg-4">
-            <div class="sidebar-card">
-                {% if teacher.profile_picture %}
-                    <img src="{{ teacher.profile_picture.url }}" alt="Teacher" class="profile-img" />
-                {% else %}
-                    <img src="https://placehold.co/130x130/4F46E5/white?text=Teacher" alt="Default" class="profile-img" />
-                {% endif %}
-
-                <h3 class="teacher-name">
-                    {{ teacher.user.first_name }} {{ teacher.user.last_name }}
-                </h3>
-                <p class="teacher-class">
-                    {{ teacher.advisory_class }}
-                </p>
-                <span class="license-badge">LPT: {{ teacher.license_number|default:"N/A" }}</span>
-
-                <hr class="my-4" style="border-color: #E2E8F0;" />
-
-                <div class="d-flex flex-column gap-3">
-                    <a href="{% url 'teacher:edit_profile' %}" class="btn btn-edit rounded-pill">
-                        <i class="fas fa-user-edit me-2"></i> Edit Profile
-                    </a>
-                    
-                    <form action="{% url 'logout' %}" method="post" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-logout rounded-pill w-100">
-                            <i class="fas fa-sign-out-alt me-2"></i> Log Out
-                        </button>
-                    </form>
+        <div class="col-md-4">
+            <a href="{% url 'teacher:my_students' %}" class="text-decoration-none">
+                <div class="action-widget widget-students">
+                    <i class="fas fa-users widget-icon icon-students"></i>
+                    <h4 class="widget-title">My Students</h4>
+                    <p class="widget-text">View and manage your current class roster.</p>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <div class="col-lg-8">
-            <h2 class="dashboard-header">Overview</h2>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <a href="{% url 'teacher:my_students' %}" class="text-decoration-none">
-                        <div class="action-widget widget-students text-center">
-                            <i class="fas fa-users widget-icon icon-students"></i>
-                            <h4 class="widget-title">My Students</h4>
-                            <p class="widget-text">View and manage your current class roster.</p>
-                        </div>
-                    </a>
+        <div class="col-md-4">
+            <a href="{% url 'teacher:manage_content' %}" class="text-decoration-none">
+                <div class="action-widget widget-content">
+                    <i class="fas fa-book-open widget-icon icon-content"></i>
+                    <h4 class="widget-title">Curriculum</h4>
+                    <p class="widget-text">Upload FSL videos and create new interactive quizzes.</p>
                 </div>
-
-                <div class="col-md-6">
-                    <a href="{% url 'learning:manage_content' %}" class="text-decoration-none">
-                        <div class="action-widget widget-content text-center">
-                            <i class="fas fa-book-open widget-icon icon-content"></i>
-                            <h4 class="widget-title">FSL Lessons</h4>
-                            <p class="widget-text">Upload videos or create new interactive quizzes.</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-12">
-                    <a href="{% url 'teacher:class_progress_report' %}" class="text-decoration-none">
-                        <div class="action-widget widget-progress d-flex flex-sm-row flex-column align-items-center text-sm-start text-center gap-4">
-                            <i class="fas fa-chart-line widget-icon icon-progress mb-0" style="font-size: 3.5rem;"></i>
-                            <div>
-                                <h4 class="widget-title">Class Progress Reports</h4>
-                                <p class="widget-text">Track student performance and see who needs help with alphabet lessons.</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
 
+        <div class="col-md-4">
+            <a href="{% url 'teacher:class_progress_report' %}" class="text-decoration-none">
+                <div class="action-widget widget-progress">
+                    <i class="fas fa-chart-line widget-icon icon-progress"></i>
+                    <h4 class="widget-title">Progress Reports</h4>
+                    <p class="widget-text">Track student performance across all lessons.</p>
+                </div>
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}
