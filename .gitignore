@@ -37,12 +37,7 @@ Thumbs.db
 media/
 !media/.gitkeep
 
-/THEME 1/
-/THEME 2/
-/THEME 3/
-/THEME 4/
 /FSL_STORIES_CUT/
-/NEW_WORDS/
 
 # Temporary data lists
 filelist.txt
