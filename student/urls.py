@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/word/<int:word_id>/done/", views.mark_word_done, name="mark_word_done"),
     path("api/quiz/<int:quiz_id>/save/", views.save_quiz_score, name="save_quiz_score"),
     path("api/story-quiz/<int:story_id>/save/", views.save_story_quiz_score, name="save_story_quiz_score"),
+    path("api/vocab-quiz/<int:quiz_id>/save/", views.save_vocab_quiz_score, name="save_vocab_quiz_score"),
 ]

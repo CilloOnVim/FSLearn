@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 
 from .forms import SectionForm, ThemeForm, WordForm, StoryForm, QuizQuestionForm, ChoiceFormSet
-from .models import Section, Theme, Word, SentenceQuiz, QuizQuestion, Story
+from .models import Section, Theme, Word, SentenceQuiz, QuizQuestion, Story, VocabQuiz
 from student.models import FSLWord
 from student.nlp_utils import translate_to_fsl
 
@@ -64,7 +64,7 @@ def word_detail(request, word_slug):
 @login_required
 def upload_word(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     if request.method == "POST":
         form = WordForm(request.POST, request.FILES)
@@ -81,7 +81,7 @@ def upload_word(request):
 @login_required
 def add_theme(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     if request.method == "POST":
         form = ThemeForm(request.POST, request.FILES)
@@ -97,7 +97,7 @@ def add_theme(request):
 @login_required
 def add_section(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     if request.method == "POST":
         form = SectionForm(request.POST)
@@ -111,9 +111,8 @@ def add_section(request):
 
 # 5. STORY LIST (Pick a story)
 @login_required
-def story_list(request):
-    stories = Story.objects.all()
-    return render(request, "learning/story_list.html", {"stories": stories})
+def quiz_select(request):
+    return render(request, "learning/story_list.html")
 
 
 # 6. STORY PLAYER & QUIZ (The logic)
@@ -152,7 +151,7 @@ def story_view(request, story_id):
 @login_required
 def manage_quizzes(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
     
     quizzes = SentenceQuiz.objects.all().order_by('-created_at')
     return render(request, "learning/manage_quizzes.html", {"quizzes": quizzes})
@@ -161,7 +160,7 @@ def manage_quizzes(request):
 @login_required
 def create_quiz(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     context = {}
 
@@ -350,7 +349,7 @@ def take_sentence_quiz(request, quiz_id):
 
 @login_required
 def edit_theme(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     theme = get_object_or_404(Theme, pk=pk)
     
     if request.method == "POST":
@@ -366,7 +365,7 @@ def edit_theme(request, pk):
 
 @login_required
 def edit_section(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     section = get_object_or_404(Section, pk=pk)
     
     if request.method == "POST":
@@ -381,7 +380,7 @@ def edit_section(request, pk):
 
 @login_required
 def edit_word(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     word = get_object_or_404(Word, pk=pk)
     
     if request.method == "POST":
@@ -401,7 +400,7 @@ def edit_word(request, pk):
 
 @login_required
 def delete_theme(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     theme = get_object_or_404(Theme, pk=pk)
     theme.delete() 
     messages.success(request, "Theme and all related content deleted.")
@@ -409,7 +408,7 @@ def delete_theme(request, pk):
 
 @login_required
 def delete_section(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     section = get_object_or_404(Section, pk=pk)
     section.delete()
     messages.success(request, "Section deleted.")
@@ -417,7 +416,7 @@ def delete_section(request, pk):
 
 @login_required
 def delete_word(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     word = get_object_or_404(Word, pk=pk)
     word.delete()
     messages.success(request, "Word deleted.")
@@ -428,7 +427,7 @@ def delete_word(request, pk):
 @login_required
 def add_story(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     if request.method == "POST":
         form = StoryForm(request.POST, request.FILES)
@@ -464,7 +463,7 @@ def math_quiz(request):
 
 @login_required
 def add_question(request, story_id):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     story = get_object_or_404(Story, pk=story_id)
 
     if request.method == "POST":
@@ -491,7 +490,7 @@ def add_question(request, story_id):
 
 @login_required
 def edit_question(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     question = get_object_or_404(QuizQuestion, pk=pk)
 
     if request.method == "POST":
@@ -513,7 +512,7 @@ def edit_question(request, pk):
 
 @login_required
 def delete_question(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     question = get_object_or_404(QuizQuestion, pk=pk)
     question.delete()
     messages.success(request, "Question deleted.")
@@ -522,7 +521,7 @@ def delete_question(request, pk):
 
 @login_required
 def edit_story(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     story = get_object_or_404(Story, pk=pk)
     
     if request.method == "POST":
@@ -538,8 +537,83 @@ def edit_story(request, pk):
 
 @login_required
 def delete_story(request, pk):
-    if not hasattr(request.user, "teacher_profile"): return redirect("index")
+    if not hasattr(request.user, "teacher_profile"): return redirect("core:index")
     story = get_object_or_404(Story, pk=pk)
     story.delete() 
     messages.success(request, "Story and all associated quizzes deleted.")
     return redirect("teacher:manage_content")
+
+
+# ==========================================
+# --- VOCAB QUIZ MANAGEMENT VIEWS ---
+# ==========================================
+@login_required
+def activate_vocab_quiz(request):
+    if not hasattr(request.user, "teacher_profile"):
+        return redirect("core:index")
+    
+    if request.method == "POST":
+        section_id = request.POST.get("section_id")
+        section = get_object_or_404(Section, pk=section_id)
+        
+        # Check if already active
+        quiz, created = VocabQuiz.objects.get_or_create(section=section)
+        if created:
+            messages.success(request, f"Vocab Quiz activated for section: {section.title}")
+        else:
+            messages.info(request, f"Vocab Quiz is already active for: {section.title}")
+            
+    return redirect("teacher:manage_content")
+
+@login_required
+def take_vocab_quiz(request, quiz_id):
+    quiz = get_object_or_404(VocabQuiz, pk=quiz_id)
+    
+    # 1. Grab 5 random words from this section
+    # Use order_by('?') for random sorting
+    target_words = list(quiz.section.words.exclude(video="").order_by('?')[:5])
+    
+    quiz_data = []
+    for target in target_words:
+        # 2. Grab 3 random distractors from other sections
+        distractors = list(Word.objects.exclude(section=quiz.section).exclude(video="").order_by('?')[:3])
+        
+        # Fallback if DB doesn't have words in other sections
+        if len(distractors) < 3:
+            distractors = list(Word.objects.exclude(pk=target.pk).exclude(video="").order_by('?')[:3])
+            
+        # 3. Compile and shuffle
+        choices = [
+            {"video_url": target.video.url if target.video else "", "is_correct": True}
+        ]
+        for d in distractors:
+            choices.append({"video_url": d.video.url if d.video else "", "is_correct": False})
+            
+        random.shuffle(choices)
+        
+        quiz_data.append({
+            "target_word": target.name,
+            "target_image": target.image.url if target.image else "",
+            "choices": choices
+        })
+        
+    context = {
+        "quiz": quiz,
+        "quiz_data_json": json.dumps(quiz_data)
+    }
+    return render(request, "learning/take_vocab_quiz.html", context)
+
+@login_required
+def vocab_quiz_list(request):
+    quizzes = VocabQuiz.objects.filter(is_active=True).order_by('-vocabquiz_id')
+    passed_quiz_ids = []
+    if hasattr(request.user, 'student_profile'):
+        passed_quiz_ids = request.user.student_profile.vocab_quiz_scores.filter(
+            passed=True
+        ).values_list('vocab_quiz_id', flat=True)
+        
+    return render(request, "learning/vocab_quiz_list.html", {
+        "quizzes": quizzes,
+        "passed_quiz_ids": passed_quiz_ids
+    })
+

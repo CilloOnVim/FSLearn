@@ -120,18 +120,22 @@
                 <p class="text-muted mb-0 small"><i class="bi bi-people-fill"></i> Guardian: {{ student.guardian_name }}</p>
 
                 <hr class="my-4 text-muted" style="opacity: 0.15;">
-                <div class="d-flex justify-content-around text-center">
+                <div class="d-flex justify-content-around text-center mt-3 flex-wrap gap-2">
                     <div>
                         <h4 class="fw-bold text-primary mb-0">{{ completed_words|length }}</h4>
-                        <small class="text-muted fw-bold">Words</small>
+                        <small class="text-muted fw-bold">Signs</small>
                     </div>
                     <div>
                         <h4 class="fw-bold text-success mb-0">{{ quiz_scores|length }}</h4>
-                        <small class="text-muted fw-bold">Quizzes</small>
+                        <small class="text-muted fw-bold">Word Quizzes</small>
                     </div>
                     <div>
                         <h4 class="fw-bold text-warning mb-0">{{ story_quiz_scores|length }}</h4>
-                        <small class="text-muted fw-bold">Stories</small>
+                        <small class="text-muted fw-bold">Story Quizzes</small>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-danger mb-0">{{ vocab_quiz_scores|length }}</h4>
+                        <small class="text-muted fw-bold">Vocab Quizzes</small>
                     </div>
                 </div>
             </div>
@@ -141,28 +145,43 @@
         <div class="col-md-8">
             <ul class="nav nav-pills mb-4" id="progressTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm me-2" id="words-tab" data-bs-toggle="pill" data-bs-target="#words" type="button" role="tab">Vocabulary</button>
+                    <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm me-2" id="words-tab" data-bs-toggle="pill" data-bs-target="#words" type="button" role="tab">Signs Learned</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm me-2" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes" type="button" role="tab">Sentence Quizzes</button>
+                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm me-2" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes" type="button" role="tab">Word Quizzes</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="stories-tab" data-bs-toggle="pill" data-bs-target="#stories" type="button" role="tab">Story Quizzes</button>
+                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm me-2" id="stories-tab" data-bs-toggle="pill" data-bs-target="#stories" type="button" role="tab">Story Quizzes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="vocab-tab" data-bs-toggle="pill" data-bs-target="#vocab" type="button" role="tab">Vocab Quizzes</button>
                 </li>
             </ul>
 
             <div class="tab-content" id="progressTabsContent">
-                <!-- Vocabulary Tab -->
+                <!-- Signs Tab -->
                 <div class="tab-pane fade show active" id="words" role="tabpanel">
                     <div class="stat-card">
-                        <h4><i class="bi bi-spellcheck text-primary me-2"></i> Words Learned</h4>
+                        <h4><i class="bi bi-spellcheck text-primary me-2"></i> Signs Learned</h4>
                         {% if completed_words %}
                         <div class="list-group list-group-gamified">
                             {% for record in completed_words %}
                             <div class="list-group-item">
-                                <div class="fw-bold fs-5 text-dark">{{ record.word.word|upper }}</div>
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> Date: {{ record.completed_at|date:"M d, Y" }}</span>
+                                    {% if record.word.image %}
+                                        <img src="{{ record.word.image.url }}" width="60" height="60" class="rounded shadow-sm" style="object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-secondary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold fs-5 text-dark">{{ record.word.name|upper }}</div>
+                                        <div class="text-muted small">Section: {{ record.word.section.title }}</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> {{ record.completed_at|date:"M d, Y" }}</span>
                                     <span class="badge-gamified bg-blue-soft"><i class="bi bi-check-circle-fill"></i> Learned</span>
                                 </div>
                             </div>
@@ -171,23 +190,28 @@
                         {% else %}
                         <div class="text-center py-5">
                             <i class="bi bi-book fs-1 text-muted opacity-50 mb-3 d-block"></i>
-                            <p class="text-muted">No words learned yet.</p>
+                            <p class="text-muted">No signs learned yet.</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Sentence Quizzes Tab -->
+                <!-- Word Quizzes Tab -->
                 <div class="tab-pane fade" id="quizzes" role="tabpanel">
                     <div class="stat-card">
-                        <h4><i class="bi bi-pencil-square text-success me-2"></i> Sentence Quizzes</h4>
+                        <h4><i class="bi bi-pencil-square text-success me-2"></i> Word Quizzes</h4>
                         {% if quiz_scores %}
                         <div class="list-group list-group-gamified">
                             {% for record in quiz_scores %}
                             <div class="list-group-item">
-                                <div>
-                                    <div class="fw-bold text-dark">{{ record.quiz.question_text|truncatechars:50 }}</div>
-                                    <div class="text-muted small">Theme: {{ record.quiz.theme.title }}</div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-pencil-square text-success fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ record.quiz.original_text|truncatechars:50 }}</div>
+                                        <div class="text-muted small">Type: Sentence Construction</div>
+                                    </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="text-muted small"><i class="bi bi-calendar-check text-muted"></i> {{ record.completed_at|date:"M d, Y" }}</span>
@@ -203,7 +227,7 @@
                         {% else %}
                         <div class="text-center py-5">
                             <i class="bi bi-pencil-square fs-1 text-muted opacity-50 mb-3 d-block"></i>
-                            <p class="text-muted">No sentence quizzes taken yet.</p>
+                            <p class="text-muted">No word quizzes taken yet.</p>
                         </div>
                         {% endif %}
                     </div>
@@ -219,14 +243,15 @@
                             <div class="list-group-item">
                                 <div class="d-flex align-items-center gap-3">
                                     {% if record.story.thumbnail %}
-                                        <img src="{{ record.story.thumbnail.url }}" width="60" class="rounded shadow-sm">
+                                        <img src="{{ record.story.thumbnail.url }}" width="60" height="60" class="rounded shadow-sm" style="object-fit: cover;">
                                     {% else %}
-                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 40px;">
+                                        <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px;">
                                             <i class="bi bi-film text-secondary"></i>
                                         </div>
                                     {% endif %}
                                     <div>
                                         <div class="fw-bold fs-5 text-dark">{{ record.story.title }}</div>
+                                        <div class="text-muted small">Theme: {{ record.story.theme.title }}</div>
                                         <div class="text-muted small">Score: {{ record.score }} pts</div>
                                     </div>
                                 </div>
@@ -243,13 +268,52 @@
                         </div>
                         {% else %}
                         <div class="text-center py-5">
-                            <i class="bi bi-camera-reels fs-1 text-muted opacity-50 mb-3 d-block"></i>
-                            <p class="text-muted">No story quizzes taken yet.</p>
+                            <i class="bi bi-controller fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                            <p class="text-muted">No story quizzes completed yet.</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
 
+                <!-- Vocab Quizzes Tab -->
+                <div class="tab-pane fade" id="vocab" role="tabpanel">
+                    <div class="stat-card">
+                        <h4><i class="bi bi-magic text-danger me-2"></i> Vocab Quizzes</h4>
+                        {% if vocab_quiz_scores %}
+                        <div class="list-group list-group-gamified">
+                            {% for record in vocab_quiz_scores %}
+                            <div class="list-group-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded shadow-sm d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-spellcheck text-danger fs-3"></i>
+                                    </div>
+                                    <div style="max-width: 400px;">
+                                        <div class="fw-bold fs-5 text-dark text-truncate">{{ record.vocab_quiz.section.title }}</div>
+                                        <div class="text-muted small">Algorithmic Vocab Quiz</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="text-end">
+                                        <div class="fw-bold text-dark fs-5">{{ record.score }} pts</div>
+                                        <div class="text-muted small">{{ record.completed_at|date:"M d, Y" }}</div>
+                                    </div>
+                                    {% if record.passed %}
+                                        <span class="badge-gamified bg-green-soft"><i class="bi bi-star-fill text-warning"></i> Passed</span>
+                                    {% else %}
+                                        <span class="badge-gamified bg-red-soft"><i class="bi bi-arrow-repeat"></i> Needs Retry</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-magic fs-1 text-muted opacity-50 mb-3 d-block"></i>
+                            <p class="text-muted">No algorithmic vocab quizzes completed yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

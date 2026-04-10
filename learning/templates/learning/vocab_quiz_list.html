@@ -1,14 +1,14 @@
 {% extends 'learning/base.html' %}
 {% load static %}
 
-{% block title %}Puzzle Menu | FSLearn{% endblock %}
+{% block title %}Vocab Quizzes | FSLearn{% endblock %}
 
 {% block extra_head %}
 <style>
     .quiz-card {
         background: white;
         border-radius: 20px;
-        border: 4px solid #20c997;
+        border: 4px solid var(--bs-pink);
         padding: 20px;
         transition: transform 0.2s;
     }
@@ -47,7 +47,7 @@
 <div style="background-color: #f0f8ff; min-height: 100vh; padding-top: 3rem; padding-bottom: 3rem;">
     <div class="container">
         <div class="d-flex justify-content-between mb-4 align-items-center">
-            <h1 class="fw-bold m-0" style="color: #6f42c1;">🧩 Pick a Puzzle!</h1>
+            <h1 class="fw-bold m-0" style="color: var(--bs-pink);">✨ Vocab Quizzes</h1>
             <a href="{% url 'learning:quiz_select' %}" class="btn-chunky">
                 <span class="fs-5 me-2">🔙</span> Back to Hub
             </a>
@@ -57,9 +57,9 @@
             {% for quiz in quizzes %}
             <div class="col-md-4">
                 <div class="quiz-card text-center shadow">
-                    <h4 class="fw-bold mb-3 text-dark">"{{ quiz.original_text }}"</h4>
+                    <h4 class="fw-bold mb-3 text-dark">{{ quiz.section.title }}</h4>
 
-                    {% if quiz.sentencequiz_id in passed_quiz_ids %}
+                    {% if quiz.vocabquiz_id in passed_quiz_ids %}
                     <div class="badge bg-success mb-3 fs-6 px-3 py-2 rounded-pill shadow-sm">
                         🌟 Completed
                     </div>
@@ -69,10 +69,10 @@
                     </div>
                     {% endif %}
 
-                    <a href="{% url 'learning:take_quiz' quiz.sentencequiz_id %}"
-                        class="btn btn-success btn-lg rounded-pill w-100 shadow-sm action-btn"
-                        style="background-color: #20c997; border: none; box-shadow: 0 5px 0px #128c68, 0 10px 15px rgba(0,0,0,0.1); transition: all 0.2s;">
-                        {% if quiz.sentencequiz_id in passed_quiz_ids %}
+                    <a href="{% url 'learning:take_vocab_quiz' quiz.vocabquiz_id %}"
+                        class="btn btn-danger btn-lg rounded-pill w-100 shadow-sm action-btn"
+                        style="background-color: var(--bs-pink); border: none; box-shadow: 0 5px 0px #c92a2a, 0 10px 15px rgba(0,0,0,0.1); transition: all 0.2s;">
+                        {% if quiz.vocabquiz_id in passed_quiz_ids %}
                         Play Again 🔄
                         {% else %}
                         Play This! 🚀
@@ -83,8 +83,8 @@
             {% empty %}
             <div class="col-12 text-center py-5">
                 <div class="display-1 mb-3">😴</div>
-                <h3 class="text-muted fw-bold">No puzzles available yet!</h3>
-                <p class="text-muted">Tell your teacher to make some in the dashboard.</p>
+                <h3 class="text-muted fw-bold">No vocab quizzes available yet!</h3>
+                <p class="text-muted">Tell your teacher to activate some in the dashboard.</p>
             </div>
             {% endfor %}
         </div>

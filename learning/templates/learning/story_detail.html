@@ -290,7 +290,7 @@
 {% block layout %}
 <div id="game-wrapper">
     <div class="top-bar">
-        <a href="{% url 'learning:story_list' %}" class="btn-exit">✖ Exit</a>
+        <a href="{% url 'learning:quiz_select' %}" class="btn-exit">✖ Exit</a>
         <h4 class="phase-title" id="phaseTitle">{{ story.title }}</h4>
         <div class="score-badge" id="scoreBadge" style="display: none;">⭐ 0</div>
     </div>
@@ -322,7 +322,7 @@
                 <p class="result-score" id="finalScore">You got X out of Y correct.</p>
 
                 <div class="w-100 d-flex flex-column gap-3 mt-4">
-                    <a href="{% url 'learning:story_list' %}" class="btn-action btn-next-story">Pick Another Story</a>
+                    <a href="{% url 'learning:quiz_select' %}" class="btn-action btn-next-story">Pick Another Story</a>
                     <button onclick="location.reload()" class="btn-action btn-retry">↻ Try Again</button>
                 </div>
             </div>

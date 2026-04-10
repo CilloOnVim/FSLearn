@@ -87,6 +87,16 @@ class StoryQuizProgress(models.Model):
     class Meta:
         unique_together = ("student", "story")
 
+class VocabQuizProgress(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="vocab_quiz_scores")
+    vocab_quiz = models.ForeignKey("learning.VocabQuiz", on_delete=models.CASCADE)
+    score = models.IntegerField()
+    passed = models.BooleanField()
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "vocab_quiz")
+
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):
     if created and not instance.is_staff:

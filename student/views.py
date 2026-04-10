@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from learning.models import Word, SentenceQuiz
-from .models import WordProgress, QuizProgress, StoryQuizProgress
+from learning.models import Word, SentenceQuiz, VocabQuiz
+from .models import WordProgress, QuizProgress, StoryQuizProgress, VocabQuizProgress
 
 # CRITICAL: Import both models
 from .models import FSLSign, FSLWord 
@@ -225,3 +225,27 @@ def save_story_quiz_score(request, story_id):
             
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)
+
+@login_required
+def save_vocab_quiz_score(request, quiz_id):
+    if request.method == "POST" and hasattr(request.user, "student_profile"):
+        quiz = get_object_or_404(VocabQuiz, pk=quiz_id)
+        
+        score = int(request.POST.get("score", 0))
+        passed = request.POST.get("passed") == "true"
+        
+        progress, created = VocabQuizProgress.objects.get_or_create(
+            student=request.user.student_profile,
+            vocab_quiz=quiz,
+            defaults={'score': score, 'passed': passed}
+        )
+        
+        if not created:
+            if score > progress.score:
+                progress.score = score
+            if passed:
+                progress.passed = True
+            progress.save()
+            
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error"}, status=400)

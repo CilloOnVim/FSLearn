@@ -65,13 +65,16 @@
     .hub-workspace {
         flex-grow: 1;
         display: flex;
-        gap: 30px; /* Reduced gap slightly to fit 3 cards nicely */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
         padding: 40px;
         align-items: stretch;
     }
 
     .hub-card {
-        flex: 1;
+        flex: 1 1 300px;
+        max-width: 400px;
         border-radius: 50px;
         display: flex;
         flex-direction: column;
@@ -95,6 +98,11 @@
     .hub-card-math {
         background-color: var(--yellow);
         box-shadow: 0 15px 0px var(--yellow-dark);
+    }
+
+    .hub-card-vocab {
+        background-color: var(--pink);
+        box-shadow: 0 15px 0px #c92a2a;
     }
 
     .hub-card:active {
@@ -147,6 +155,11 @@
     <a href="{% url 'learning:math_quiz' %}" class="hub-card hub-card-math">
         <div class="hub-icon">🔢</div>
         <h2 class="hub-title">Math<br>Magic</h2>
+    </a>
+
+    <a href="{% url 'learning:vocab_quiz_list' %}" class="hub-card hub-card-vocab">
+        <div class="hub-icon">✨</div>
+        <h2 class="hub-title">Vocab<br>Quiz</h2>
     </a>
 </div>
 {% endblock %}

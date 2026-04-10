@@ -121,3 +121,13 @@ class SentenceQuiz(models.Model):
 
     def __str__(self):
         return self.original_text
+
+# --- 8. VOCAB QUIZ ---
+class VocabQuiz(models.Model):
+    vocabquiz_id = models.BigAutoField(primary_key=True)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name="vocab_quizzes")
+    passing_score = models.IntegerField(default=3)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Vocab Quiz for: {self.section.title}"

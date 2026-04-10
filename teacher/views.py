@@ -27,12 +27,12 @@ def teacher_dashboard(request):
 @login_required
 def class_progress_report(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     teacher = request.user.teacher_profile
     
     # Grab all students assigned to this teacher's specific class section
-    students = StudentProfile.objects.filter(section=teacher.advisory_class).prefetch_related('completed_words', 'quiz_scores', 'story_quiz_scores')
+    students = StudentProfile.objects.filter(section=teacher.advisory_class).prefetch_related('completed_words', 'quiz_scores', 'story_quiz_scores', 'vocab_quiz_scores')
 
     return render(request, "teacher/class_progress.html", {
         "teacher": teacher,
@@ -42,7 +42,7 @@ def class_progress_report(request):
 @login_required
 def edit_profile(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     teacher = request.user.teacher_profile
 
@@ -69,7 +69,7 @@ def edit_profile(request):
 @login_required
 def my_students(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     teacher = request.user.teacher_profile
     # Pull only the students assigned to this teacher's exact class
@@ -114,7 +114,7 @@ def my_students(request):
 @login_required
 def remove_student(request, student_id):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
 
     teacher = request.user.teacher_profile
     
@@ -131,7 +131,7 @@ def remove_student(request, student_id):
 @login_required
 def student_progress_detail(request, student_id):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
     
     teacher = request.user.teacher_profile
     # Ensure this student belongs to the teacher to prevent unauthorized access
@@ -141,19 +141,21 @@ def student_progress_detail(request, student_id):
     completed_words = student.completed_words.all().order_by('-completed_at')
     quiz_scores = student.quiz_scores.all().order_by('-completed_at')
     story_quiz_scores = student.story_quiz_scores.all().order_by('-completed_at')
+    vocab_quiz_scores = student.vocab_quiz_scores.all().order_by('-completed_at')
 
     return render(request, "teacher/student_progress_detail.html", {
         "teacher": teacher,
         "student": student,
         "completed_words": completed_words,
         "quiz_scores": quiz_scores,
-        "story_quiz_scores": story_quiz_scores
+        "story_quiz_scores": story_quiz_scores,
+        "vocab_quiz_scores": vocab_quiz_scores
     })
 
 @login_required
 def manage_content(request):
     if not hasattr(request.user, "teacher_profile"):
-        return redirect("index")
+        return redirect("core:index")
     
     themes = Theme.objects.prefetch_related('sections__words').all()
     return render(request, "teacher/manage_content.html", {

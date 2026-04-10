@@ -29,7 +29,7 @@ urlpatterns = [
     path("manage/word/<int:pk>/delete/", views.delete_word, name="delete_word"),
 
     # --- STORIES & QUIZZES ---
-    path("stories/", views.story_list, name="story_list"),
+    path("quiz_select/", views.quiz_select, name="quiz_select"),
     path("stories/<int:story_id>/", views.story_view, name="story_view"),
     path('quizzes/', views.manage_quizzes, name='manage_quizzes'),
     path('quizzes/create/', views.create_quiz, name='create_quiz'),
@@ -49,4 +49,9 @@ urlpatterns = [
     path("manage/story/<int:pk>/edit/", views.edit_story, name="edit_story"),
     path("manage/story/<int:pk>/delete/", views.delete_story, name="delete_story"),
     path('story_library/', views.story_library, name='story_library'),
+
+    # --- VOCAB QUIZ ---
+    path("manage/vocab_quiz/activate/", views.activate_vocab_quiz, name="activate_vocab_quiz"),
+    path("vocab_quizzes/", views.vocab_quiz_list, name="vocab_quiz_list"),
+    path("vocab_quiz/<int:quiz_id>/", views.take_vocab_quiz, name="take_vocab_quiz"),
 ]
