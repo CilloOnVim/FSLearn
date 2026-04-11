@@ -50,7 +50,7 @@ if __name__ == "__main__":
     BASE_VIDEOS_DIR = BASE_SCRIPT_DIR
 
     # Define the themes you want to iterate through automatically
-    THEMES_TO_PROCESS = ["THEME 1", "THEME 2", "THEME 3", "THEME 4"]
+    THEMES_TO_PROCESS = ["renamed_ready",]
     
     grand_total = 0
     
