@@ -51,7 +51,8 @@ urlpatterns = [
     path('story_library/', views.story_library, name='story_library'),
 
     # --- VOCAB QUIZ ---
-    path("manage/vocab_quiz/activate/", views.activate_vocab_quiz, name="activate_vocab_quiz"),
+    path("manage/vocab-quizzes/", views.manage_vocab_quizzes, name="manage_vocab_quizzes"),
+    path("api/vocab-quiz/toggle/<int:section_id>/", views.toggle_vocab_quiz, name="toggle_vocab_quiz"),
     path("vocab_quizzes/", views.vocab_quiz_list, name="vocab_quiz_list"),
     path("vocab_quiz/<int:quiz_id>/", views.take_vocab_quiz, name="take_vocab_quiz"),
 ]

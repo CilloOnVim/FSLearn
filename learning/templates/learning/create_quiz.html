@@ -1,11 +1,16 @@
 {% extends 'learning/base.html' %}
 {% load static %}
 {% block content %}
+<div class="mb-4">
+    <a href="{% url 'learning:manage_quizzes' %}" class="btn btn-light btn-lg rounded-pill fw-bold shadow-sm px-4">
+        <span class="fs-5 me-2">🔙</span> Back to Quizzes
+    </a>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold text-white mb-0">🧩 Create Sentence Puzzle</h3>
-            <a href="{% url 'learning:manage_quizzes' %}" class="btn btn-outline-light rounded-pill btn-sm">Cancel</a>
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-white mb-0">🧩 Create Sentence Puzzle</h2>
         </div>
 
         <div class="card shadow-lg border-0 rounded-4 mb-3">
@@ -20,10 +25,6 @@
                             🔍 Analyze
                         </button>
                     </div>
-                    
-                    {% if nlp_result %}
-                        <input type="hidden" name="action" value="save">
-                        {% endif %}
                 </form>
             </div>
         </div>
@@ -62,9 +63,10 @@
                             {% if item.has_video %}
                                 <span class="badge bg-success rounded-pill">✅ Video Found</span>
                             {% else %}
-                                <div>
-                                    <span class="badge bg-danger rounded-pill me-2">❌ Missing Video</span>
-                                    <small class="text-danger d-block mt-1">Will default to fingerspelling</small>
+                                <div class="text-end">
+                                    <span class="badge bg-danger rounded-pill mb-1">❌ Missing Video</span>
+                                    <small class="text-danger d-block mb-1">Will default to fingerspelling</small>
+                                    <a href="{% url 'learning:upload_word' %}" target="_blank" class="btn btn-sm btn-outline-primary px-3 rounded-pill mt-1">➕ Add Word</a>
                                 </div>
                             {% endif %}
                         </div>

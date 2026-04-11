@@ -143,9 +143,20 @@
             box-shadow: 0 12px 0px var(--cyan-dark);
         }
 
+        .action-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            filter: brightness(1.05);
+        }
+
+        .btn-learn:hover { box-shadow: 0 17px 0px var(--mint-dark); }
+        .btn-finger:hover { box-shadow: 0 17px 0px var(--purple-dark); }
+        .btn-sentence:hover { box-shadow: 0 17px 0px var(--pink-dark); }
+        .btn-quiz:hover { box-shadow: 0 17px 0px var(--cyan-dark); }
+
         .action-btn:active {
-            transform: translateY(12px);
+            transform: translateY(12px) scale(0.98);
             box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
+            filter: brightness(0.95);
         }
 
         /* Logout Button */

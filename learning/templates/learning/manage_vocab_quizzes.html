@@ -1,0 +1,173 @@
+{% extends 'learning/base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="background-color: #f8f9fa; border-radius: 20px; padding: 10px;" class="shadow-sm">
+<style>
+    /* Modern Teacher Dashboard Theme */
+    .teacher-page-header {
+        color: #1E293B;
+    }
+    
+    .text-subtitle {
+        color: #64748B;
+    }
+
+    .theme-card {
+        background: white;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+
+    .theme-header {
+        background: #F8FAFC;
+        padding: 15px 20px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .section-row {
+        padding: 15px 20px;
+        border-bottom: 1px solid #F1F5F9;
+        transition: background-color 0.2s;
+    }
+
+    .section-row:last-child {
+        border-bottom: none;
+    }
+
+    .section-row:hover {
+        background-color: #F8FAFC;
+    }
+
+    /* Custom iOS-style Switch */
+    .form-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+    
+    .form-switch .form-check-input:checked {
+        background-color: #10B981; /* Emerald Green for active */
+        border-color: #10B981;
+    }
+
+    .badge-status {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="container pt-3 pb-4">
+    <div class="mb-3">
+        <a href="{% url 'teacher:manage_content' %}" class="text-decoration-none text-secondary fw-bold">
+            <span class="fs-5 me-1">🔙</span> Back to Content
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-bold teacher-page-header mb-1">Vocabulary Quizzes</h3>
+            <p class="text-subtitle mb-0 small">Toggle algorithmic quizzes ON or OFF for each section. Active quizzes will dynamically appear on the Student Hub.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% csrf_token %}
+            {% for theme in themes %}
+                {% if theme.sections.all %}
+                <div class="theme-card">
+                    <div class="theme-header">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-folder2-open text-primary me-2"></i>{{ theme.title }}</h5>
+                    </div>
+                    <div class="theme-body">
+                        {% for section in theme.sections.all %}
+                            {% with quiz=section.vocab_quizzes.first %}
+                            <div class="section-row d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1">{{ section.title }}</h6>
+                                    {% if quiz and quiz.is_active %}
+                                        <span class="badge badge-status bg-success bg-opacity-10 text-success border border-success border-opacity-25" id="badge-{{ section.pk }}">● Active</span>
+                                    {% else %}
+                                        <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" id="badge-{{ section.pk }}">○ Inactive</span>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check form-switch m-0 p-0 d-flex align-items-center gap-2">
+                                    <input class="form-check-input quiz-toggle ms-0 mt-0" type="checkbox" role="switch"
+                                           data-section-id="{{ section.pk }}" 
+                                           {% if quiz and quiz.is_active %}checked{% endif %}>
+                                </div>
+                            </div>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% empty %}
+                <div class="text-center py-5 mt-4" style="background: white; border: 2px dashed #CBD5E1; border-radius: 20px;">
+                    <div class="fs-1 mb-3">📭</div>
+                    <h4 class="fw-bold text-dark">No Curriculum Found</h4>
+                    <p class="text-subtitle mb-0">Create Themes and Sections first to enable vocabulary quizzes.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggles = document.querySelectorAll('.quiz-toggle');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', async function() {
+                const sectionId = this.getAttribute('data-section-id');
+                const badge = document.getElementById(`badge-${sectionId}`);
+                
+                // Disable temporarily
+                this.disabled = true;
+
+                try {
+                    const response = await fetch(`/learning/api/vocab-quiz/toggle/${sectionId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if(data.success) {
+                        // Update UI
+                        if(data.is_active) {
+                            badge.className = "badge badge-status bg-success bg-opacity-10 text-success border border-success border-opacity-25";
+                            badge.innerText = "● Active";
+                        } else {
+                            badge.className = "badge badge-status bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25";
+                            badge.innerText = "○ Inactive";
+                        }
+                    } else {
+                        // Revert if error
+                        this.checked = !this.checked;
+                        alert("Error updating quiz state.");
+                    }
+                } catch(error) {
+                    console.error("Fetch error:", error);
+                    // Revert 
+                    this.checked = !this.checked;
+                } finally {
+                    this.disabled = false;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

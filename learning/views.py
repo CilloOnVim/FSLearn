@@ -548,22 +548,32 @@ def delete_story(request, pk):
 # --- VOCAB QUIZ MANAGEMENT VIEWS ---
 # ==========================================
 @login_required
-def activate_vocab_quiz(request):
+def manage_vocab_quizzes(request):
+    """Teacher dashboard to manage all vocab quizzes via toggle switches."""
     if not hasattr(request.user, "teacher_profile"):
         return redirect("core:index")
-    
-    if request.method == "POST":
-        section_id = request.POST.get("section_id")
-        section = get_object_or_404(Section, pk=section_id)
         
-        # Check if already active
-        quiz, created = VocabQuiz.objects.get_or_create(section=section)
-        if created:
-            messages.success(request, f"Vocab Quiz activated for section: {section.title}")
-        else:
-            messages.info(request, f"Vocab Quiz is already active for: {section.title}")
-            
-    return redirect("teacher:manage_content")
+    themes = Theme.objects.prefetch_related('sections__vocab_quizzes').all().order_by('order')
+    return render(request, "learning/manage_vocab_quizzes.html", {"themes": themes})
+
+@login_required
+def toggle_vocab_quiz(request, section_id):
+    """API endpoint to toggle a vocab quiz's active state."""
+    if not hasattr(request.user, "teacher_profile") or request.method != "POST":
+        return JsonResponse({"error": "Unauthorized or invalid method"}, status=400)
+    
+    section = get_object_or_404(Section, pk=section_id)
+    quiz, created = VocabQuiz.objects.get_or_create(section=section)
+    
+    if not created:
+        quiz.is_active = not quiz.is_active
+        quiz.save()
+        
+    return JsonResponse({
+        "success": True,
+        "is_active": quiz.is_active,
+        "section_title": section.title
+    })
 
 @login_required
 def take_vocab_quiz(request, quiz_id):

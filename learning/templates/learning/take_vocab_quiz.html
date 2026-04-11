@@ -7,17 +7,30 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
     :root {
-        --primary: #6f42c1;
-        --secondary: #0dcaf0;
-        --success: #20c997;
-        --danger: #ff6b6b;
+        --mint: #20c997;
+        --mint-dark: #128c68;
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --cyan: #0dcaf0;
+        --cyan-dark: #0aa2c0;
+        --yellow: #ffd700;
+        --yellow-dark: #d4b200;
+        --pink: #ff6b6b;
+        --pink-dark: #c92a2a;
     }
     
-    body {
-        background-color: #f8f9fa;
-        overflow-x: hidden;
+    body { margin: 0; padding: 0; }
+    
+    #game-wrapper {
+        background-color: #f0f8ff;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
+    /* Top Bar */
     .top-bar {
         background-color: white;
         padding: 15px 30px;
@@ -26,56 +39,97 @@
         justify-content: space-between;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         z-index: 10;
-        border-bottom: 2px solid #edf2f7;
     }
 
     .btn-exit {
-        background-color: #e2e8f0;
-        color: #475569 !important;
+        background-color: var(--pink);
+        color: white !important;
         border-radius: 50px;
-        padding: 8px 20px;
+        padding: 10px 25px;
         font-weight: 700;
+        font-size: 1.2rem;
         text-decoration: none;
+        box-shadow: 0 5px 0px var(--pink-dark);
         transition: all 0.1s;
     }
-    .btn-exit:hover { background-color: #cbd5e1; }
+
+    .btn-exit:active {
+        transform: translateY(5px);
+        box-shadow: 0 0px 0px transparent;
+    }
+
+    .phase-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--purple);
+        margin: 0;
+    }
+
+    .score-badge {
+        background-color: var(--yellow);
+        color: #333;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        box-shadow: 0 4px 0px var(--yellow-dark);
+    }
+
+    .content-stage {
+        flex-grow: 1;
+        display: flex;
+        padding: 10px 20px;
+        overflow-y: auto;
+        justify-content: center;
+        align-items: flex-start;
+    }
 
     .quiz-container {
-        max-width: 800px;
-        margin: 40px auto;
+        width: 100%;
+        max-width: 1350px;
+        margin: auto;
         background: white;
-        border-radius: 24px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        padding: 40px;
+        border-radius: 40px;
+        border: 6px solid var(--purple);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        padding: 50px 40px;
         text-align: center;
+        position: relative;
     }
 
     .target-word-display {
-        font-size: 3.5rem;
-        font-weight: 900;
-        color: var(--primary);
+        color: var(--cyan);
         letter-spacing: 2px;
-        margin-bottom: 30px;
         text-transform: uppercase;
         padding: 20px;
-        background: #f3f0ff;
-        border-radius: 16px;
-        border: 4px dashed #d0bfff;
+        background: #f0f8ff;
+        border-radius: 15px;
+        border: 4px dashed var(--cyan-dark);
+        line-height: 1.1;
+        width: 100%;
     }
 
     .video-choice-card {
-        background: white;
-        border: 6px solid #edf2f7;
+        background: #f8f9fa;
+        border: 5px solid #dee2e6;
         border-radius: 20px;
         overflow: hidden;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.1s ease;
         position: relative;
         aspect-ratio: 4/3;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: #000;
+        box-shadow: 0 6px 0px #dee2e6;
+    }
+
+    .video-choice-card:active {
+        transform: translateY(8px);
+        box-shadow: 0 0px 0px transparent;
     }
 
     .video-choice-card video {
@@ -85,77 +139,100 @@
         pointer-events: none;
     }
 
-    .video-choice-card:hover {
-        transform: scale(1.03);
-        border-color: var(--secondary);
-        box-shadow: 0 10px 20px rgba(13, 202, 240, 0.3);
-    }
-
     .video-choice-card.correct {
-        border-color: var(--success);
-        box-shadow: 0 0 20px rgba(32, 201, 151, 0.5);
+        border-color: var(--mint);
+        box-shadow: 0 8px 0px var(--mint-dark);
+        background-color: var(--mint-dark);
     }
 
     .video-choice-card.wrong {
-        border-color: var(--danger);
-        opacity: 0.6;
+        border-color: var(--pink);
+        box-shadow: 0 8px 0px var(--pink-dark);
+        opacity: 0.8;
     }
 
-    /* Result Overlay */
-    #resultOverlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.95);
-        z-index: 1050;
+    /* Result Screen */
+    .center-screen {
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        text-align: center;
+        height: 100%;
     }
 
+    .result-emoji { font-size: 8rem; margin: 0; line-height: 1; }
+    .result-title { font-size: 4rem; font-weight: 900; color: var(--purple); margin: 0; }
+    .result-score { font-size: 2.5rem; color: #666; font-weight: 700; }
+
     .btn-massive {
-        color: white;
         font-size: 1.5rem;
         font-weight: 700;
         padding: 15px 40px;
         border-radius: 50px;
         border: none;
         text-decoration: none;
-        transition: transform 0.2s;
+        color: white;
+        transition: all 0.1s;
+        cursor: pointer;
     }
-    .btn-massive:hover { transform: translateY(-3px); color: white; }
+    
+    .btn-massive:active {
+        transform: translateY(8px);
+        box-shadow: 0 0px 0px transparent !important;
+    }
+
+    @media (max-width: 900px) {
+        .content-stage { padding: 10px; flex-direction: column; overflow-y: auto;}
+        #game-wrapper { overflow: auto; }
+        .target-word-display { font-size: 2.5rem; }
+        .quiz-container { min-height: 60vh; }
+    }
 </style>
 {% endblock %}
 
 {% block layout %}
-<div class="top-bar">
-    <a href="{% url 'learning:theme_list' %}" class="btn-exit">✖ Exit</a>
-    <h4 class="mb-0 fw-bold" style="color: #64748b;">Question <span id="currentQ">1</span> of <span id="totalQ">5</span></h4>
-    <div class="fw-bold" style="color: #ffc107; font-size: 1.2rem;">⭐ <span id="scoreDisplay">0</span></div>
-</div>
-
-<div class="container pb-5">
-    <div class="quiz-container" id="quizArea">
-        <h5 class="text-muted fw-bold mb-3">Which sign means...</h5>
-        <div class="target-word-display d-flex flex-column align-items-center justify-content-center" id="targetWordContainer">
-            <img id="targetImage" src="" alt="Target Image" style="max-height: 180px; object-fit: contain; margin-bottom: 15px; display: none;">
-            <div id="targetWordText">LOADING</div>
-        </div>
-        
-        <div class="row g-4 mt-2" id="videoGrid">
-            <!-- Videos injected via JS -->
-        </div>
+<div id="game-wrapper">
+    <div class="top-bar">
+        <a href="{% url 'learning:vocab_quiz_list' %}" class="btn-exit">✖ Exit</a>
+        <h4 class="phase-title" id="phaseTitle">Vocab Quiz</h4>
+        <div class="score-badge" id="scoreBadge">⭐ <span id="scoreDisplay">0</span></div>
     </div>
-</div>
 
-<!-- Results Area -->
-<div id="resultOverlay">
-    <div style="font-size: 6rem; line-height: 1;" id="resultEmoji">🏆</div>
-    <h1 class="fw-bold text-primary mt-3 mb-2" id="resultTitle" style="font-size: 4rem;">Quiz Complete!</h1>
-    <h3 class="text-secondary fw-bold mb-4">You scored <span id="finalScore"></span> out of <span id="finalTotal"></span></h3>
-    <div class="d-flex gap-3">
-        <a href="{% url 'learning:theme_list' %}" class="btn-massive" style="background: var(--primary);">Return to Menu</a>
+    <div class="content-stage">
+        <div class="quiz-container" id="quizArea">
+            <div class="row w-100 m-0 align-items-center">
+                <!-- Left Hand Side: Focus Prompt -->
+                <div class="col-md-5 d-flex flex-column align-items-center justify-content-center pe-md-5">
+                    <h4 class="text-muted fw-bold mb-4">Question <span id="currentQ">1</span> of <span id="totalQ">5</span></h4>
+                    
+                    <div class="target-word-display d-flex flex-column align-items-center justify-content-center" id="targetWordContainer">
+                        <img id="targetImage" src="" alt="Target Image" style="max-height: 240px; object-fit: contain; margin-bottom: 20px; display: none; border-radius: 10px;">
+                        <div id="targetWordText" style="font-size: 5rem; font-weight: 900;">LOADING</div>
+                    </div>
+                </div>
+                
+                <!-- Right Hand Side: Video Grid -->
+                <div class="col-md-7 ps-md-4 mt-4 mt-md-0">
+                    <div class="row g-4" id="videoGrid">
+                        <!-- Videos injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="quiz-container" id="resultPanel" style="display: none; justify-content: center;">
+            <div class="center-screen">
+                <p class="result-emoji" id="resultIcon">🎉</p>
+                <h2 class="result-title" id="resultTitle">Great Job!</h2>
+                <p class="result-score">You scored <span id="finalScore"></span> out of <span id="finalTotal"></span></p>
+
+                <div class="d-flex gap-4 mt-4">
+                    <button onclick="location.reload()" class="btn-massive" style="background-color: var(--cyan); box-shadow: 0 10px 0px var(--cyan-dark);">↻ Play Again</button>
+                    <a href="{% url 'learning:vocab_quiz_list' %}" class="btn-massive" style="background-color: #e9ecef; box-shadow: 0 10px 0px #ced4da; color: #333;">Quit</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -265,10 +342,10 @@
     async function endQuiz() {
         document.getElementById('quizArea').style.display = 'none';
         
-        const resultOverlay = document.getElementById('resultOverlay');
+        const resultPanel = document.getElementById('resultPanel');
         const finalScore = document.getElementById('finalScore');
         const finalTotal = document.getElementById('finalTotal');
-        const resultEmoji = document.getElementById('resultEmoji');
+        const resultEmoji = document.getElementById('resultIcon');
         const resultTitle = document.getElementById('resultTitle');
 
         finalScore.innerText = score;
@@ -287,7 +364,7 @@
             resultTitle.style.color = "var(--primary)";
         }
 
-        resultOverlay.style.display = 'flex';
+        resultPanel.style.display = 'flex';
 
         // AJAX Save Score
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
