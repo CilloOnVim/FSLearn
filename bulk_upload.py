@@ -9,58 +9,54 @@ django.setup()
 # Import the model AFTER django.setup()
 from student.models import FSLWord
 
-def run_bulk_upload(videos_folder):
-    """Loops through a folder (and its subfolders) of videos and adds them to the FSLWord database."""
+def run_bulk_upload():
+    print("🚀 Initializing Render Bulk Upload Sequence...")
     
+    # Get the current working directory (Render runs from the project root)
+    base_dir = os.getcwd()
+    videos_folder = os.path.join(base_dir, "renamed_ready")
+
     if not os.path.exists(videos_folder):
-        print(f"❌ Error: The folder '{videos_folder}' does not exist. Skipping.")
+        print(f"❌ FATAL ERROR: The folder '{videos_folder}' was not found.")
+        print("Did you remember to push the 'renamed_ready' folder to GitHub?")
         return 0
 
+    print(f"📂 Found target directory: {videos_folder}")
     added_count = 0
+    skipped_count = 0
+    failed_count = 0
 
     for root, dirs, files in os.walk(videos_folder):
         for filename in files:
             if filename.lower().endswith(('.mp4', '.webm', '.mov')):
                 
+                # Strip the extension to get the word
                 word_text = os.path.splitext(filename)[0].upper()
                 file_path = os.path.join(root, filename)
 
+                # Check if it already exists to prevent duplicates if the script fails halfway
                 if FSLWord.objects.filter(word__iexact=word_text).exists():
-                    print(f"⚠️ Skipped: '{word_text}' already exists.")
+                    print(f"⚠️ Skipped: '{word_text}' already exists in database.")
+                    skipped_count += 1
                     continue
 
                 try:
+                    # Upload to database (and Cloudinary)
                     with open(file_path, 'rb') as video_file:
                         new_fsl_word = FSLWord(word=word_text)
                         new_fsl_word.video.save(filename, File(video_file), save=True)
                         added_count += 1
-                        print(f"✅ Success: Uploaded '{word_text}' from {root}")
+                        print(f"✅ Success [{added_count}]: Uploaded '{word_text}' to database/cloud.")
                 except Exception as e:
                     print(f"❌ Failed to upload '{word_text}': {e}")
+                    failed_count += 1
 
-    return added_count
+    print("\n" + "="*40)
+    print("🏁 BULK UPLOAD COMPLETE")
+    print(f"✅ Successfully Added: {added_count}")
+    print(f"⚠️ Skipped (Duplicates): {skipped_count}")
+    print(f"❌ Failed: {failed_count}")
+    print("="*40 + "\n")
 
 if __name__ == "__main__": 
-    # Get the directory where THIS script is currently located
-    BASE_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    
-    # Assuming your THEME folders are in the exact same directory as this script.
-    # If they are inside another folder (e.g., a 'videos' folder), change this to:
-    # BASE_VIDEOS_DIR = os.path.join(BASE_SCRIPT_DIR, "videos")
-    BASE_VIDEOS_DIR = BASE_SCRIPT_DIR
-
-    # Define the themes you want to iterate through automatically
-    THEMES_TO_PROCESS = ["renamed_ready",]
-    
-    grand_total = 0
-    
-    for theme in THEMES_TO_PROCESS:
-        print(f"\n📂 Starting processing for: {theme}...")
-        # Join the base directory with the theme name so it works on Windows or Linux
-        theme_folder_path = os.path.join(BASE_VIDEOS_DIR, theme)
-        
-        theme_added_count = run_bulk_upload(theme_folder_path)
-        grand_total += theme_added_count
-        print(f"🏁 Finished {theme}. Added {theme_added_count} words.")
-
-    print(f"\n🚀 ALL DONE! Grand total: Successfully added {grand_total} new words across all themes.")
+    run_bulk_upload()
