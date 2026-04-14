@@ -38,6 +38,7 @@ media/
 !media/.gitkeep
 
 /FSL_STORIES_CUT/
+/renamed_ready/
 
 # Temporary data lists
 filelist.txt

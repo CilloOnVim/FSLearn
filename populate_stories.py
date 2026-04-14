@@ -10,7 +10,7 @@ from learning.models import Theme, Story, QuizQuestion, QuizChoice
 
 # --- CONFIGURATION ---
 # The absolute path to the main folder containing "Story 1", "Story 2", etc.
-STORIES_BASE_DIR = r"C:\Users\cillo\OneDrive\Desktop\FSLearn\FSL_STORIES_CUT"
+STORIES_BASE_DIR = r"FSL_STORIES_CUT"
 
 # The data mapping. I generated the wrong answers (False) for you.
 STORIES_DATA = [

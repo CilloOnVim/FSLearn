@@ -1,0 +1,224 @@
+[33mcommit 89ce3b7bb15e7306d41e15350c96973d3a850ff7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Wed Apr 15 00:32:09 2026 +0800
+
+    fixed space issue for fingerspelling and sentence structuring
+
+[33mcommit 20132bec617aa2d00baa7a84dbd71d0d1dd5f41d[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 22:35:05 2026 +0800
+
+    pushed stories folder
+
+[33mcommit 694dfbaa009a430e6092ddf8819067cc253e9133[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 22:08:54 2026 +0800
+
+    modified bulk upload script
+
+[33mcommit d62e64c3efd499468600cdfe024d4afdfe47ab80[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 21:55:37 2026 +0800
+
+    pushed new bulk_upload.py
+
+[33mcommit 34a116636b67049c25527d7a3c748cdb840e1831[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 21:53:31 2026 +0800
+
+    pushed new words folder
+
+[33mcommit 7f9dc23a6acfab560d9ae120bf695c59ae25c0cd[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 21:33:58 2026 +0800
+
+    pushed new_upload_script
+
+[33mcommit c1d50fe917362d6c28eab246034974f33c102606[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sat Apr 11 20:27:01 2026 +0800
+
+    pushed upload script for new_words
+
+[33mcommit d7248d58a39138c845da7e21aa86d60cc7ec9d03[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Fri Apr 10 10:51:52 2026 +0800
+
+    pushed upload script for images
+
+[33mcommit 22c6c76642be2dfad40cc30b11a06632d392a608[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 15:17:14 2026 +0800
+
+    updated populate sign script again
+
+[33mcommit c4ec61f0fa467def52654457d062c68242f22359[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 14:47:32 2026 +0800
+
+    updated populate sign script
+
+[33mcommit f6a96822172613927ef5e9933186adb9315d66d6[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 13:35:21 2026 +0800
+
+    updated bulk upload script for fsl words
+
+[33mcommit 413ad7cd65e12fbc2fc6d85853766456d3801617[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 13:12:55 2026 +0800
+
+    pushed theme folder clips to github
+
+[33mcommit e319e26c17ba79fee3dc4a62876421c57ada51ae[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 11:29:08 2026 +0800
+
+    fixed cloudinary issue with fetching alphabet clips
+
+[33mcommit ac97061ee65587c7ac09d2da3a4deb40ec7da83b[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 11:03:03 2026 +0800
+
+    fixed teacher UI and added bulk upload script for alphabet and alphabet folder clips
+
+[33mcommit 3d503fe1727e1c9d2a90a6434c2756b5beb1eed7[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Apr 9 10:55:00 2026 +0800
+
+    uploaded alphabet folder
+
+[33mcommit 5910717951b21d9b967bb777935b0cae139cf501[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Wed Apr 8 11:59:45 2026 +0800
+
+    improved teacher dashboard and added online/offline status for students.
+
+[33mcommit 18e98418d3601b336fc8f81816a067e464976715[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sun Apr 5 02:13:44 2026 +0800
+
+    tweaked and improved NLP algorithm
+
+[33mcommit 3b00fa54e3fdd8731db8604917d40a5701e0162d[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 30 16:59:41 2026 +0800
+
+    fix: configure whitenoise to serve production CSS
+
+[33mcommit 20d7c7443b3b4910b66e3f5748da1081b51e316c[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 30 16:45:55 2026 +0800
+
+    fix: final locked dependencies with spacy and web server tools
+
+[33mcommit 5d71126c6a85a5d88f0e2b40f48a32c5fff40f18[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 30 14:47:59 2026 +0800
+
+    chore: finalize production settings, dynamic media storage, and render configs
+
+[33mcommit 7a011bead98ce26c0c7d2a83231043aa874613bb[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 30 14:40:58 2026 +0800
+
+    fix: update requirements.txt with all production dependencies
+
+[33mcommit 32c0026f37cf317a9bc74148000ab4b75db6d762[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 30 02:06:05 2026 +0800
+
+    feat(admin): overhaul FSLearn dashboard UI with django-unfold
+    
+    - Integrated django-unfold into settings.py for a modern Tailwind CSS interface.
+    - Configured global UNFOLD dictionary to group apps logically into a custom sidebar navigation.
+    - Refactored learning/admin.py: Replaced default ModelAdmin, added TabularInlines for Sections and QuizQuestions to improve data entry workflow.
+    - Refactored student/admin.py: Implemented custom fieldsets for StudentProfile to organize UI into visual cards, added list filters for progress tracking.
+    - Refactored teacher/admin.py: Updated display and search fields for easier staff management.
+
+[33mcommit 6ae65089a939f199fa960d99e0cc4723d9071730[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Mar 5 23:14:22 2026 +0800
+
+    UI improvements for student pages
+
+[33mcommit 3e89ca2eaf81c9f8aec2368c08478b93bdf7cbb2[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Mar 2 01:14:47 2026 +0800
+
+    improved button UI and size.
+
+[33mcommit 13bd615ca8ef18377d824d45b63b3eac6a7d0641[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Wed Feb 25 16:30:38 2026 +0800
+
+    feat: implement student progress tracking and teacher reporting
+    
+    - Built WordProgress and QuizProgress models to link students to completed content.
+    
+    - Created backend API endpoints to save completed lessons and passed quizzes.
+    
+    - Injected JavaScript fetch requests into word_detail.html and take_quiz.html to hit APIs on video completion and puzzle success.
+    
+    - Stripped fake hardcoded numbers from the Student Dashboard and replaced them with live database stats.
+    
+    - Built a class_progress_report view and template for teachers to monitor their specific section's performance.
+    
+    - Wired up all required URLs for the new APIs and teacher reports.
+
+[33mcommit f6ba35dd7e5777a96c80533e2557688732ee19f6[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Tue Feb 24 01:29:35 2026 +0800
+
+    feat: Implement full CRUD for curriculum and fix ID routing bugs
+    
+    - Refactored ORM queries and templates globally to use .pk instead
+      of .id to prevent FieldError crashes caused by custom primary keys.
+    - Fixed core/views.py login routing by replacing outdated hasattr
+      checks with proper ObjectDoesNotExist exception handling for Django 6.0.
+    - Removed unsafe post_save signal in User model to prevent ghost
+      StudentProfiles from being forced onto Teacher accounts.
+    - Implemented Update and Delete views/URLs for Themes, Sections, and Words.
+    - Added complete CRUD logic and UI for Story modules (video/thumbnail uploads).
+    - Integrated inlineformset_factory for Story Quizzes, enabling teachers
+      to build a QuizQuestion and 4 QuizChoices simultaneously on one form.
+    - Overhauled manage_content.html dashboard to include the Add Story tile.
+    - Rebuilt the dashboard sidebar accordion to dynamically display the full
+      nested hierarchy (Themes > Sections > Words & Themes > Stories > Questions)
+      with inline Edit and Delete action buttons.
+
+[33mcommit fdf00f8cec07bd25bbed583e230a21c13afa4c3c[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Wed Feb 18 17:33:53 2026 +0800
+
+    sixth commit. fixed the fsl sentence restructuring page in student.
+
+[33mcommit 64c64b8fca428c7eea867fc3accb06214c33e69e[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Sun Feb 15 17:45:28 2026 +0800
+
+    fifth commit. improved text-to-fsl translation page, added story-based quizzes. added sidebar in teacher dashboard for quick look at module structure.
+
+[33mcommit 71e23ed291a2a58cafcb475cc3cbcfeee2c290af[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Jan 29 15:22:11 2026 +0800
+
+    fourth commit. added learning module for FSL words. Added teacher functionality to add theme, sections, and words within teacher dashboard
+
+[33mcommit 59235eb752f528cfea639df9e4d4ed0602e4cc8c[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Thu Jan 29 12:29:51 2026 +0800
+
+    third commit. added learning project application. routed text-to-FSL fingerspelling from student dashboard.
+
+[33mcommit d4a0aa147567da3a0026a3068822ac8fcf0181c5[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Wed Jan 28 22:59:25 2026 +0800
+
+    second commit. added login and dashboard pages for student and teacher. added text-to-FSL fingerspelling feature in student project application. implemented global login and logout features.
+
+[33mcommit d83c0f971538eac89c07f579a455e21afdd2a527[m
+Author: CilloJoe <joelinux2025@gmail.com>
+Date:   Mon Dec 15 13:13:14 2025 +0800
+
+    first commit. ignoring venv

@@ -106,9 +106,20 @@
         box-shadow: 0 15px 0px #c92a2a;
     }
 
+    .hub-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        filter: brightness(1.05);
+    }
+
+    .hub-card-stories:hover { box-shadow: 0 17px 0px var(--cyan-dark); }
+    .hub-card-puzzles:hover { box-shadow: 0 17px 0px var(--mint-dark); }
+    .hub-card-math:hover { box-shadow: 0 17px 0px var(--yellow-dark); }
+    .hub-card-vocab:hover { box-shadow: 0 17px 0px #c92a2a; }
+
     .hub-card:active {
-        transform: translateY(15px);
-        box-shadow: 0 0px 0px transparent;
+        transform: translateY(12px) scale(0.98);
+        box-shadow: 0 0px 0px transparent !important;
+        filter: brightness(0.95);
     }
 
     .hub-icon {
@@ -169,7 +180,7 @@
 
     <a href="{% url 'learning:vocab_quiz_list' %}" class="hub-card hub-card-vocab">
         <div class="hub-icon">✨</div>
-        <h2 class="hub-title">Vocab<br>Quiz</h2>
+        <h2 class="hub-title">Sign<br>Quiz</h2>
     </a>
 </div>
 {% endblock %}

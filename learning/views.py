@@ -69,7 +69,23 @@ def upload_word(request):
     if request.method == "POST":
         form = WordForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            word_obj = form.save()
+            
+            # --- NEW: Add to FSLWord for NLP sentence restructuring ---
+            import re
+            match = re.search(r'\((.*?)\)', word_obj.name)
+            fsl_target_word = match.group(1).strip() if match else word_obj.name.strip()
+            
+            # Map it so the drag & drop can find the same video clip
+            FSLWord.objects.get_or_create(
+                word__iexact=fsl_target_word,
+                defaults={
+                    'word': fsl_target_word.upper(),
+                    'video': word_obj.video
+                }
+            )
+            # ----------------------------------------------------------
+
             return redirect("teacher:teacher_dashboard")
     else:
         form = WordForm()
@@ -386,7 +402,26 @@ def edit_word(request, pk):
     if request.method == "POST":
         form = WordForm(request.POST, request.FILES, instance=word)
         if form.is_valid():
-            form.save()
+            word_obj = form.save()
+            
+            # --- NEW: Sync with FSLWord for NLP sentence restructuring ---
+            import re
+            match = re.search(r'\((.*?)\)', word_obj.name)
+            fsl_target_word = match.group(1).strip() if match else word_obj.name.strip()
+            
+            # Attempt to find the existing word and update its video, or create
+            fsl_word, created = FSLWord.objects.get_or_create(
+                word__iexact=fsl_target_word,
+                defaults={
+                    'word': fsl_target_word.upper(),
+                    'video': word_obj.video
+                }
+            )
+            if not created and word_obj.video:
+                fsl_word.video = word_obj.video
+                fsl_word.save()
+            # -------------------------------------------------------------
+
             messages.success(request, "Word updated.")
             return redirect("teacher:manage_content")
     else:

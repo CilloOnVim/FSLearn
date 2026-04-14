@@ -1,4 +1,3 @@
-# fsl_nlp/nlp_utils.py
 import spacy
 from student.models import FSLWord
 
@@ -91,22 +90,37 @@ def translate_to_fsl(english_sentence):
             if word_lemma not in structure["time"]: 
                 structure["time"].append(word_lemma)
                 
-        # 5. Topic Extraction (Direct Objects)
-        elif token.dep_ in ["dobj", "pobj", "attr"]:
+        # ==========================================
+        # 5. Topic Extraction (Direct Objects, Indirect Objects, and Numbers)
+        # ==========================================
+        elif token.dep_ in ["dobj", "pobj", "attr", "dative", "nummod"]:
+            if word_lemma == "I": 
+                word_lemma = "ME"
             structure["topic"].append(word_lemma)
             
-        # 6. Comment - Subject Extraction
-        elif token.dep_ in ["nsubj", "nsubjpass", "prt", "poss"]:
+        # ==========================================
+        # 6. Comment - Subject Extraction (Removed 'prt')
+        # ==========================================
+        elif token.dep_ in ["nsubj", "nsubjpass", "poss"]:
             if word_lemma == "I": 
                 word_lemma = "ME"
             if token.text.lower() == "my": 
                 word_lemma = "MY"
             structure["comment_subject"].append(word_lemma)
             
-        # 7. Comment - Verb Extraction
-        elif token.pos_ in ["VERB", "ADJ", "ROOT"] or token.dep_ == "ROOT" or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
+        # ==========================================
+        # 7. Comment - Verb Extraction (Added 'prt')
+        # ==========================================
+        elif token.pos_ in ["VERB", "ADJ", "ROOT"] or token.dep_ in ["ROOT", "prt"] or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
             structure["comment_verb"].append(word_lemma)
-        
+            
+    # ==========================================
+    # 8. FSL REDUNDANCY CLEANUP
+    # ==========================================
+    # If "ME" (from "I" or "me") is anywhere in the sentence, "MY" becomes redundant in FSL.
+    has_me = "ME" in structure["comment_subject"] or "ME" in structure["topic"]
+    if has_me and "MY" in structure["comment_subject"]:
+        structure["comment_subject"] = [word for word in structure["comment_subject"] if word != "MY"]
 
     time_part = " ".join(structure["time"])
     topic_part = " ".join(structure["topic"])
