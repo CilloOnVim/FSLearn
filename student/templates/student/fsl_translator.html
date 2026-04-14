@@ -443,15 +443,8 @@
 
             placeholder.style.display = 'none';
 
-            if (item.isSpace) {
-                videoPlayer.style.display = 'none';
-                videoPlayer.pause();
-                imgPlayer.style.display = 'none';
-                bigLetter.innerText = "SPACE";
-                setTimeout(() => { playStep(index + 1); }, 1000); // 1-second pause
-                return;
-            }
-
+            // The previous lock on Space has been removed, so the Space video can play normally just like any other letter!
+            
             bigLetter.innerText = item.char;
 
             if (item.isVideo) {
