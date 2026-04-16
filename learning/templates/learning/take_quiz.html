@@ -477,6 +477,15 @@
 
         } else {
             tryAgainModal.show();
+            // Send failed attempt
+            const formData = new FormData();
+            formData.append("passed", false);
+            formData.append("wrong_answers", JSON.stringify(currentSequence));
+            fetch(`/student/api/quiz/{{ quiz.sentencequiz_id }}/save/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: formData
+            }).catch(error => console.error("Network error saving failed attempt:", error));
         }
     }
 </script>

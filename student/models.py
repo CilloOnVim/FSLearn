@@ -75,6 +75,7 @@ class QuizProgress(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="quiz_scores")
     quiz = models.ForeignKey("learning.SentenceQuiz", on_delete=models.CASCADE)
     is_passed = models.BooleanField(default=False)
+    details = models.JSONField(blank=True, null=True, help_text="Stored incorrect sequences")
     completed_at = models.DateTimeField(auto_now_add=True)
 
 class StoryQuizProgress(models.Model):
@@ -82,20 +83,16 @@ class StoryQuizProgress(models.Model):
     story = models.ForeignKey("learning.Story", on_delete=models.CASCADE)
     score = models.IntegerField(default=0, help_text="Number of questions answered correctly")
     is_passed = models.BooleanField(default=False)
+    details = models.JSONField(blank=True, null=True, help_text="Questions answered incorrectly")
     completed_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("student", "story")
 
 class VocabQuizProgress(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="vocab_quiz_scores")
     vocab_quiz = models.ForeignKey("learning.VocabQuiz", on_delete=models.CASCADE)
     score = models.IntegerField()
     passed = models.BooleanField()
+    details = models.JSONField(blank=True, null=True, help_text="Words answered incorrectly")
     completed_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("student", "vocab_quiz")
 
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):

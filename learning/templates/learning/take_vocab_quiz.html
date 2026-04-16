@@ -127,6 +127,11 @@
         box-shadow: 0 6px 0px #dee2e6;
     }
 
+    .video-choice-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 0px #dee2e6;
+    }
+
     .video-choice-card:active {
         transform: translateY(8px);
         box-shadow: 0 0px 0px transparent;
@@ -249,6 +254,7 @@
     let currentIndex = 0;
     let score = 0;
     let isAnswering = false;
+    let wrongAnswers = [];
 
     const targetWordText = document.getElementById('targetWordText');
     const videoGrid = document.getElementById('videoGrid');
@@ -329,8 +335,11 @@
             Array.from(document.querySelectorAll('.video-choice-card')).forEach(c => {
                 c.classList.add("wrong");
             });
-            // Finding the actual correct choice takes a bit of DOM mapping, but for simplicity
-            // we will just move to the next after a delay.
+            // Track the mistake
+            const targetWord = quizData[currentIndex].target_word;
+            if (!wrongAnswers.includes(targetWord)) {
+                wrongAnswers.push(targetWord);
+            }
         }
 
         setTimeout(() => {
@@ -371,6 +380,7 @@
         const formData = new FormData();
         formData.append('score', score);
         formData.append('passed', passed);
+        formData.append('wrong_answers', JSON.stringify(wrongAnswers));
 
         try {
             await fetch(`/student/api/vocab-quiz/${quizId}/save/`, {

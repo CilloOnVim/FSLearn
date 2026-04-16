@@ -5,50 +5,105 @@
 
 {% block extra_head %}
 <style>
-    .btn-chunky {
-        background-color: #6f42c1;
-        color: white;
-        border-radius: 50px;
-        padding: 10px 25px;
-        font-weight: 700;
-        text-decoration: none;
-        border: none;
-        box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        display: inline-block;
+    :root {
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --bg-color: #e0f7fa;
     }
 
-    .btn-chunky:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
-        color: white;
+    body {
+        background-color: var(--bg-color);
+        background-image: radial-gradient(#b2ebf2 3px, transparent 3px);
+        background-size: 30px 30px;
+    }
+
+    .section-header {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: #007bff;
+        text-shadow: 2px 2px 0px white;
+        margin-bottom: 40px;
+        letter-spacing: 1px;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 35px;
+        transition: all 0.1s ease;
+        cursor: pointer;
+        border: 6px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+        text-decoration: none !important;
+        position: relative;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    /* Playful automated coloring */
+    .section-wrapper:nth-child(4n+1) .section-card { border-color: #FF6B6B; box-shadow: 0 10px 0px #c92a2a; color: #c92a2a; }
+    .section-wrapper:nth-child(4n+2) .section-card { border-color: #20c997; box-shadow: 0 10px 0px #0ca678; color: #0ca678; }
+    .section-wrapper:nth-child(4n+3) .section-card { border-color: #FFD166; box-shadow: 0 10px 0px #e67e22; color: #e67e22; }
+    .section-wrapper:nth-child(4n+4) .section-card { border-color: #0dcaf0; box-shadow: 0 10px 0px #0aa2c0; color: #0aa2c0; }
+
+    .section-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .section-wrapper:nth-child(4n+1) .section-card:hover { box-shadow: 0 15px 0px #c92a2a; }
+    .section-wrapper:nth-child(4n+2) .section-card:hover { box-shadow: 0 15px 0px #0ca678; }
+    .section-wrapper:nth-child(4n+3) .section-card:hover { box-shadow: 0 15px 0px #e67e22; }
+    .section-wrapper:nth-child(4n+4) .section-card:hover { box-shadow: 0 15px 0px #0aa2c0; }
+
+    .section-card:active {
+        transform: translateY(10px);
+        box-shadow: 0 0px 0px transparent !important;
+    }
+
+    .btn-chunky {
+        background-color: var(--purple);
+        color: white !important;
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-decoration: none;
+        border: none;
+        box-shadow: 0 6px 0px var(--purple-dark);
+        transition: all 0.1s ease;
+        display: inline-flex;
+        align-items: center;
     }
 
     .btn-chunky:active {
-        transform: translateY(4px);
-        box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
     }
 </style>
 {% endblock %}
 
 {% block layout %}
-<div class="p-4" style="background-color: #e0f7fa; min-height: 100vh;">
-    <div class="container text-center">
-        <div class="d-flex justify-content-start mb-4">
+<div class="py-5" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Top Navigation -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
             <a href="{% url 'learning:theme_list' %}" class="btn-chunky">
-                <span class="fs-5 me-2">🔙</span> Back to Themes
+                <span class="fs-4 me-2">🔙</span> Back
             </a>
         </div>
 
-        <h2 class="fw-bold mb-4">{{ theme.title }}</h2>
+        <h1 class="text-center section-header">{{ theme.title }}</h1>
 
-        <div class="d-grid gap-3 col-md-6 mx-auto">
+        <div class="row g-4 justify-content-center">
             {% for section in sections %}
-            <a href="{% url 'learning:word_list' section.pk %}"
-                class="btn btn-lg btn-light shadow p-4 fw-bold rounded-pill"
-                style="color: #007bff; border: 2px solid #007bff;">
-                {{ section.title }}
-            </a>
+            <div class="col-md-6 col-lg-4 section-wrapper">
+                <a href="{% url 'learning:word_list' section.pk %}" class="section-card h-100 w-100" style="min-height: 200px;">
+                    {{ section.title }}
+                </a>
+            </div>
             {% endfor %}
         </div>
     </div>

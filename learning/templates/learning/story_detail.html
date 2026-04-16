@@ -178,6 +178,11 @@
         box-shadow: 0 6px 0px #dee2e6;
     }
 
+    .choice-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 0px #dee2e6;
+    }
+
     .choice-card:active {
         transform: translateY(6px);
         box-shadow: 0 0px 0px transparent;
@@ -355,6 +360,7 @@
     let currentQuestionIndex = 0;
     let score = 0;
     let isAnswering = false;
+    let wrongQuestions = [];
 
     function startQuiz() {
         if (quizData.length === 0) {
@@ -402,6 +408,10 @@
             scoreBadge.innerText = `⭐ ${score}`;
         } else {
             element.classList.add('wrong');
+            const qText = quizData[currentQuestionIndex].text || "Question " + (currentQuestionIndex + 1);
+            if (!wrongQuestions.includes(qText)) {
+                wrongQuestions.push(qText);
+            }
         }
 
         setTimeout(() => {
@@ -440,6 +450,7 @@
         let formData = new URLSearchParams();
         formData.append('score', score);
         formData.append('passed', isPassed);
+        formData.append('wrong_answers', JSON.stringify(wrongQuestions));
 
         fetch(`/student/api/story-quiz/${storyId}/save/`, {
             method: 'POST',

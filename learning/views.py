@@ -290,7 +290,7 @@ def sentence_quiz_list(request):
     if hasattr(request.user, 'student_profile'):
         passed_quiz_ids = request.user.student_profile.quiz_scores.filter(
             is_passed=True
-        ).values_list('quiz_id', flat=True)
+        ).values_list('quiz_id', flat=True).distinct()
 
     return render(request, "learning/quiz_list.html", {
         "quizzes": quizzes,
@@ -655,7 +655,7 @@ def vocab_quiz_list(request):
     if hasattr(request.user, 'student_profile'):
         passed_quiz_ids = request.user.student_profile.vocab_quiz_scores.filter(
             passed=True
-        ).values_list('vocab_quiz_id', flat=True)
+        ).values_list('vocab_quiz_id', flat=True).distinct()
         
     return render(request, "learning/vocab_quiz_list.html", {
         "quizzes": quizzes,

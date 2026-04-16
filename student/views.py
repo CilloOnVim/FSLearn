@@ -181,19 +181,18 @@ def mark_word_done(request, word_id):
 def save_quiz_score(request, quiz_id):
     if request.method == "POST" and hasattr(request.user, "student_profile"):
         quiz = get_object_or_404(SentenceQuiz, pk=quiz_id)
-        # Expecting the frontend to send a 'passed' boolean
         passed = request.POST.get("passed") == "true"
+        try:
+            details = json.loads(request.POST.get("wrong_answers", "[]"))
+        except json.JSONDecodeError:
+            details = []
         
-        progress, created = QuizProgress.objects.get_or_create(
+        QuizProgress.objects.create(
             student=request.user.student_profile, 
             quiz=quiz,
-            defaults={'is_passed': passed}
+            is_passed=passed,
+            details=details
         )
-        
-        # If it already existed but wasn't passed, update it if they just passed
-        if not created and passed and not progress.is_passed:
-            progress.is_passed = True
-            progress.save()
             
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)
@@ -204,24 +203,20 @@ def save_story_quiz_score(request, story_id):
         from learning.models import Story
         story = get_object_or_404(Story, pk=story_id)
         
-        # Expecting the frontend to send a 'score' and 'passed'
         score = int(request.POST.get("score", 0))
         passed = request.POST.get("passed") == "true"
+        try:
+            details = json.loads(request.POST.get("wrong_answers", "[]"))
+        except json.JSONDecodeError:
+            details = []
         
-        # Update or create the progress record
-        progress, created = StoryQuizProgress.objects.get_or_create(
+        StoryQuizProgress.objects.create(
             student=request.user.student_profile, 
             story=story,
-            defaults={'score': score, 'is_passed': passed}
+            score=score,
+            is_passed=passed,
+            details=details
         )
-        
-        # If it already existed, update with the best score
-        if not created:
-            if score > progress.score:
-                progress.score = score
-            if passed:
-                progress.is_passed = True
-            progress.save()
             
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)
@@ -233,19 +228,18 @@ def save_vocab_quiz_score(request, quiz_id):
         
         score = int(request.POST.get("score", 0))
         passed = request.POST.get("passed") == "true"
+        try:
+            details = json.loads(request.POST.get("wrong_answers", "[]"))
+        except json.JSONDecodeError:
+            details = []
         
-        progress, created = VocabQuizProgress.objects.get_or_create(
+        VocabQuizProgress.objects.create(
             student=request.user.student_profile,
             vocab_quiz=quiz,
-            defaults={'score': score, 'passed': passed}
+            score=score,
+            passed=passed,
+            details=details
         )
-        
-        if not created:
-            if score > progress.score:
-                progress.score = score
-            if passed:
-                progress.passed = True
-            progress.save()
             
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "error"}, status=400)

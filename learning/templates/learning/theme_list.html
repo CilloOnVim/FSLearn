@@ -5,67 +5,142 @@
 
 {% block extra_head %}
 <style>
-    .theme-card {
-        background: white;
-        border-radius: 20px;
-        transition: transform 0.2s;
-        cursor: pointer;
-        height: 100%;
-        border: none;
+    :root {
+        --purple: #6f42c1;
+        --purple-dark: #4e2d8b;
+        --bg-color: #f0f8ff;
     }
 
+    body {
+        background-color: var(--bg-color);
+        background-image: radial-gradient(#d0e3ff 3px, transparent 3px);
+        background-size: 30px 30px;
+    }
+
+    .theme-header {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #ff6b6b;
+        text-shadow: 3px 3px 0px #ffd166, -2px -2px 0 #fff;
+        margin-bottom: 40px;
+        letter-spacing: 2px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .theme-card {
+        background: white;
+        border-radius: 40px;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        height: 100%;
+        border: 8px solid;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        text-align: center;
+        text-decoration: none !important;
+        position: relative;
+    }
+
+    .theme-card * {
+        text-decoration: none !important;
+    }
+
+    /* Playful automated coloring */
+    .theme-wrapper:nth-child(4n+1) .theme-card { border-color: #FF6B6B; box-shadow: 0 12px 0px #c92a2a; color: #c92a2a; }
+    .theme-wrapper:nth-child(4n+2) .theme-card { border-color: #20c997; box-shadow: 0 12px 0px #0ca678; color: #0ca678; }
+    .theme-wrapper:nth-child(4n+3) .theme-card { border-color: #FFD166; box-shadow: 0 12px 0px #e67e22; color: #e67e22; }
+    .theme-wrapper:nth-child(4n+4) .theme-card { border-color: #0dcaf0; box-shadow: 0 12px 0px #0aa2c0; color: #0aa2c0; }
+
     .theme-card:hover {
-        transform: scale(1.05);
+        transform: translateY(-8px) scale(1.02);
+    }
+    
+    .theme-card:active {
+        transform: translateY(8px);
+        box-shadow: 0 0px 0px transparent !important;
+    }
+
+    .theme-icon-container {
+        height: 120px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .theme-icon-container img {
+        max-height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 10px rgba(0,0,0,0.1));
+    }
+
+    .theme-title {
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 15px;
+    }
+
+    .theme-desc {
+        font-size: 1.1rem;
+        font-weight: 600;
+        opacity: 0.8;
     }
 
     .btn-chunky {
-        background-color: #6f42c1;
-        color: white;
+        background-color: var(--purple);
+        color: white !important;
         border-radius: 50px;
-        padding: 10px 25px;
-        font-weight: 700;
+        padding: 12px 30px;
+        font-size: 1.4rem;
+        font-weight: 800;
         text-decoration: none;
         border: none;
-        box-shadow: 0 4px 0px #4e2d8b, 0 5px 10px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        display: inline-block;
-    }
-
-    .btn-chunky:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 0px #4e2d8b, 0 8px 15px rgba(0, 0, 0, 0.15);
-        color: white;
+        box-shadow: 0 6px 0px var(--purple-dark);
+        transition: all 0.1s ease;
+        display: inline-flex;
+        align-items: center;
     }
 
     .btn-chunky:active {
-        transform: translateY(4px);
-        box-shadow: 0 0px 0px #4e2d8b, 0 2px 5px rgba(0, 0, 0, 0.1);
+        transform: translateY(6px);
+        box-shadow: 0 0px 0px transparent;
     }
 </style>
 {% endblock %}
 
 {% block layout %}
-<div class="p-4" style="background-color: #f0f8ff; min-height: 100vh;">
+<div class="py-5" style="min-height: 100vh;">
     <div class="container">
-        <a href="{% url 'student:student_dashboard' %}" class="btn-chunky mb-4">
-            <span class="fs-5 me-2">🔙</span> Back to Dashboard
-        </a>
+        <!-- Top Navigation -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <a href="{% url 'student:student_dashboard' %}" class="btn-chunky">
+                <span class="fs-4 me-2">🔙</span> Dashboard
+            </a>
+        </div>
 
-        <h1 class="text-center fw-bold mb-5" style="color: #d63384;">Pick a Theme! 🌍</h1>
+        <h1 class="text-center theme-header">Pick a Theme! 🌍</h1>
 
-        <div class="row g-4">
+        <div class="row g-5 justify-content-center">
             {% for theme in themes %}
-            <div class="col-md-6 col-lg-3">
-                <a href="{% url 'learning:section_list' theme.pk %}" class="text-decoration-none text-dark">
-                    <div class="card theme-card shadow p-3 text-center">
-                        {% if theme.icon %}
-                        <img src="{{ theme.icon.url }}" class="img-fluid mb-3"
-                            style="height: 100px; object-fit: contain;">
-                        {% else %}
-                        <div class="display-1">📚</div>
-                        {% endif %}
-                        <h4 class="fw-bold">{{ theme.title }}</h4>
-                        <p class="text-muted small">{{ theme.description }}</p>
+            <div class="col-md-6 col-lg-4 theme-wrapper">
+                <a href="{% url 'learning:section_list' theme.pk %}" style="display: block; height: 100%; text-decoration: none;">
+                    <div class="theme-card">
+                        <div class="theme-icon-container">
+                            {% if theme.icon %}
+                                <img src="{{ theme.icon.url }}">
+                            {% else %}
+                                <span style="font-size: 6rem; line-height: 1;">📚</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="theme-title">{{ theme.title }}</h4>
+                        <p class="theme-desc">{{ theme.description }}</p>
                     </div>
                 </a>
             </div>
