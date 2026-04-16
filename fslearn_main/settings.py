@@ -188,6 +188,7 @@ UNFOLD = {
                     {"title": "Themes & Sections", "icon": "menu_book", "link": "/admin/learning/theme/"},
                     {"title": "Vocabulary (Words)", "icon": "spellcheck", "link": "/admin/learning/word/"},
                     {"title": "Stories", "icon": "video_library", "link": "/admin/learning/story/"},
+                    {"title": "Sentence Quizzes", "icon": "format_list_numbered", "link": "/admin/learning/sentencequiz/"},
                 ],
             },
             {
@@ -196,6 +197,8 @@ UNFOLD = {
                 "items": [
                     {"title": "Student Profiles", "icon": "face", "link": "/admin/student/studentprofile/"},
                     {"title": "Word Progress", "icon": "trending_up", "link": "/admin/student/wordprogress/"},
+                    {"title": "Story Quiz Progress", "icon": "check_circle", "link": "/admin/student/storyquizprogress/"},
+                    {"title": "Quiz Progress", "icon": "assessment", "link": "/admin/student/quizprogress/"},
                 ],
             },
             {
@@ -204,6 +207,15 @@ UNFOLD = {
                 "items": [
                     {"title": "Teacher Profiles", "icon": "school", "link": "/admin/teacher/teacherprofile/"},
                     {"title": "System Users", "icon": "manage_accounts", "link": "/admin/auth/user/"},
+                    {"title": "System Groups", "icon": "group", "link": "/admin/auth/group/"},
+                ],
+            },
+            {
+                "title": "FSL Media Library",
+                "separator": True,
+                "items": [
+                    {"title": "FSL Signs", "icon": "sign_language", "link": "/admin/student/fslsign/"},
+                    {"title": "FSL Words", "icon": "language", "link": "/admin/student/fslword/"},
                 ],
             },
         ],
