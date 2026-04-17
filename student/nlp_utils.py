@@ -51,6 +51,11 @@ def translate_to_fsl(english_sentence):
             continue
 
         word_lemma = token.lemma_.upper()
+
+        # --- EXCEPTION PATCH: Protect 'Philippines' from being lemmatized ---
+        if token.text.lower() == "philippines":
+            word_lemma = "PHILIPPINES"
+        # --------------------------------------------------------------------
         
         # 1. Stop Word Filter
         if token.text.lower() in STOP_WORDS:
@@ -115,12 +120,20 @@ def translate_to_fsl(english_sentence):
             structure["comment_verb"].append(word_lemma)
             
     # ==========================================
-    # 8. FSL REDUNDANCY CLEANUP
+    # 8. FSL REDUNDANCY & POSSESSIVE CLEANUP
     # ==========================================
-    # If "ME" (from "I" or "me") is anywhere in the sentence, "MY" becomes redundant in FSL.
+    # FSL drops possessive pronouns when the subject is already established.
+    # This prevents Signed Exact English (SEE) and stops fingerspelling fallbacks.
+    possessives_to_drop = ["HIS", "HER", "ITS", "THEIR", "OUR"]
+
+    # Handle the "MY" redundancy (if "ME" is present)
     has_me = "ME" in structure["comment_subject"] or "ME" in structure["topic"]
     if has_me and "MY" in structure["comment_subject"]:
         structure["comment_subject"] = [word for word in structure["comment_subject"] if word != "MY"]
+
+    # Purge all 3rd-person possessives from the arrays
+    structure["comment_subject"] = [word for word in structure["comment_subject"] if word not in possessives_to_drop]
+    structure["topic"] = [word for word in structure["topic"] if word not in possessives_to_drop]
 
     time_part = " ".join(structure["time"])
     topic_part = " ".join(structure["topic"])
