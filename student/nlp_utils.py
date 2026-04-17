@@ -96,17 +96,17 @@ def translate_to_fsl(english_sentence):
                 structure["time"].append(word_lemma)
                 
         # ==========================================
-        # 5. Topic Extraction (Direct Objects, Indirect Objects, and Numbers)
+        # 5. Topic Extraction (Objects & their Adjectives)
         # ==========================================
-        elif token.dep_ in ["dobj", "pobj", "attr", "dative", "nummod"]:
+        elif token.dep_ in ["dobj", "pobj", "attr", "dative", "nummod"] or (token.pos_ == "ADJ" and token.dep_ == "amod" and token.head.dep_ in ["dobj", "pobj", "attr", "dative"]):
             if word_lemma == "I": 
                 word_lemma = "ME"
             structure["topic"].append(word_lemma)
             
         # ==========================================
-        # 6. Comment - Subject Extraction (Removed 'prt')
+        # 6. Comment - Subject Extraction (Subjects & their Adjectives)
         # ==========================================
-        elif token.dep_ in ["nsubj", "nsubjpass", "poss"]:
+        elif token.dep_ in ["nsubj", "nsubjpass", "poss"] or (token.pos_ == "ADJ" and token.dep_ == "amod" and token.head.dep_ in ["nsubj", "nsubjpass"]):
             if word_lemma == "I": 
                 word_lemma = "ME"
             if token.text.lower() == "my": 
@@ -114,9 +114,9 @@ def translate_to_fsl(english_sentence):
             structure["comment_subject"].append(word_lemma)
             
         # ==========================================
-        # 7. Comment - Verb Extraction (Added 'prt')
+        # 7. Comment - Verb Extraction (Actions & Predicate Adjectives)
         # ==========================================
-        elif token.pos_ in ["VERB", "ADJ", "ROOT"] or token.dep_ in ["ROOT", "prt"] or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
+        elif token.pos_ in ["VERB", "ROOT"] or token.dep_ in ["ROOT", "prt", "acomp"] or word_lemma in ["LIKE (GUSTO)", "LIKE (PAREHO)", "HELP", "HELPING"]:
             structure["comment_verb"].append(word_lemma)
             
     # ==========================================
@@ -139,12 +139,15 @@ def translate_to_fsl(english_sentence):
     topic_part = " ".join(structure["topic"])
     comment_part = " ".join(structure["comment_subject"] + structure["comment_verb"])
 
+    # ==========================================
+    # FSL TIME-COMMENT-TOPIC SYNTAX
+    # ==========================================
     full_sequence = []
     if time_part:
         full_sequence.append(time_part)
-    if comment_part:
+    if comment_part: # Comment (Subject + Verb) comes BEFORE Topic
         full_sequence.append(comment_part)
-    if topic_part:
+    if topic_part:  # Topic (Object) comes LAST
         full_sequence.append(topic_part)
 
     complete_output = " ".join(full_sequence)
@@ -177,7 +180,7 @@ def validate_quiz_sentence(sentence):
                 if clean_word:
                     words_to_check.append((clean_word, category_name))
 
-    # Processes in the exact order the teacher requested
+    # Processes in the exact FSL order: Time -> Comment (Subject -> Action) -> Topic
     process_slot(nlp_result.get('time'), 'Time')
     process_slot(nlp_result.get('comment_subject'), 'Subject')
     process_slot(nlp_result.get('comment_verb'), 'Action')
