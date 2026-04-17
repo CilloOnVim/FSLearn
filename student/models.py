@@ -93,14 +93,4 @@ class VocabQuizProgress(models.Model):
     passed = models.BooleanField()
     details = models.JSONField(blank=True, null=True, help_text="Words answered incorrectly")
     completed_at = models.DateTimeField(auto_now_add=True)
-
-@receiver(post_save, sender=User)
-def create_student_profile(sender, instance, created, **kwargs):
-    if created and not instance.is_staff:
-        StudentProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_student_profile(sender, instance, **kwargs):
-    # Only try to save the student profile if one actually exists
-    if hasattr(instance, 'student_profile'):
-        instance.student_profile.save()
+
