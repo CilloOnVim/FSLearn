@@ -83,10 +83,10 @@ def my_students(request):
             # 1. Save the user object but hash the password first
             user = u_form.save(commit=False)
             user.set_password(u_form.cleaned_data['password'])
-            user.save() # BOOM: Your signal just created an empty StudentProfile
+            user.save()
 
-            # 2. Grab that empty profile the signal just made
-            student_profile = user.student_profile
+            # 2. Explicitly create the StudentProfile
+            student_profile = StudentProfile(user=user)
             
             # 3. Populate it with the form data
             student_profile.nickname = p_form.cleaned_data['nickname']
